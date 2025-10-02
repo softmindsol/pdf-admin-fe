@@ -1,14 +1,23 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Loader from "@/components/LoadingFalback";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { isUserLoggedIn } from "@/lib/auth";
 
 export default function AdminLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [isHovering, setIsHovering] = useState(false);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(() => {
+    console.log("auth");
+    if (!isUserLoggedIn()) {
+      navigate("/auth/login");
+    }
+  }, [navigate, location.pathname]);
   const toggleCollapse = () => {
     setIsCollapsed((prevState) => !prevState);
 

@@ -218,7 +218,7 @@ export default function DepartmentsManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+                        {/* <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() =>
                             updateDepartment({
@@ -229,7 +229,7 @@ export default function DepartmentsManagement() {
                           className="text-red-600"
                         >
                           Delete
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

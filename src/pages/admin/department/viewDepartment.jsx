@@ -65,20 +65,11 @@ export default function ViewDepartment() {
     skip: !id, // Skip the query if there's no ID
   });
 
-  const [deleteDepartment] = useDeleteDepartmentMutation();
 
   // Correctly access the nested department object
   const department = response?.data?.department;
 
-  const handleDelete = async () => {
-    // In a real app, you'd add a confirmation dialog here
-    try {
-      await deleteDepartment(id).unwrap();
-      navigate("/department"); // Navigate back to the list after deletion
-    } catch (err) {
-      console.error("Failed to delete the department:", err);
-    }
-  };
+
 
   // --- Loading State ---
   if (isLoading) {
@@ -138,10 +129,7 @@ export default function ViewDepartment() {
             <Edit className="mr-2 h-4 w-4" />
             Edit
           </Button>
-          <Button variant="destructive" onClick={handleDelete}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete
-          </Button>
+         
         </div>
       </div>
 

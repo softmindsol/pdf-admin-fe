@@ -219,8 +219,8 @@ export default function UsersManagement() {
               <TableHead>Name</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Role</TableHead>
               <TableHead>Department</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
