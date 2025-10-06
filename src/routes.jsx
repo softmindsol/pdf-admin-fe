@@ -10,6 +10,9 @@ import CreateUser from "./pages/admin/users/CreateUser";
 import DepartmentsManagement from "./pages/admin/department";
 import EditDepartment from "./pages/admin/department/EditDepartment";
 import ViewDepartment from "./pages/admin/department/viewDepartment";
+import WorkOrderManagement from "./pages/admin/workOrder";
+import CreateWorkOrder from "./pages/admin/workOrder/createWorkOrder";
+import ViewWorkOrder from "./pages/admin/workOrder/ViewWorkOrder";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -57,13 +60,29 @@ export const router = createBrowserRouter([
         path: "department",
         element: <DepartmentsManagement />,
       },
-       {
+      {
         path: "department/:id/update",
         element: <EditDepartment />,
       },
-             {
+      {
         path: "department/:id",
         element: <ViewDepartment />,
+      },
+      {
+        path: "work-order",
+        element: <WorkOrderManagement />,
+      },
+      {
+        path: "work-order/new",
+        element: <CreateWorkOrder />,
+      },
+      {
+        path: "work-order/update/:id",
+        element: <CreateWorkOrder />,
+      },
+      {
+        path: "work-order/:id",
+        element: <ViewWorkOrder />,
       },
     ],
   },

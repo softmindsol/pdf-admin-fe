@@ -134,6 +134,39 @@ export const GlobalApi = createApi({
       query: () => createRequest(`/admin/department/forms`),
       invalidatesTags: [""],
     }),
+
+// WorkOrder Endpoints
+    createWorkOrder: builder.mutation({
+      query: (body) => createPostRequest(`/admin/work-order`, body),
+      invalidatesTags: ["WorkOrder"],
+    }),
+    getWorkOrders: builder.query({
+      query: ({ page = 1, limit = 10, search, customerName, jobNumber, technicianName }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+          ...(customerName && { customerName }),
+          ...(jobNumber && { jobNumber }),
+          ...(technicianName && { technicianName }),
+        });
+        return createRequest(`/admin/work-order?${params.toString()}`);
+      },
+      providesTags: ["WorkOrder"],
+    }),
+    getWorkOrderById: builder.query({
+      query: (id) => createRequest(`/admin/work-order/${id}`),
+      providesTags: (result, error, id) => [{ type: "WorkOrder", id }],
+    }),
+    updateWorkOrder: builder.mutation({
+      query: ({ id, ...body }) => createPatchRequest(`/admin/work-order/${id}`, body),
+      invalidatesTags: ["WorkOrder"],
+    }),
+    deleteWorkOrder: builder.mutation({
+      query: (id) => createDeleteRequest(`/admin/work-order/${id}`),
+      invalidatesTags: ["WorkOrder"],
+    }),
+
   }),
 });
 
@@ -147,5 +180,10 @@ export const {
   useGetDepartmentsQuery,
   useGetDepartmentByIdQuery,
   useUpdateDepartmentMutation,
-  useFormsQuery
+  useFormsQuery,
+  useCreateWorkOrderMutation,
+  useGetWorkOrdersQuery,
+  useGetWorkOrderByIdQuery,
+  useUpdateWorkOrderMutation,
+  useDeleteWorkOrderMutation,
 } = GlobalApi;
