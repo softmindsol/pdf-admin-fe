@@ -2,7 +2,6 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   useGetDepartmentByIdQuery,
-  useDeleteDepartmentMutation,
 } from "@/store/GlobalApi"; // Adjust the import path
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 

@@ -129,10 +129,7 @@ export const GlobalApi = createApi({
       invalidatesTags: ["Department"],
     }),
 
-    deleteDepartment: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/department/${id}`),
-      invalidatesTags: ["Department"],
-    }),
+
     forms: builder.query({
       query: () => createRequest(`/admin/department/forms`),
       invalidatesTags: [""],
@@ -150,6 +147,5 @@ export const {
   useGetDepartmentsQuery,
   useGetDepartmentByIdQuery,
   useUpdateDepartmentMutation,
-  useDeleteDepartmentMutation,
   useFormsQuery
 } = GlobalApi;
