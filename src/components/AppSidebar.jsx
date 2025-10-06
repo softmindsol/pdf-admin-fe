@@ -30,7 +30,7 @@ const sidebarNavItems = [
   },
   {
     label: "Manage",
-    to: "/manage", // This 'to' is mainly for grouping, not a real page
+    to: "/manage",
     icon: MdPeople,
     children: [
       {
@@ -47,13 +47,13 @@ const sidebarNavItems = [
   },
   {
     label: "Documents",
-    to: "/docs", // Also for grouping
+    to: "/docs",
     icon: FileBarChart,
     children: [
       {
         label: "Work Order",
         to: "/work-order",
-        icon: FileBarChart, // Changed icon to be more consistent
+        icon: FileBarChart,
       },
     ],
   },
@@ -96,7 +96,12 @@ export function AppSidebar({
       <SidebarHeader className="p-4 border-b border-orange-200 bg-white/50 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           {isVisuallyExpanded && (
-            <div className="flex items-center space-x-2">
+            <div
+              onClick={() => {
+                navigate("/");
+              }}
+              className="flex items-center space-x-2"
+            >
               <img
                 src="/logofull.svg"
                 alt="Admin Panel"
@@ -105,7 +110,14 @@ export function AppSidebar({
             </div>
           )}
           {!isVisuallyExpanded && (
-            <img src="/logo.svg" alt="Logo" className="h-8 w-8 mx-auto" />
+            <img
+              src="/logo.svg"
+              onClick={() => {
+                navigate("/");
+              }}
+              alt="Logo"
+              className="h-8 w-8 mx-auto"
+            />
           )}
           {isVisuallyExpanded && (
             <button
@@ -130,7 +142,6 @@ export function AppSidebar({
               const Icon = item.icon;
               const isExpanded = expandedItems.has(index);
 
-              // --- FIX #1: Handle the root path ('/') specifically ---
               const isActive =
                 item.to === "/"
                   ? location.pathname === "/"
@@ -182,7 +193,6 @@ export function AppSidebar({
                             {item.children.map((child, childIndex) => {
                               const ChildIcon = child.icon;
 
-                              // --- FIX #2: Use startsWith for child items for better matching on sub-routes ---
                               const isChildActive =
                                 location.pathname.startsWith(child.to);
 

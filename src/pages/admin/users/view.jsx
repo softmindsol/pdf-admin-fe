@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useGetUserByIdQuery } from "@/store/GlobalApi"; // Adjust the import path
+import { useDeleteUserMutation, useGetUserByIdQuery } from "@/store/GlobalApi"; // Adjust the import path
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 
 // --- Shadcn UI Imports ---
@@ -64,6 +64,7 @@ export default function ViewUser() {
         skip: !id, // Skip the query if there's no ID
     });
 
+    const [deleteUser ]=useDeleteUserMutation()
   // Correctly access the nested user object
   const user = response?.data?.user;
 
@@ -119,11 +120,16 @@ export default function ViewUser() {
           Back to Users
         </Button>
         <div className="flex items-center space-x-2">
-            <Button variant="outline">
+            <Button onClick={()=>{
+              navigate(`/user/${id}/update`)
+            }} variant="outline">
                 <Edit className="mr-2 h-4 w-4"/>
                 Edit
             </Button>
-            <Button variant="destructive">
+            <Button variant="destructive" onClick={()=>{
+              deleteUser(id);
+              navigate('/user');
+            }}>
                 <Trash2 className="mr-2 h-4 w-4"/>
                 Delete
             </Button>
