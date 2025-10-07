@@ -13,6 +13,9 @@ import ViewDepartment from "./pages/admin/department/viewDepartment";
 import WorkOrderManagement from "./pages/admin/workOrder";
 import CreateWorkOrder from "./pages/admin/workOrder/createWorkOrder";
 import ViewWorkOrder from "./pages/admin/workOrder/ViewWorkOrder";
+import CustomerManagement from "./pages/admin/customer";
+import CustomerForm from "./pages/admin/customer/createCustomer";
+import ViewCustomer from "./pages/admin/customer/ViewWorkOrder";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -72,6 +75,10 @@ export const router = createBrowserRouter([
         path: "work-order",
         element: <WorkOrderManagement />,
       },
+       {
+        path: "customer",
+        element: <CustomerManagement />,
+      },
       {
         path: "work-order/new",
         element: <CreateWorkOrder />,
@@ -83,6 +90,18 @@ export const router = createBrowserRouter([
       {
         path: "work-order/:id",
         element: <ViewWorkOrder />,
+      },
+        {
+        path: "customer/new",
+        element: <CustomerForm />,
+      },
+      {
+        path: "customer/update/:id",
+        element: <CustomerForm />,
+      },
+      {
+        path: "customer/:id",
+        element: <ViewCustomer />,
       },
     ],
   },

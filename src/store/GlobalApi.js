@@ -60,7 +60,7 @@ export const GlobalApi = createApi({
   reducerPath: "GlobalApi",
   baseQuery: baseQueryWithAutoTokenSave,
 
-  tagTypes: ["User"],
+  tagTypes: ["User", "Department", "WorkOrder", "Customer"], // Added "Customer" TagType
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (body) => createPostRequest(`/auth/login`, body),
@@ -68,12 +68,18 @@ export const GlobalApi = createApi({
 
     createUser: builder.mutation({
       query: (body) => createPostRequest(`/admin/user`, body),
-
       invalidatesTags: ["User", "Department"],
     }),
 
     getUsers: builder.query({
-      query: ({ department, page = 1, limit = 10, search, role, isDeleted = false }) => {
+      query: ({
+        department,
+        page = 1,
+        limit = 10,
+        search,
+        role,
+        isDeleted = false,
+      }) => {
         const params = new URLSearchParams({
           page,
           limit,
@@ -84,25 +90,21 @@ export const GlobalApi = createApi({
         });
         return createRequest(`/admin/user?${params.toString()}`);
       },
-
       providesTags: ["User"],
     }),
 
     getUserById: builder.query({
       query: (id) => createRequest(`/admin/user/${id}`),
-
       providesTags: (result, error, id) => [{ type: "User", id }],
     }),
 
     updateUser: builder.mutation({
       query: ({ id, ...body }) => createPatchRequest(`/admin/user/${id}`, body),
-
       invalidatesTags: ["User"],
     }),
 
     deleteUser: builder.mutation({
       query: (id) => createDeleteRequest(`/admin/user/${id}`),
-
       invalidatesTags: ["User"],
     }),
     getDepartments: builder.query({
@@ -129,19 +131,25 @@ export const GlobalApi = createApi({
       invalidatesTags: ["Department"],
     }),
 
-
     forms: builder.query({
       query: () => createRequest(`/admin/department/forms`),
       invalidatesTags: [""],
     }),
 
-// WorkOrder Endpoints
+    // WorkOrder Endpoints
     createWorkOrder: builder.mutation({
       query: (body) => createPostRequest(`/admin/work-order`, body),
       invalidatesTags: ["WorkOrder"],
     }),
     getWorkOrders: builder.query({
-      query: ({ page = 1, limit = 10, search, customerName, jobNumber, technicianName }) => {
+      query: ({
+        page = 1,
+        limit = 10,
+        search,
+        customerName,
+        jobNumber,
+        technicianName,
+      }) => {
         const params = new URLSearchParams({
           page,
           limit,
@@ -159,7 +167,8 @@ export const GlobalApi = createApi({
       providesTags: (result, error, id) => [{ type: "WorkOrder", id }],
     }),
     updateWorkOrder: builder.mutation({
-      query: ({ id, ...body }) => createPatchRequest(`/admin/work-order/${id}`, body),
+      query: ({ id, ...body }) =>
+        createPatchRequest(`/admin/work-order/${id}`, body),
       invalidatesTags: ["WorkOrder"],
     }),
     deleteWorkOrder: builder.mutation({
@@ -167,6 +176,35 @@ export const GlobalApi = createApi({
       invalidatesTags: ["WorkOrder"],
     }),
 
+    // Customer Endpoints
+    createCustomer: builder.mutation({
+      query: (body) => createPostRequest(`/admin/customer-ticket`, body),
+      invalidatesTags: ["Customer"],
+    }),
+    getCustomers: builder.query({
+      query: ({ page = 1, limit = 10, search }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+        });
+        return createRequest(`/admin/customer-ticket?${params.toString()}`);
+      },
+      providesTags: ["Customer"],
+    }),
+    getCustomerById: builder.query({
+      query: (id) => createRequest(`/admin/customer-ticket/${id}`),
+      providesTags: (result, error, id) => [{ type: "Customer", id }],
+    }),
+    updateCustomer: builder.mutation({
+      query: ({ id, ...body }) =>
+        createPatchRequest(`/admin/customer-ticket/${id}`, body),
+      invalidatesTags: ["Customer"],
+    }),
+    deleteCustomer: builder.mutation({
+      query: (id) => createDeleteRequest(`/admin/customer-ticket/${id}`),
+      invalidatesTags: ["Customer"],
+    }),
   }),
 });
 
@@ -186,4 +224,10 @@ export const {
   useGetWorkOrderByIdQuery,
   useUpdateWorkOrderMutation,
   useDeleteWorkOrderMutation,
+  // Export new customer hooks
+  useCreateCustomerMutation,
+  useGetCustomersQuery,
+  useGetCustomerByIdQuery,
+  useUpdateCustomerMutation,
+  useDeleteCustomerMutation,
 } = GlobalApi;
