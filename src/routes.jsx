@@ -16,6 +16,7 @@ import ViewWorkOrder from "./pages/admin/workOrder/ViewWorkOrder";
 import CustomerManagement from "./pages/admin/customer";
 import CustomerForm from "./pages/admin/customer/createCustomer";
 import ViewCustomer from "./pages/admin/customer/ViewWorkOrder";
+import AboveGroundTestManagement from "./pages/admin/AboveGround";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -75,7 +76,7 @@ export const router = createBrowserRouter([
         path: "work-order",
         element: <WorkOrderManagement />,
       },
-       {
+      {
         path: "customer",
         element: <CustomerManagement />,
       },
@@ -91,7 +92,7 @@ export const router = createBrowserRouter([
         path: "work-order/:id",
         element: <ViewWorkOrder />,
       },
-        {
+      {
         path: "customer/new",
         element: <CustomerForm />,
       },
@@ -102,6 +103,10 @@ export const router = createBrowserRouter([
       {
         path: "customer/:id",
         element: <ViewCustomer />,
+      },
+      {
+        path: "above-ground",
+        element: <AboveGroundTestManagement />,
       },
     ],
   },

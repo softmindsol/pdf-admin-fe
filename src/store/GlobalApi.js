@@ -205,6 +205,35 @@ export const GlobalApi = createApi({
       query: (id) => createDeleteRequest(`/admin/customer-ticket/${id}`),
       invalidatesTags: ["Customer"],
     }),
+    // Above Ground Test
+    createAboveGroundTest: builder.mutation({
+      query: (body) => createPostRequest(`/admin/above-ground`, body),
+      invalidatesTags: ["AboveGroundTest"],
+    }),
+    getAboveGroundTests: builder.query({
+      query: ({ page = 1, limit = 10, search }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+        });
+        return createRequest(`/admin/above-ground?${params.toString()}`);
+      },
+      providesTags: ["AboveGroundTest"],
+    }),
+    getAboveGroundTestById: builder.query({
+      query: (id) => createRequest(`/admin/above-ground/${id}`),
+      providesTags: (result, error, id) => [{ type: "AboveGroundTest", id }],
+    }),
+    updateAboveGroundTest: builder.mutation({
+      query: ({ id, ...body }) =>
+        createPatchRequest(`/admin/above-ground/${id}`, body),
+      invalidatesTags: ["AboveGroundTest"],
+    }),
+    deleteAboveGroundTest: builder.mutation({
+      query: (id) => createDeleteRequest(`/admin/above-ground/${id}`),
+      invalidatesTags: ["AboveGroundTest"],
+    }),
   }),
 });
 
@@ -230,4 +259,11 @@ export const {
   useGetCustomerByIdQuery,
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
+
+  //  Above Ground Test,
+  useCreateAboveGroundTestMutation,
+  useGetAboveGroundTestsQuery,
+  useGetAboveGroundTestByIdQuery,
+  useUpdateAboveGroundTestMutation,
+  useDeleteAboveGroundTestMutation,
 } = GlobalApi;
