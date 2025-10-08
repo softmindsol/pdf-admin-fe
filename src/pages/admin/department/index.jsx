@@ -28,10 +28,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTablePagination } from "@/components/pagination";
+import { Badge } from "@/components/ui/badge";
 
 export default function DepartmentsManagement() {
   const navigate = useNavigate();
-  const [updateDepartment] = useUpdateDepartmentMutation();
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -184,10 +184,23 @@ export default function DepartmentsManagement() {
                   <TableCell className="font-medium">
                     {department.name}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {department.manager
-                      ? `${department.manager.firstName} ${department.manager.lastName}`
-                      : "N/A"}
+                  <TableCell>
+                    {department.manager?.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {department.manager.map((m) => (
+                          <Badge
+                          
+                            key={m._id}
+                            variant="secondary"
+                            className="cursor-pointer select-none"
+                          >
+                            {m.firstName} {m.lastName}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">N/A</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <span className={getStatusBadge(department.status)}>

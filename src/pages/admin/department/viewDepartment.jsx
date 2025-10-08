@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 // --- Helper Components & Functions ---
 
@@ -116,7 +117,7 @@ export default function ViewDepartment() {
     <div className="w-full p-4 md:p-6 space-y-4">
       {/* --- Header --- */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button variant="outline" onClick={() => navigate('/department')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Departments
         </Button>
@@ -151,13 +152,21 @@ export default function ViewDepartment() {
             </DetailItem>
 
             <DetailItem
-              label="Manager"
-              value={
-                department.manager
-                  ? `${department.manager.firstName} ${department.manager.lastName}`
-                  : "N/A"
-              }
-            />
+  label="Managers" // It's better to make the label plural
+  value={
+    department.manager?.length > 0 ? (
+      <div className="flex flex-wrap gap-2">
+        {department.manager.map((manager) => (
+          <Badge key={manager._id} variant="secondary">
+            {manager.firstName} {manager.lastName}
+          </Badge>
+        ))}
+      </div>
+    ) : (
+      "N/A"
+    )
+  }
+/>
 
             <DetailItem label="Date Created" value={formatDate(department.createdAt)} />
 

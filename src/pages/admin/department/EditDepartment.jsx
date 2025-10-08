@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+// src/pages/EditDepartment.js
+
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,10 +11,11 @@ import {
   useGetUsersQuery,
   useUpdateDepartmentMutation,
 } from "@/store/GlobalApi";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, UserPlus } from "lucide-react";
 
-// --- Shadcn UI Imports ---
+import { ManagerSelectionDialog } from "@/components/dialogs/ManagerSelection";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -21,13 +24,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -40,12 +36,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// --- Zod Schema (FIXED) ---
 const formSchema = z.object({
   name: z.string().min(2, "Department name must be at least 2 characters."),
-  // REMOVED the strict regex. The form only needs to handle strings.
-  // The backend will validate the ObjectId.
-  manager: z.string().optional().or(z.literal("")),
+  manager: z.array(z.string()).default([]),
   allowedForms: z.array(z.string()).default([]),
 });
 
@@ -56,65 +49,67 @@ const formOptions = [
   { id: "workOrder", label: "Work Order" },
 ];
 
+// Constant to control how many badges are visible before collapsing
+const VISIBLE_MANAGERS_LIMIT = 3;
+
 export default function EditDepartment() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isManagerDialogOpen, setManagerDialogOpen] = useState(false);
 
-  const { data: usersResponse, isLoading: areUsersLoading } = useGetUsersQuery(
-    {
-      page: 0,
-      department: id,
-    },
-    {
-      skip: !id,
-    }
+  const { data: usersResponse } = useGetUsersQuery(
+    { page: 0, department: id },
+    { skip: !id }
   );
-  const departmentUsers = usersResponse?.data?.users || [];
+  console.log("🚀 ~ EditDepartment ~ usersResponse:", usersResponse)
+
+  const allUsers = usersResponse?.data?.users || [];
 
   const {
     data: response,
     isLoading: isDepartmentLoading,
     isError,
   } = useGetDepartmentByIdQuery(id, { skip: !id });
-
   const [updateDepartment, { isLoading: isUpdating }] =
     useUpdateDepartmentMutation();
-
   const department = response?.data?.department;
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      manager: "",
-      allowedForms: [],
-    },
+    defaultValues: { name: "", manager: [], allowedForms: [] },
   });
+
+  const selectedManagerIds = form.watch("manager");
+  const usersMap = useMemo(
+    () => new Map(allUsers.map((user) => [user._id, user])),
+    [allUsers]
+  );
+  const selectedManagers = useMemo(
+    () =>
+      (selectedManagerIds || []).map((id) => usersMap.get(id)).filter(Boolean),
+    [selectedManagerIds, usersMap]
+  );
 
   useEffect(() => {
     if (department) {
-      const formData = {
+      form.reset({
         name: department.name || "",
-        manager:
-          typeof department.manager === "object"
-            ? department.manager?._id
-            : department.manager || "",
+        manager: department.manager?.map((m) => m._id) || [],
         allowedForms: department.allowedForms || [],
-      };
-      form.reset(formData);
+      });
     }
   }, [department, form]);
 
-  // --- onSubmit Function (FIXED) ---
-  async function onSubmit(values) {
-    const payload = { ...values };
-    // If manager is our special placeholder or empty, set it to actual null for the API.
-    if (payload.manager === "--" || !payload.manager) {
-      payload.manager = null;
-    }
+  const handleSaveManagers = (newManagerIds) => {
+    form.setValue("manager", newManagerIds, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
 
+  async function onSubmit(values) {
     try {
-      await updateDepartment({ id, ...payload }).unwrap();
+      await updateDepartment({ id, ...values }).unwrap();
       navigate(`/department/${id}`);
     } catch (err) {
       if (err.data?.errors?.[0]?.name) {
@@ -145,7 +140,6 @@ export default function EditDepartment() {
       </div>
     );
   }
-
   if (isError) {
     return (
       <div className="p-4 md:p-6">
@@ -160,7 +154,11 @@ export default function EditDepartment() {
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate("/department")}
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -180,8 +178,8 @@ export default function EditDepartment() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid sm:grid-cols-2 gap-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <div className="grid sm:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="name"
@@ -196,39 +194,66 @@ export default function EditDepartment() {
                   )}
                 />
 
+                {/* --- THIS IS THE CORRECTED MANAGER SELECTION UI --- */}
                 <FormField
                   control={form.control}
                   name="manager"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Manager (Optional)</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value || ""}
-                        disabled={areUsersLoading}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a manager" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* --- SelectItem for "None" (FIXED) --- */}
-                          <SelectItem value="--">None</SelectItem>
-                          {departmentUsers.map((user) => (
-                            <SelectItem key={user._id} value={user._id}>
-                              {`${user.firstName} ${user.lastName}`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={() => {
+                    const visibleManagers = selectedManagers.slice(
+                      0,
+                      VISIBLE_MANAGERS_LIMIT
+                    );
+                    const remainingCount =
+                      selectedManagers.length - VISIBLE_MANAGERS_LIMIT;
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Managers</FormLabel>
+                        <div className="flex flex-col gap-3">
+                          <div className="min-h-[40px] w-full rounded-md border border-input p-2 flex items-center gap-2">
+                            {selectedManagers.length > 0 ? (
+                              <>
+                                {visibleManagers.map((user) => (
+                                  <Badge key={user._id} variant="secondary">
+                                    {user.firstName} {user.lastName}
+                                  </Badge>
+                                ))}
+                                {remainingCount > 0 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="cursor-pointer hover:bg-accent"
+                                    onClick={() => setManagerDialogOpen(true)}
+                                  >
+                                    +{remainingCount} more
+                                  </Badge>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-sm text-muted-foreground px-1">
+                                No managers selected
+                              </span>
+                            )}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-fit"
+                            onClick={() => setManagerDialogOpen(true)}
+                          >
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            {selectedManagers.length > 0
+                              ? "Edit Managers"
+                              : "Select Managers"}
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
 
-              {/* Allowed Forms section remains the same */}
+              {/* Allowed Forms section */}
               <FormField
                 control={form.control}
                 name="allowedForms"
@@ -252,18 +277,18 @@ export default function EditDepartment() {
                               <FormControl>
                                 <Checkbox
                                   checked={field.value?.includes(option.id)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
+                                  onCheckedChange={(checked) =>
+                                    checked
                                       ? field.onChange([
                                           ...field.value,
                                           option.id,
                                         ])
                                       : field.onChange(
                                           field.value?.filter(
-                                            (value) => value !== option.id
+                                            (v) => v !== option.id
                                           )
-                                        );
-                                  }}
+                                        )
+                                  }
                                 />
                               </FormControl>
                               <FormLabel className="font-normal">
@@ -291,6 +316,13 @@ export default function EditDepartment() {
           </Form>
         </CardContent>
       </Card>
+
+      <ManagerSelectionDialog
+        open={isManagerDialogOpen} id={id}
+        onOpenChange={setManagerDialogOpen}
+        initialSelectedIds={selectedManagerIds}
+        onSave={handleSaveManagers}
+      />
     </div>
   );
 }

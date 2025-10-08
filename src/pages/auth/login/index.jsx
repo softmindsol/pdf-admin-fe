@@ -78,7 +78,7 @@ export default function LoginPage() {
 
 
   return (
-    <section className="container mx-auto min-h-screen flex items-center justify-center p-4">
+    <section className="container  mx-auto min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
         
         <div className="hidden lg:flex justify-center">
