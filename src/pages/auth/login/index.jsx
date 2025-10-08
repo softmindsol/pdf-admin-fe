@@ -6,7 +6,7 @@ import { Eye, EyeOff, Lock, User2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-import LoginImage from "@/assets/illustrations/login.png";
+import LoginImage from "/logofull-white.svg";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -78,8 +78,8 @@ export default function LoginPage() {
 
 
   return (
-    <section className="container  mx-auto min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+    <section className="bg-gradient-to-r from-[#BE0200] to-[#FB7F09]">
+    <div className="container  mx-auto min-h-screen flex items-center justify-center p-4">  <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
         
         <div className="hidden lg:flex justify-center">
           <img 
@@ -89,8 +89,8 @@ export default function LoginPage() {
           />
         </div>
 
-        <div className="w-full max-w-md mx-auto">
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <div className="w-full max-w-xl  mx-auto">
+          <Card className="shadow-lg border-0 py-10 bg-white/90 backdrop-blur-sm">
             <CardHeader className="space-y-4 text-center">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#BE0200] to-[#FB7F09] bg-clip-text text-transparent">
                 Welcome Back
@@ -162,15 +162,7 @@ export default function LoginPage() {
                     )}
                   />
 
-                  <div className="text-right">
-                    <Button 
-                      type="button" 
-                      variant="link" 
-                      className="p-0 h-auto text-[#FB7F09] hover:text-[#BE0200] text-sm"
-                    >
-                      Forgot your password?
-                    </Button>
-                  </div>
+                 
 
                   <Button
                     type="submit"
@@ -194,6 +186,7 @@ export default function LoginPage() {
           </Card>
         </div>
       </div>
+</div>
     </section>
   )
 }
