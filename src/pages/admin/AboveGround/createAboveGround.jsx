@@ -24,7 +24,7 @@ import { AlarmsAndValvesSection } from "./formComponents/AlarmsAndValvesSection"
 import { TestingSection } from "./formComponents/Testing";
 import { WeldingAndCutoutsSection } from "./formComponents/WeldingAndCutoutsSection";
 import { FinalChecksSection } from "./formComponents/FinalChecksSection";
-import { RemarksAndSignaturesSection } from "./formComponents/remarks";
+import { RemarksAndSignaturesSection } from "./formComponents/Remarks";
 import { NotesSection } from "./formComponents/Notes";
 
 const signatureSchema = z.object({
