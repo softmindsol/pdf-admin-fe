@@ -118,7 +118,7 @@ export default function AboveGroundTestManagement() {
             />
           </div>
         </div>
-        <Button onClick={() => navigate("/above-ground-test/new")}>
+        <Button onClick={() => navigate("/above-ground/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add New Test
         </Button>
@@ -204,7 +204,7 @@ export default function AboveGroundTestManagement() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            navigate(`/above-ground-test/update/${test._id}`)
+                            navigate(`/above-ground/${test._id}/update`)
                           }
                         >
                           Edit

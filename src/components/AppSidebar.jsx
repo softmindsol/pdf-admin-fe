@@ -55,9 +55,14 @@ const sidebarNavItems = [
         to: "/work-order",
         icon: FileBarChart,
       },
-       {
+      {
         label: "Customer Ticket",
         to: "/customer",
+        icon: FileBarChart,
+      },
+      {
+        label: "Above Ground",
+        to: "/above-ground",
         icon: FileBarChart,
       },
     ],

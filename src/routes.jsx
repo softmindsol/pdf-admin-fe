@@ -17,6 +17,7 @@ import CustomerManagement from "./pages/admin/customer";
 import CustomerForm from "./pages/admin/customer/createCustomer";
 import ViewCustomer from "./pages/admin/customer/ViewWorkOrder";
 import AboveGroundTestManagement from "./pages/admin/AboveGround";
+import AboveGroundTestForm from "./pages/admin/AboveGround/createAboveGround";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -107,6 +108,14 @@ export const router = createBrowserRouter([
       {
         path: "above-ground",
         element: <AboveGroundTestManagement />,
+      },
+        {
+        path: "above-ground/new",
+        element: <AboveGroundTestForm />,
+      },
+              {
+        path: "above-ground/:id/update",
+        element: <AboveGroundTestForm />,
       },
     ],
   },
