@@ -234,6 +234,44 @@ export const GlobalApi = createApi({
       query: (id) => createDeleteRequest(`/admin/above-ground/${id}`),
       invalidatesTags: ["AboveGroundTest"],
     }),
+    createServiceTicket: builder.mutation({
+      query: (body) => createPostRequest(`/admin/service-ticket`, body),
+      invalidatesTags: ["ServiceTicket"],
+    }),
+    getServiceTickets: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search,
+        jobName,
+        customerName,
+        technicianName,
+      }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+          ...(jobName && { jobName }),
+          ...(customerName && { customerName }),
+          ...(technicianName && { technicianName }),
+        });
+        return createRequest(`/admin/service-ticket?${params.toString()}`);
+      },
+      providesTags: ["ServiceTicket"],
+    }),
+    getServiceTicketById: builder.query({
+      query: (id) => createRequest(`/admin/service-ticket/${id}`),
+      providesTags: (result, error, id) => [{ type: "ServiceTicket", id }],
+    }),
+    updateServiceTicket: builder.mutation({
+      query: ({ id, ...body }) =>
+        createPatchRequest(`/admin/service-ticket/${id}`, body),
+      invalidatesTags: ["ServiceTicket"],
+    }),
+    deleteServiceTicket: builder.mutation({
+      query: (id) => createDeleteRequest(`/admin/service-ticket/${id}`),
+      invalidatesTags: ["ServiceTicket"],
+    }),
   }),
 });
 
@@ -266,4 +304,11 @@ export const {
   useGetAboveGroundTestByIdQuery,
   useUpdateAboveGroundTestMutation,
   useDeleteAboveGroundTestMutation,
+
+  // 3. NEW: Export Service Ticket Hooks
+  useCreateServiceTicketMutation,
+  useGetServiceTicketsQuery,
+  useGetServiceTicketByIdQuery,
+  useUpdateServiceTicketMutation,
+  useDeleteServiceTicketMutation,
 } = GlobalApi;

@@ -18,6 +18,10 @@ import CustomerForm from "./pages/admin/customer/createCustomer";
 import ViewCustomer from "./pages/admin/customer/ViewWorkOrder";
 import AboveGroundTestManagement from "./pages/admin/AboveGround";
 import AboveGroundTestForm from "./pages/admin/AboveGround/createAboveGround";
+import ServiceTicketManagement from "./pages/admin/serviceTicket";
+import ServiceTicketForm from "./pages/admin/serviceTicket/createupdateServiceTicket";
+import ViewServiceTicket from "./pages/admin/serviceTicket/viewServiceTicket";
+import ViewAboveGroundTicket from "./pages/admin/AboveGround/view";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -113,9 +117,29 @@ export const router = createBrowserRouter([
         path: "above-ground/new",
         element: <AboveGroundTestForm />,
       },
+       {
+        path: "above-ground/:id",
+        element: <ViewAboveGroundTicket />,
+      },
               {
         path: "above-ground/:id/update",
         element: <AboveGroundTestForm />,
+      },
+      {
+        path: "service-ticket",
+        element: <ServiceTicketManagement />,
+      },
+        {
+        path: "service-ticket/new",
+        element: <ServiceTicketForm />,
+      },
+       {
+        path: "service-ticket/update/:id",
+        element: <ServiceTicketForm />,
+      },
+       {
+        path: "service-ticket/:id",
+        element: <ViewServiceTicket />,
       },
     ],
   },

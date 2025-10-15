@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
-  useGetAboveGroundTestsQuery,
-  useDeleteAboveGroundTestMutation,
+  useGetServiceTicketsQuery,
+  useDeleteServiceTicketMutation,
 } from "@/store/GlobalApi";
 import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 
+// --- Shadcn UI Imports ---
 import {
   Table,
   TableBody,
@@ -27,42 +28,46 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTablePagination } from "@/components/pagination";
+import { DataTablePagination } from "@/components/pagination"; // Assuming this is a shared component
+import { Badge } from "@/components/ui/badge"; // Added for status display
 
-export default function AboveGroundTestManagement() {
+export default function ServiceTicketManagement() {
   const navigate = useNavigate();
+  const [deleteServiceTicket] = useDeleteServiceTicketMutation();
 
-  const [deleteAboveGroundTest] = useDeleteAboveGroundTestMutation();
-
+  // --- State Management for Filters ---
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
+  // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
-      setPage(1);
+      setPage(1); // Reset to first page on new search
       setDebouncedSearch(searchTerm);
-    }, 500);
+    }, 500); // 500ms delay
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
+  // --- Fetch Service Tickets ---
   const {
     data: response,
     isLoading,
     isFetching,
     isError,
-  } = useGetAboveGroundTestsQuery({
+  } = useGetServiceTicketsQuery({
     page,
     limit,
     search: debouncedSearch,
   });
 
-  const aboveGroundTests = response?.data?.aboveGroundTests || [];
+  const serviceTickets = response?.data?.serviceTickets || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
 
+  // Function to render skeleton loaders
   const renderSkeletons = () => {
     return Array(limit)
       .fill(0)
@@ -75,13 +80,16 @@ export default function AboveGroundTestManagement() {
             <Skeleton className="h-4 w-40" />
           </TableCell>
           <TableCell>
-            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-4 w-32" />
           </TableCell>
           <TableCell>
             <Skeleton className="h-4 w-32" />
           </TableCell>
           <TableCell>
-            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell>
+             <Skeleton className="h-4 w-28" />
           </TableCell>
           <TableCell className="text-right">
             <Skeleton className="h-8 w-8 ml-auto" />
@@ -92,48 +100,61 @@ export default function AboveGroundTestManagement() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
-      {/* Header */}
+      {/* --- Header --- */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Above Ground Tests
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Service Tickets</h1>
         <p className="text-muted-foreground">
-          Manage all above ground sprinkler system tests.
+          Manage all service tickets in the system.
         </p>
       </div>
 
-      {/* Toolbar */}
+      {/* --- Toolbar --- */}
       <div className="flex items-center justify-between space-x-2">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search by property name, address..."
+              placeholder="Search by job, customer, technician..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8"
             />
           </div>
         </div>
-        <Button onClick={() => navigate("/above-ground/new")}>
+        <Button onClick={() => navigate("/service-ticket/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add New Test
+          Add Service Ticket
         </Button>
       </div>
 
-      {/* Data Table */}
+      {/* --- Data Table --- */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]">
-                <Checkbox />
+                <Checkbox
+                  checked={
+                    Object.keys(rowSelection).length === serviceTickets.length &&
+                    serviceTickets.length > 0
+                  }
+                  onCheckedChange={(checked) => {
+                    const newSelection = {};
+                    if (checked) {
+                      serviceTickets.forEach(
+                        (ticket) => (newSelection[ticket._id] = true)
+                      );
+                    }
+                    setRowSelection(newSelection);
+                  }}
+                />
               </TableHead>
-              <TableHead>Property Name</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Contractor</TableHead>
-              <TableHead>Date of Test</TableHead>
+              <TableHead>Job Name</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Technician</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Completion Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -142,57 +163,63 @@ export default function AboveGroundTestManagement() {
               renderSkeletons()
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   Failed to load data.
                 </TableCell>
               </TableRow>
-            ) : aboveGroundTests.length > 0 ? (
-              aboveGroundTests.map((test) => (
-                <TableRow key={test._id}>
+            ) : serviceTickets.length > 0 ? (
+              serviceTickets.map((ticket) => (
+                <TableRow key={ticket._id}>
                   <TableCell>
-                    <Checkbox />
+                    <Checkbox
+                      checked={rowSelection[ticket._id] || false}
+                      onCheckedChange={(checked) => {
+                        const newSelection = { ...rowSelection };
+                        if (checked) {
+                          newSelection[ticket._id] = true;
+                        } else {
+                          delete newSelection[ticket._id];
+                        }
+                        setRowSelection(newSelection);
+                      }}
+                    />
                   </TableCell>
-                  <TableCell className="font-medium">
-                    {test.propertyDetails.propertyName}
-                  </TableCell>
-                  <TableCell>{test.propertyDetails.propertyAddress}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {test.remarksAndSignatures?.sprinklerContractor?.name ||
-                      "N/A"}
-                  </TableCell>
+                  <TableCell className="font-medium">{ticket.jobName}</TableCell>
+                  <TableCell>{ticket.customerName}</TableCell>
+                  <TableCell>{ticket.technicianName}</TableCell>
                   <TableCell>
-                    {format(new Date(test.propertyDetails.date), "PP")}
+                    <Badge variant={ticket.workOrderStatus === 'Complete' ? 'default' : 'secondary'}>
+                      {ticket.workOrderStatus}
+                    </Badge>
+                  </TableCell>
+                   <TableCell>
+                    {format(new Date(ticket.completionDate), "PPP")}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/above-ground/${test._id}`)
-                          }
+                          onClick={() => navigate(`/service-ticket/${ticket._id}`)}
                         >
                           View
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            navigate(`/above-ground/${test._id}/update`)
+                            navigate(`/service-ticket/update/${ticket._id}`)
                           }
                         >
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-
-                        {/* --- 2. CALL THE DELETE MUTATION ON CLICK --- */}
                         <DropdownMenuItem
-                          onClick={async () => {
-                            await deleteAboveGroundTest(test._id).unwrap();
-                          }}
+                          onClick={() => deleteServiceTicket(ticket._id).unwrap()}
                           className="text-red-600"
                         >
                           Delete
@@ -204,7 +231,7 @@ export default function AboveGroundTestManagement() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>
@@ -213,21 +240,14 @@ export default function AboveGroundTestManagement() {
         </Table>
       </div>
 
-      {/* --- 3. AUTOMATIC DATA REFRESH --- */}
-      {/* 
-        When the `deleteAboveGroundTest` mutation is successful, RTK Query automatically
-        invalidates the "AboveGroundTest" tag (as configured in your GlobalApi slice).
-        This tells the `useGetAboveGroundTestsQuery` to re-fetch its data.
-        The table then re-renders with the updated list, and the deleted item is gone.
-        You do not need to manually remove the item from the state.
-      */}
+      {/* --- Pagination --- */}
       <DataTablePagination
         page={page}
         setPage={setPage}
         pageCount={pageCount}
         isLoading={isLoading || isFetching}
         selectedRowCount={Object.keys(rowSelection).length}
-        totalItems={pagination.totalAboveGroundTests || 0}
+        totalItems={pagination.totalDocuments || 0} // Using totalDocuments as per ApiFeatures
         currentPage={pagination.currentPage || 0}
       />
     </div>

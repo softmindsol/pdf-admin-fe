@@ -276,6 +276,7 @@ export default function AboveGroundTestForm() {
     useUpdateAboveGroundTestMutation();
   const { data: existingData, isLoading: isFetching } =
     useGetAboveGroundTestByIdQuery(id, { skip: !isUpdateMode });
+  console.log("🚀 ~ AboveGroundTestForm ~ existingData:", existingData);
 
   const isLoading = isCreating || isUpdating;
 
@@ -283,7 +284,7 @@ export default function AboveGroundTestForm() {
     if (!dateString) return "";
     try {
       return format(parseISO(dateString), "yyyy-MM-dd");
-    } catch (error) {
+    } catch {
       return "";
     }
   };
@@ -324,66 +325,32 @@ export default function AboveGroundTestForm() {
     },
   });
 
-  // Destructure reset from the form object for a cleaner dependency array
   const { reset } = form;
 
   useEffect(() => {
     if (isUpdateMode && existingData) {
-      const testData = existingData.data?.ticket || existingData.data;
-      if (testData) {
-        // 1. Get the current form values which are the default values on first load
-        const defaultFormValues = form.getValues();
+      const testData = existingData.data?.aboveGroundTest;
 
-        // 2. Create a deep merge of default values and the fetched data
-        //    NOTE: A simple { ...default, ...fetched } is a SHALLOW merge and won't work for nested objects.
-        //    Here we manually handle the deep merge for clarity.
+      if (testData) {
         const dataForReset = {
-          ...defaultFormValues,
           ...testData,
+
           propertyDetails: {
-            ...defaultFormValues.propertyDetails,
             ...testData.propertyDetails,
             date: formatDateForInput(testData.propertyDetails?.date),
           },
-          plansAndInstructions: {
-            ...defaultFormValues.plansAndInstructions,
-            ...testData.plansAndInstructions,
-          },
-          systemComponents: {
-            ...defaultFormValues.systemComponents,
-            ...testData.systemComponents,
-          },
-          alarmsAndValves: {
-            ...defaultFormValues.alarmsAndValves,
-            ...testData.alarmsAndValves,
-          },
-          testing: {
-            ...defaultFormValues.testing,
-            ...testData.testing,
-          },
-          weldingAndCutouts: {
-            ...defaultFormValues.weldingAndCutouts,
-            ...testData.weldingAndCutouts,
-          },
-          finalChecks: {
-            ...defaultFormValues.finalChecks,
-            ...testData.finalChecks,
-          },
           remarksAndSignatures: {
-            ...defaultFormValues.remarksAndSignatures,
             ...testData.remarksAndSignatures,
             dateLeftInService: formatDateForInput(
               testData.remarksAndSignatures?.dateLeftInService
             ),
             fireMarshalOrAHJ: {
-              ...defaultFormValues.remarksAndSignatures?.fireMarshalOrAHJ,
               ...testData.remarksAndSignatures?.fireMarshalOrAHJ,
               date: formatDateForInput(
                 testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
               ),
             },
             sprinklerContractor: {
-              ...defaultFormValues.remarksAndSignatures?.sprinklerContractor,
               ...testData.remarksAndSignatures?.sprinklerContractor,
               date: formatDateForInput(
                 testData.remarksAndSignatures?.sprinklerContractor?.date
@@ -392,11 +359,10 @@ export default function AboveGroundTestForm() {
           },
         };
 
-        console.log("🚀 ~ Data being passed to reset:", dataForReset);
+        console.log("🚀 ~ Corrected data being passed to reset:", dataForReset);
         reset(dataForReset);
       }
     }
-    // 3. Use `reset` in the dependency array instead of the whole `form` object
   }, [existingData, isUpdateMode, reset]);
 
   async function onSubmit(values) {
