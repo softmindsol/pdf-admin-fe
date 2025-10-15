@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// --- UPDATED: Import useWatch ---
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,7 +10,6 @@ import {
   useGetWorkOrderByIdQuery,
 } from "@/store/GlobalApi";
 
-// --- (No changes to imports below this line) ---
 import {
   ArrowLeft,
   Loader2,
@@ -45,15 +43,16 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
-// --- (No changes to Zod schemas) ---
 const materialSchema = z.object({
   _id: z.string().optional(),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1."),
   description: z.string().min(3, "Description is required."),
   unitCost: z.coerce.number().min(0, "Unit cost cannot be negative."),
   totalCost: z.coerce.number(),
+  taxRate: z.coerce.number().min(0, "Tax rate cannot be negative."),
 });
 
 const formSchema = z.object({
@@ -72,6 +71,8 @@ export default function WorkOrderForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isUpdateMode = !!id;
+
+  const [noTax, setNoTax] = useState({});
 
   const [createWorkOrder, { isLoading: isCreating }] =
     useCreateWorkOrderMutation();
@@ -100,7 +101,6 @@ export default function WorkOrderForm() {
     },
   });
 
-  // --- UPDATED: Destructure control and setValue from form ---
   const { control, setValue, getValues } = form;
 
   useEffect(() => {
@@ -110,21 +110,53 @@ export default function WorkOrderForm() {
         ...workOrder,
         date: new Date(workOrder.date),
       });
+
+      const initialNoTaxState = {};
+      workOrder.materialList.forEach((material, index) => {
+        if (material.taxRate === 0) {
+          initialNoTaxState[index] = true;
+        }
+      });
+      setNoTax(initialNoTaxState);
     }
   }, [existingData, isUpdateMode, form]);
 
   const { fields, append, remove } = useFieldArray({
-    control, // Use control here
+    control,
     name: "materialList",
   });
 
-  // --- UPDATED: Use the useWatch hook for reliable updates ---
   const watchedMaterials = useWatch({
     control,
     name: "materialList",
   });
 
-  // --- UPDATED: This useEffect is now more robust ---
+  const totals = useMemo(() => {
+    let subtotal = 0;
+    let totalTaxes = 0;
+
+    if (watchedMaterials) {
+      watchedMaterials.forEach((material) => {
+        const quantity = parseFloat(material.quantity) || 0;
+        const unitCost = parseFloat(material.unitCost) || 0;
+        const taxRate = parseFloat(material.taxRate) || 0;
+
+        const itemTotal = quantity * unitCost;
+        subtotal += itemTotal;
+
+        if (taxRate > 0) {
+          totalTaxes += itemTotal * (taxRate / 100);
+        }
+      });
+    }
+
+    return {
+      subtotal: subtotal.toFixed(2),
+      taxes: totalTaxes.toFixed(2),
+      total: (subtotal + totalTaxes).toFixed(2),
+    };
+  }, [watchedMaterials]);
+
   useEffect(() => {
     if (watchedMaterials) {
       watchedMaterials.forEach((material, index) => {
@@ -132,18 +164,23 @@ export default function WorkOrderForm() {
         const unitCost = parseFloat(material.unitCost) || 0;
         const total = quantity * unitCost;
 
-        // Get the current total from the form state to avoid unnecessary updates
         const currentTotalInForm = getValues(`materialList.${index}.totalCost`);
 
-        // Only update if the calculated total is different
         if (total !== currentTotalInForm) {
           setValue(`materialList.${index}.totalCost`, total, {
-            shouldValidate: false, // Prevent re-validating on every keystroke
+            shouldValidate: false,
           });
         }
       });
     }
   }, [watchedMaterials, setValue, getValues]);
+
+  const handleNoTaxChange = (index, checked) => {
+    setNoTax((prev) => ({ ...prev, [index]: checked }));
+    if (checked) {
+      setValue(`materialList.${index}.taxRate`, 0, { shouldValidate: true });
+    }
+  };
 
   async function onSubmit(values) {
     try {
@@ -169,7 +206,6 @@ export default function WorkOrderForm() {
   }
 
   if (isFetching) {
-    // --- (Skeleton loading state remains the same) ---
     return (
       <div className="w-full p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-4">
@@ -198,7 +234,6 @@ export default function WorkOrderForm() {
   }
 
   return (
-    // --- (The rest of the JSX form remains exactly the same) ---
     <div className="w-full p-4 md:p-6 space-y-4">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
@@ -388,7 +423,7 @@ export default function WorkOrderForm() {
                       key={field.id}
                       className="grid grid-cols-12 gap-x-4 gap-y-2 items-start p-3 border rounded-lg relative"
                     >
-                      <div className="col-span-12 sm:col-span-5">
+                      <div className="col-span-12 sm:col-span-3">
                         <FormField
                           control={control}
                           name={`materialList.${index}.description`}
@@ -408,7 +443,7 @@ export default function WorkOrderForm() {
                           )}
                         />
                       </div>
-                      <div className="col-span-4 sm:col-span-2">
+                      <div className="col-span-4 sm:col-span-1">
                         <FormField
                           control={control}
                           name={`materialList.${index}.quantity`}
@@ -449,6 +484,7 @@ export default function WorkOrderForm() {
                           )}
                         />
                       </div>
+
                       <div className="col-span-4 sm:col-span-2">
                         <FormField
                           control={control}
@@ -472,6 +508,51 @@ export default function WorkOrderForm() {
                           )}
                         />
                       </div>
+                      <div className="col-span-8 sm:col-span-3">
+                        <FormField
+                          control={control}
+                          name={`materialList.${index}.taxRate`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">
+                                Tax Rate (%)
+                              </FormLabel>
+                              <div className="flex items-center gap-2">
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Tax Rate %"
+                                    {...field}
+                                    disabled={noTax[index]}
+                                    className={cn(
+                                      noTax[index] &&
+                                        "bg-muted cursor-not-allowed"
+                                    )}
+                                  />
+                                </FormControl>
+                                <div className="flex items-center space-x-2 pt-1">
+                                  <Checkbox
+                                    id={`noTax-${index}`}
+                                    checked={noTax[index] || false}
+                                    onCheckedChange={(checked) =>
+                                      handleNoTaxChange(index, checked)
+                                    }
+                                  />
+                                  <label
+                                    htmlFor={`noTax-${index}`}
+                                    className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                  >
+                                    No Tax
+                                  </label>
+                                </div>
+                              </div>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
                       <div className="col-span-12 sm:col-span-1 flex justify-end items-center mt-2 sm:mt-0 sm:self-center">
                         <Button
                           type="button"
@@ -497,12 +578,31 @@ export default function WorkOrderForm() {
                       quantity: 1,
                       unitCost: 0,
                       totalCost: 0,
+                      taxRate: 7,
                     })
                   }
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Add Material
                 </Button>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <div className="w-full max-w-xs space-y-2">
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Subtotal:</span>
+                    <span>${totals.subtotal}</span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Taxes:</span>
+                    <span>${totals.taxes}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span>${totals.total}</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end">

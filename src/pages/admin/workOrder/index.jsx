@@ -98,7 +98,6 @@ export default function WorkOrderManagement() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
-      {/* --- Header --- */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Work Orders</h1>
         <p className="text-muted-foreground">
@@ -106,10 +105,8 @@ export default function WorkOrderManagement() {
         </p>
       </div>
 
-      {/* --- Toolbar --- */}
       <div className="flex items-center justify-between space-x-2">
         <div className="flex flex-1 items-center space-x-2">
-          {/* Search Input */}
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -127,7 +124,6 @@ export default function WorkOrderManagement() {
         </Button>
       </div>
 
-      {/* --- Data Table --- */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -187,7 +183,9 @@ export default function WorkOrderManagement() {
                     {wo.technicianName}
                   </TableCell>
                   <TableCell>{format(new Date(wo.date), "PP")}</TableCell>
-                  <TableCell className="capitalize">{wo.paymentMethod}</TableCell>
+                  <TableCell className="capitalize">
+                    {wo.paymentMethod}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
