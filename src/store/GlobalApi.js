@@ -272,6 +272,35 @@ export const GlobalApi = createApi({
       query: (id) => createDeleteRequest(`/admin/service-ticket/${id}`),
       invalidatesTags: ["ServiceTicket"],
     }),
+
+     createUndergroundTest: builder.mutation({
+      query: (body) => createPostRequest(`/admin/under-ground`, body),
+      invalidatesTags: ["UndergroundTest"],
+    }),
+    getUndergroundTests: builder.query({
+      query: ({ page = 1, limit = 10, search }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+        });
+        return createRequest(`/admin/under-ground?${params.toString()}`);
+      },
+      providesTags: ["UndergroundTest"],
+    }),
+    getUndergroundTestById: builder.query({
+      query: (id) => createRequest(`/admin/under-ground/${id}`),
+      providesTags: (result, error, id) => [{ type: "UndergroundTest", id }],
+    }),
+    updateUndergroundTest: builder.mutation({
+      query: ({ id, ...body }) =>
+        createPatchRequest(`/admin/under-ground/${id}`, body),
+      invalidatesTags: ["UndergroundTest"],
+    }),
+    deleteUndergroundTest: builder.mutation({
+      query: (id) => createDeleteRequest(`/admin/under-ground/${id}`),
+      invalidatesTags: ["UndergroundTest"],
+    }),
   }),
 });
 
@@ -305,10 +334,20 @@ export const {
   useUpdateAboveGroundTestMutation,
   useDeleteAboveGroundTestMutation,
 
-  // 3. NEW: Export Service Ticket Hooks
+  // 3. Export Underground Test Hooks
+   useCreateUndergroundTestMutation,
+  useGetUndergroundTestsQuery,
+  useGetUndergroundTestByIdQuery,
+  useUpdateUndergroundTestMutation,
+  useDeleteUndergroundTestMutation,
+
+  
+  // 4.  Export Service Ticket Hooks
   useCreateServiceTicketMutation,
   useGetServiceTicketsQuery,
   useGetServiceTicketByIdQuery,
   useUpdateServiceTicketMutation,
   useDeleteServiceTicketMutation,
+
+
 } = GlobalApi;

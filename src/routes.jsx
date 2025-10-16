@@ -22,6 +22,7 @@ import ServiceTicketManagement from "./pages/admin/serviceTicket";
 import ServiceTicketForm from "./pages/admin/serviceTicket/createupdateServiceTicket";
 import ViewServiceTicket from "./pages/admin/serviceTicket/viewServiceTicket";
 import ViewAboveGroundTicket from "./pages/admin/AboveGround/view";
+import UndergroundTestList from "./pages/admin/underGround";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -141,6 +142,11 @@ export const router = createBrowserRouter([
         path: "service-ticket/:id",
         element: <ViewServiceTicket />,
       },
+        {
+        path: "under-ground",
+        element: <UndergroundTestList />,
+      },
+
     ],
   },
 ]);
