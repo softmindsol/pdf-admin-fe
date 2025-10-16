@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTablePagination } from "@/components/pagination";
+import { showDeleteConfirm } from "@/lib/swal";
 
 export default function AboveGroundTestManagement() {
   const navigate = useNavigate();
@@ -173,9 +174,7 @@ export default function AboveGroundTestManagement() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/above-ground/${test._id}`)
-                          }
+                          onClick={() => navigate(`/above-ground/${test._id}`)}
                         >
                           View
                         </DropdownMenuItem>
@@ -190,8 +189,10 @@ export default function AboveGroundTestManagement() {
 
                         {/* --- 2. CALL THE DELETE MUTATION ON CLICK --- */}
                         <DropdownMenuItem
-                          onClick={async () => {
-                            await deleteAboveGroundTest(test._id).unwrap();
+                          onClick={() => {
+                            showDeleteConfirm(async () => {
+                              await deleteAboveGroundTest(test._id).unwrap();
+                            });
                           }}
                           className="text-red-600"
                         >

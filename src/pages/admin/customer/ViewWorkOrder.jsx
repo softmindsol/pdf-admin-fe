@@ -19,6 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { showDeleteConfirm } from "@/lib/swal";
 
 // --- Helper Components & Functions ---
 
@@ -124,8 +125,10 @@ export default function ViewCustomer() {
           </Button>
           <Button
             onClick={() => {
-              deleteCustomer(id);
-              navigate("/customer");
+              showDeleteConfirm(async () => {
+                await deleteCustomer(customer._id).unwrap();
+                navigate("/customer");
+              });
             }}
             ariant="destructive"
           >

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTablePagination } from "@/components/pagination"; // Assuming this is a shared component
 import { Badge } from "@/components/ui/badge"; // Added for status display
+import { showDeleteConfirm } from "@/lib/swal";
 
 export default function ServiceTicketManagement() {
   const navigate = useNavigate();
@@ -219,7 +220,12 @@ export default function ServiceTicketManagement() {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => deleteServiceTicket(ticket._id).unwrap()}
+                          onClick={() =>{
+                            showDeleteConfirm(async ()=>{
+                              await deleteServiceTicket(ticket._id).unwrap();
+                            })
+                          }
+                          }
                           className="text-red-600"
                         >
                           Delete

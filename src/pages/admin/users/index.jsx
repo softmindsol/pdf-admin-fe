@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
+import { showDeleteConfirm } from "@/lib/swal";
 
 export default function UsersManagement() {
   const navigate = useNavigate();
@@ -284,10 +285,11 @@ export default function UsersManagement() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={async () => {
-                            await updateUser({
+                          showDeleteConfirm(async ()=>{await updateUser({
                               id: user?._id,
                               isDeleted: true,
-                            }).unwrap();
+                            }).unwrap()})
+                             
                           }}
                           className="text-red-600"
                         >

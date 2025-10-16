@@ -441,9 +441,7 @@ export default function AboveGroundTestForm() {
               watch={form.watch}
             />
             <NotesSection control={form.control} />
-            <div className="text-center text-muted-foreground p-8 border rounded-lg">
-              <p>Form sections will be added here.</p>
-            </div>
+           
           </Accordion>
         </form>
       </Form>

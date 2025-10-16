@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTablePagination } from "@/components/pagination";
+import { showDeleteConfirm } from "@/lib/swal";
 
 export default function WorkOrderManagement() {
   const navigate = useNavigate();
@@ -211,7 +212,9 @@ export default function WorkOrderManagement() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={async () => {
-                            await deleteWorkOrder(wo._id).unwrap();
+                            showDeleteConfirm(() => {
+                              deleteWorkOrder(wo._id).unwrap();
+                            });
                           }}
                           className="text-red-600"
                         >

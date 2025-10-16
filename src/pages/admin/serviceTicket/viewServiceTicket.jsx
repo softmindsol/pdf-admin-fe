@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { showDeleteConfirm } from "@/lib/swal";
 
 // --- Helper Components & Functions ---
 
@@ -108,7 +109,6 @@ export default function ViewServiceTicket() {
   // --- Success State ---
   return (
     <div className="w-full p-4 md:p-6 space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <Button variant="outline" onClick={() => navigate(-1)}>
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -124,8 +124,10 @@ export default function ViewServiceTicket() {
           </Button>
           <Button
             onClick={() => {
-              deleteServiceTicket(id);
-              navigate("/service-ticket");
+              showDeleteConfirm(async () => {
+                await deleteServiceTicket(id);
+                navigate("/service-ticket");
+              });
             }}
             variant="destructive"
           >
@@ -135,7 +137,6 @@ export default function ViewServiceTicket() {
         </div>
       </div>
 
-      {/* Main Details Card */}
       {ticket && (
         <Card>
           <CardHeader>
@@ -145,7 +146,6 @@ export default function ViewServiceTicket() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
-            {/* Job & Customer Information */}
             <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Job & Customer Information
@@ -164,9 +164,8 @@ export default function ViewServiceTicket() {
             </div>
 
             <Separator />
-            
-            {/* Work Description */}
-             <div>
+
+            <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Work Description
               </h3>
@@ -174,55 +173,77 @@ export default function ViewServiceTicket() {
                 <DetailItem value={ticket.workDescription} />
               </div>
             </div>
-            
+
             <Separator />
 
-            {/* Materials Used */}
             <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Materials Used
               </h3>
               <div className="grid gap-4">
                 {ticket.materials && ticket.materials.length > 0 ? (
-                    ticket.materials.map((item, index) => (
-                        <div key={item._id || index} className="flex justify-between items-center text-base p-2 border-b">
-                            <span>{item.material}</span>
-                            <span className="font-mono text-gray-700">Qty: {item.quantity}</span>
-                        </div>
-                    ))
+                  ticket.materials.map((item, index) => (
+                    <div
+                      key={item._id || index}
+                      className="flex justify-between items-center text-base p-2 border-b"
+                    >
+                      <span>{item.material}</span>
+                      <span className="font-mono text-gray-700">
+                        Qty: {item.quantity}
+                      </span>
+                    </div>
+                  ))
                 ) : (
-                    <p className="text-gray-500">No materials were listed for this job.</p>
+                  <p className="text-gray-500">
+                    No materials were listed for this job.
+                  </p>
                 )}
               </div>
             </div>
-            
+
             <Separator />
-            
-            {/* Labor Information */}
+
             <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Labor Information
               </h3>
               <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
-                <DetailItem label="Technician Name" value={ticket.technicianName} />
-                <DetailItem label="Technician Contact" value={ticket.technicianContactNumber} />
-                <DetailItem label="Straight Time Hours" value={`${ticket.stHours} hrs`} />
-                <DetailItem label="Overtime Hours" value={`${ticket.otHours} hrs`} />
+                <DetailItem
+                  label="Technician Name"
+                  value={ticket.technicianName}
+                />
+                <DetailItem
+                  label="Technician Contact"
+                  value={ticket.technicianContactNumber}
+                />
+                <DetailItem
+                  label="Straight Time Hours"
+                  value={`${ticket.stHours} hrs`}
+                />
+                <DetailItem
+                  label="Overtime Hours"
+                  value={`${ticket.otHours} hrs`}
+                />
               </div>
             </div>
 
             <Separator />
 
-            {/* Status & Financials */}
             <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Status & Financials
               </h3>
               <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
                 <DetailItem label="Work Status">
-                    <Badge variant={ticket.workOrderStatus === 'Complete' ? 'default' : 'secondary'}>
-                        {ticket.workOrderStatus}
-                    </Badge>
+                  <Badge
+                    variant={
+                      ticket.workOrderStatus === "Complete"
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
+                    {ticket.workOrderStatus}
+                  </Badge>
                 </DetailItem>
                 <DetailItem
                   label="Completion Date"
@@ -236,7 +257,10 @@ export default function ViewServiceTicket() {
             </div>
           </CardContent>
           <CardFooter className="flex-col items-start text-xs text-gray-500 space-y-1">
-            <p>Created On: {formatDate(ticket.createdAt)} by {ticket.createdBy?.username || 'N/A'}</p>
+            <p>
+              Created On: {formatDate(ticket.createdAt)} by{" "}
+              {ticket.createdBy?.username || "N/A"}
+            </p>
             <p>Last Updated: {formatDate(ticket.updatedAt)}</p>
             <p className="pt-2">Ticket ID: {ticket._id}</p>
           </CardFooter>

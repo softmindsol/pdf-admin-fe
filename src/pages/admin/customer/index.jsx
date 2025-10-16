@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTablePagination } from "@/components/pagination";
+import { showDeleteConfirm } from "@/lib/swal";
 
 export default function CustomerManagement() {
   const navigate = useNavigate();
@@ -210,8 +211,10 @@ export default function CustomerManagement() {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={async () => {
-                            await deleteCustomer(customer._id).unwrap();
+                          onClick={() => {
+                            showDeleteConfirm(async () => {
+                              await deleteCustomer(customer._id).unwrap();
+                            });
                           }}
                           className="text-red-600"
                         >
