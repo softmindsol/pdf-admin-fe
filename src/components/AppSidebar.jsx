@@ -8,13 +8,12 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   MdDashboard,
   MdPeople,
   MdInventory,
-  MdSettings,
   MdChevronLeft,
   MdPushPin,
   MdExpandMore,
@@ -37,12 +36,15 @@ const sidebarNavItems = [
         label: "Users",
         to: "/user",
         icon: MdPeople,
+        module: "user",
       },
       {
         label: "Department",
         to: "/department",
         icon: MdInventory,
+        module: "department",
       },
+    
     ],
   },
   {
@@ -54,26 +56,31 @@ const sidebarNavItems = [
         label: "Work Order",
         to: "/work-order",
         icon: FileBarChart,
+        module: "workOrder",
       },
       {
-        label: "Customer Ticket",
+        label: "Customer",
         to: "/customer",
         icon: FileBarChart,
+        module: "customer",
       },
       {
         label: "Above Ground",
         to: "/above-ground",
         icon: FileBarChart,
+        module: "AboveGround",
       },
       {
         label: "Service Ticket",
         to: "/service-ticket",
         icon: FileBarChart,
+        module: "serviceTicket",
       },
       {
         label: "Under Ground",
         to: "/under-ground",
         icon: FileBarChart,
+        module: "underGround",
       },
     ],
   },
@@ -85,12 +92,31 @@ export function AppSidebar({
   isHovering,
   handleMouseEnter,
   handleMouseLeave,
+  allowedModules = [],
 }) {
   const [expandedItems, setExpandedItems] = useState(new Set());
   const location = useLocation();
   const navigate = useNavigate();
 
   const isVisuallyExpanded = !isCollapsed || isHovering;
+
+  const visibleNavItems = sidebarNavItems
+    .map((item) => {
+      if (!item.children) {
+        return item;
+      }
+
+      const visibleChildren = item.children.filter((child) =>
+        allowedModules.includes(child.module)
+      );
+
+      if (visibleChildren.length > 0) {
+        return { ...item, children: visibleChildren };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
 
   const toggleExpanded = (index) => {
     const newExpanded = new Set(expandedItems);
@@ -113,6 +139,7 @@ export function AppSidebar({
         isVisuallyExpanded ? "w-64" : "w-16"
       }`}
     >
+      {/* --- ALL YOUR JSX REMAINS UNCHANGED FROM HERE --- */}
       <SidebarHeader className="p-4 border-b border-orange-200 bg-white/50 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           {isVisuallyExpanded && (
@@ -158,7 +185,8 @@ export function AppSidebar({
       <SidebarContent className="p-2 overflow-y-auto">
         <SidebarGroup>
           <SidebarMenu className="space-y-1">
-            {sidebarNavItems.map((item, index) => {
+            {/* 4. MODIFICATION: Map over the new 'visibleNavItems' array instead of the original. */}
+            {visibleNavItems.map((item, index) => {
               const Icon = item.icon;
               const isExpanded = expandedItems.has(index);
 
@@ -212,7 +240,6 @@ export function AppSidebar({
                           <SidebarMenu>
                             {item.children.map((child, childIndex) => {
                               const ChildIcon = child.icon;
-
                               const isChildActive =
                                 location.pathname.startsWith(child.to);
 

@@ -3,6 +3,10 @@ import { Suspense, lazy } from "react";
 import Loader from "@/components/LoadingFalback";
 import AdminLayout from "./layouts/admin";
 import Dashboard from "./pages/admin/dashboard";
+ import ProtectedRoute from "@/layouts/ProtectedRoute.jsx"
+
+
+// --- Import all your page components ---
 import UsersManagement from "./pages/admin/users";
 import ViewUser from "./pages/admin/users/view";
 import EditUser from "./pages/admin/users/EditUser";
@@ -18,11 +22,11 @@ import CustomerForm from "./pages/admin/customer/createCustomer";
 import ViewCustomer from "./pages/admin/customer/ViewWorkOrder";
 import AboveGroundTestManagement from "./pages/admin/AboveGround";
 import AboveGroundTestForm from "./pages/admin/AboveGround/createAboveGround";
+import ViewAboveGroundTicket from "./pages/admin/AboveGround/view";
 import ServiceTicketManagement from "./pages/admin/serviceTicket";
 import ServiceTicketForm from "./pages/admin/serviceTicket/createupdateServiceTicket";
 import ViewServiceTicket from "./pages/admin/serviceTicket/viewServiceTicket";
-import ViewAboveGroundTicket from "./pages/admin/AboveGround/view";
-import UndergroundTestList from "./pages/admin/underGround";
+import UndergroundTestManagement from "./pages/admin/underGround"; // Renamed for consistency
 import ViewUndergroundTest from "./pages/admin/underGround/view";
 import UndergroundTestForm from "./pages/admin/underGround/createUpdateUnderground";
 
@@ -49,118 +53,241 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Dashboard />,
+        element: <Dashboard />, // Dashboard is accessible to all logged-in users
       },
+
+      // --- Protected "User" Routes ---
+      // NOTE: Assuming the module name in your token for this is "user"
       {
         path: "user",
-        element: <UsersManagement />,
+        element: (
+          <ProtectedRoute moduleName="user">
+            <UsersManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "user/:id",
-        element: <ViewUser />,
+        element: (
+          <ProtectedRoute moduleName="user">
+            <ViewUser />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "user/:id/update",
-        element: <EditUser />,
+        element: (
+          <ProtectedRoute moduleName="user">
+            <EditUser />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "user/new",
-        element: <CreateUser />,
+        element: (
+          <ProtectedRoute moduleName="user">
+            <CreateUser />
+          </ProtectedRoute>
+        ),
       },
-      // department
+
+      // --- Protected "Department" Routes ---
+      // NOTE: Assuming the module name in your token for this is "department"
       {
         path: "department",
-        element: <DepartmentsManagement />,
+        element: (
+          <ProtectedRoute moduleName="department">
+            <DepartmentsManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "department/:id/update",
-        element: <EditDepartment />,
+        element: (
+          <ProtectedRoute moduleName="department">
+            <EditDepartment />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "department/:id",
-        element: <ViewDepartment />,
+        element: (
+          <ProtectedRoute moduleName="department">
+            <ViewDepartment />
+          </ProtectedRoute>
+        ),
       },
+
+      // --- Protected "Work Order" Routes ---
       {
         path: "work-order",
-        element: <WorkOrderManagement />,
-      },
-      {
-        path: "customer",
-        element: <CustomerManagement />,
+        element: (
+          <ProtectedRoute moduleName="workOrder">
+            <WorkOrderManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "work-order/new",
-        element: <CreateWorkOrder />,
+        element: (
+          <ProtectedRoute moduleName="workOrder">
+            <CreateWorkOrder />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "work-order/update/:id",
-        element: <CreateWorkOrder />,
+        element: (
+          <ProtectedRoute moduleName="workOrder">
+            <CreateWorkOrder />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "work-order/:id",
-        element: <ViewWorkOrder />,
+        element: (
+          <ProtectedRoute moduleName="workOrder">
+            <ViewWorkOrder />
+          </ProtectedRoute>
+        ),
+      },
+
+      // --- Protected "Customer" Routes ---
+      // NOTE: Assuming the module name is "customer"
+      {
+        path: "customer",
+        element: (
+          <ProtectedRoute moduleName="customer">
+            <CustomerManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "customer/new",
-        element: <CustomerForm />,
+        element: (
+          <ProtectedRoute moduleName="customer">
+            <CustomerForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "customer/update/:id",
-        element: <CustomerForm />,
+        element: (
+          <ProtectedRoute moduleName="customer">
+            <CustomerForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "customer/:id",
-        element: <ViewCustomer />,
+        element: (
+          <ProtectedRoute moduleName="customer">
+            <ViewCustomer />
+          </ProtectedRoute>
+        ),
       },
+
+      // --- Protected "Above Ground" Routes ---
       {
         path: "above-ground",
-        element: <AboveGroundTestManagement />,
+        element: (
+          <ProtectedRoute moduleName="AboveGround">
+            <AboveGroundTestManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "above-ground/new",
-        element: <AboveGroundTestForm />,
+        element: (
+          <ProtectedRoute moduleName="AboveGround">
+            <AboveGroundTestForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "above-ground/:id",
-        element: <ViewAboveGroundTicket />,
+        element: (
+          <ProtectedRoute moduleName="AboveGround">
+            <ViewAboveGroundTicket />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "above-ground/:id/update",
-        element: <AboveGroundTestForm />,
+        element: (
+          <ProtectedRoute moduleName="AboveGround">
+            <AboveGroundTestForm />
+          </ProtectedRoute>
+        ),
       },
+
+      // --- Protected "Service Ticket" Routes ---
       {
         path: "service-ticket",
-        element: <ServiceTicketManagement />,
+        element: (
+          <ProtectedRoute moduleName="serviceTicket">
+            <ServiceTicketManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "service-ticket/new",
-        element: <ServiceTicketForm />,
+        element: (
+          <ProtectedRoute moduleName="serviceTicket">
+            <ServiceTicketForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "service-ticket/update/:id",
-        element: <ServiceTicketForm />,
+        element: (
+          <ProtectedRoute moduleName="serviceTicket">
+            <ServiceTicketForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "service-ticket/:id",
-        element: <ViewServiceTicket />,
+        element: (
+          <ProtectedRoute moduleName="serviceTicket">
+            <ViewServiceTicket />
+          </ProtectedRoute>
+        ),
       },
+
+      // --- Protected "Under Ground" Routes ---
       {
         path: "under-ground",
-        element: <UndergroundTestList />,
+        element: (
+          <ProtectedRoute moduleName="underGround">
+            <UndergroundTestManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "under-ground/new",
-        element: <UndergroundTestForm />,
+        element: (
+          <ProtectedRoute moduleName="underGround">
+            <UndergroundTestForm />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "under-ground/update/:id",
-        element: <UndergroundTestForm />,
+        path: "under-ground/update/:id", // Corrected path from previous example
+        element: (
+          <ProtectedRoute moduleName="underGround">
+            <UndergroundTestForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "under-ground/:id",
-        element: <ViewUndergroundTest />,
+        element: (
+          <ProtectedRoute moduleName="underGround">
+            <ViewUndergroundTest />
+          </ProtectedRoute>
+        ),
       },
-      
     ],
   },
 ]);

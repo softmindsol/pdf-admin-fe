@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
 
-// 1. Updated Imports for RTK Query and Swal
 import {
   useGetUndergroundTestsQuery,
   useDeleteUndergroundTestMutation,
 } from "@/store/GlobalApi";
 import { showDeleteConfirm } from "@/lib/swal";
 
-// 2. Updated Imports for UI Components
 import {
   Table,
   TableBody,
@@ -36,14 +34,12 @@ import { DataTablePagination } from "@/components/pagination";
 export default function UndergroundTestManagement() {
   const navigate = useNavigate();
 
-  // State management mirroring the 'AboveGround' component
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
-  // Debouncing logic using useEffect
   useEffect(() => {
     const handler = setTimeout(() => {
       setPage(1);
@@ -52,7 +48,6 @@ export default function UndergroundTestManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // RTK Query hooks for Underground Tests
   const [deleteUndergroundTest] = useDeleteUndergroundTestMutation();
   const {
     data: response,
@@ -65,12 +60,10 @@ export default function UndergroundTestManagement() {
     search: debouncedSearch,
   });
 
-  // Data extraction and pagination logic
   const undergroundTests = response?.data?.undergroundTests || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
 
-  // Skeleton loader for a better user experience
   const renderSkeletons = () => {
     return Array(limit)
       .fill(0)
@@ -79,10 +72,18 @@ export default function UndergroundTestManagement() {
           <TableCell className="w-[40px]">
             <Skeleton className="h-4 w-4" />
           </TableCell>
-          <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-40" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-48" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-28" />
+          </TableCell>
           <TableCell className="text-right">
             <Skeleton className="h-8 w-8 ml-auto" />
           </TableCell>
@@ -125,7 +126,9 @@ export default function UndergroundTestManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]"><Checkbox /></TableHead>
+              <TableHead className="w-[40px]">
+                <Checkbox />
+              </TableHead>
               <TableHead>Property Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Contractor</TableHead>
@@ -145,7 +148,9 @@ export default function UndergroundTestManagement() {
             ) : undergroundTests.length > 0 ? (
               undergroundTests.map((test) => (
                 <TableRow key={test._id}>
-                  <TableCell><Checkbox /></TableCell>
+                  <TableCell>
+                    <Checkbox />
+                  </TableCell>
                   <TableCell className="font-medium">
                     {test.propertyDetails.propertyName}
                   </TableCell>
@@ -165,10 +170,16 @@ export default function UndergroundTestManagement() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigate(`/under-ground/${test._id}`)}>
+                        <DropdownMenuItem
+                          onClick={() => navigate(`/under-ground/${test._id}`)}
+                        >
                           View
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(`/under-ground/update/${test._id}`)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/under-ground/update/${test._id}`)
+                          }
+                        >
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

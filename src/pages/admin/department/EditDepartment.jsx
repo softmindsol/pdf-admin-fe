@@ -47,6 +47,7 @@ const formOptions = [
   { id: "serviceTicket", label: "Service Ticket" },
   { id: "underGround", label: "Under Ground" },
   { id: "workOrder", label: "Work Order" },
+  { id: "customer", label: "Customer" },
 ];
 
 // Constant to control how many badges are visible before collapsing
