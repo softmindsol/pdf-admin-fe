@@ -65,9 +65,14 @@ const sidebarNavItems = [
         to: "/above-ground",
         icon: FileBarChart,
       },
-       {
+      {
         label: "Service Ticket",
         to: "/service-ticket",
+        icon: FileBarChart,
+      },
+      {
+        label: "Under Ground",
+        to: "/under-ground",
         icon: FileBarChart,
       },
     ],

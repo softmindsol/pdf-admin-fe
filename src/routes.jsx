@@ -23,6 +23,8 @@ import ServiceTicketForm from "./pages/admin/serviceTicket/createupdateServiceTi
 import ViewServiceTicket from "./pages/admin/serviceTicket/viewServiceTicket";
 import ViewAboveGroundTicket from "./pages/admin/AboveGround/view";
 import UndergroundTestList from "./pages/admin/underGround";
+import ViewUndergroundTest from "./pages/admin/underGround/view";
+import UndergroundTestForm from "./pages/admin/underGround/createUpdateUnderground";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -114,15 +116,15 @@ export const router = createBrowserRouter([
         path: "above-ground",
         element: <AboveGroundTestManagement />,
       },
-        {
+      {
         path: "above-ground/new",
         element: <AboveGroundTestForm />,
       },
-       {
+      {
         path: "above-ground/:id",
         element: <ViewAboveGroundTicket />,
       },
-              {
+      {
         path: "above-ground/:id/update",
         element: <AboveGroundTestForm />,
       },
@@ -130,23 +132,35 @@ export const router = createBrowserRouter([
         path: "service-ticket",
         element: <ServiceTicketManagement />,
       },
-        {
+      {
         path: "service-ticket/new",
         element: <ServiceTicketForm />,
       },
-       {
+      {
         path: "service-ticket/update/:id",
         element: <ServiceTicketForm />,
       },
-       {
+      {
         path: "service-ticket/:id",
         element: <ViewServiceTicket />,
       },
-        {
+      {
         path: "under-ground",
         element: <UndergroundTestList />,
       },
-
+      {
+        path: "under-ground/new",
+        element: <UndergroundTestForm />,
+      },
+      {
+        path: "under-ground/update/:id",
+        element: <UndergroundTestForm />,
+      },
+      {
+        path: "under-ground/:id",
+        element: <ViewUndergroundTest />,
+      },
+      
     ],
   },
 ]);

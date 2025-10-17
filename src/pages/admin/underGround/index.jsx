@@ -168,7 +168,7 @@ export default function UndergroundTestManagement() {
                         <DropdownMenuItem onClick={() => navigate(`/under-ground/${test._id}`)}>
                           View
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(`/under-ground/${test._id}/update`)}>
+                        <DropdownMenuItem onClick={() => navigate(`/under-ground/update/${test._id}`)}>
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
