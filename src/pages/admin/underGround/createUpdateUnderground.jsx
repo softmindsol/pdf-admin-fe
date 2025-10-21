@@ -30,6 +30,7 @@ import { HydrostaticTest } from "./formComponents/hydrostaticTest";
 import { LeakageTest } from "./formComponents/leakageTest";
 import { HydrantsAndValves } from "./formComponents/hydrantsAndControlValves";
 import { RemarksAndSignatures } from "./formComponents/remarksAndSignatures";
+import { LeadsFlushingTests } from "./formComponents/leadsFlushing";
 
 const signatureSchema = z.object({
   signed: z.string().optional().default(""),
@@ -75,6 +76,16 @@ const formSchema = z.object({
   }),
 
   flushingTests: z.object({
+    undergroundPipingStandard: z.string().optional().default(""),
+    undergroundPipingStandardConform: z.boolean().optional().default(true),
+    undergroundPipingStandardExplanation: z.string().optional().default(""),
+    flushingFlowObtained: z
+      .enum(["Public water", "Tank or reservoir", "Fire pump"])
+      .nullable()
+      .optional(),
+    openingType: z.enum(["Hydrant butt", "Open pipe"]).nullable().optional(),
+  }),
+  leadsflushingTests: z.object({
     undergroundPipingStandard: z.string().optional().default(""),
     undergroundPipingStandardConform: z.boolean().optional().default(true),
     undergroundPipingStandardExplanation: z.string().optional().default(""),
@@ -161,6 +172,8 @@ export default function UndergroundTestForm() {
       suppliesBuildingsNames: [],
       undergroundPipesAndJoints: {},
       flushingTests: {},
+      leadsflushingTests: {},
+
       hydrostaticTest: {},
       leakageTest: {},
       hydrantsAndControlValves: {},
@@ -278,6 +291,7 @@ export default function UndergroundTestForm() {
             <PlansAndInstructionsSection control={form.control} />
             <PipesAndJointsSection control={form.control} />
             <FlushingTests control={form.control} />
+            <LeadsFlushingTests control={form.control} />
             <HydrostaticTest control={form.control} />
             <LeakageTest control={form.control} />
             <HydrantsAndValves control={form.control} />

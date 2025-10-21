@@ -1,6 +1,6 @@
 import React from "react";
 
-// 1. Import necessary components from shadcn/ui
+// 1. Import necessary components
 import {
   FormControl,
   FormField,
@@ -23,27 +23,28 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator"; // For visual separation
 
 // 2. The component accepts `control` from the main useForm hook
-export function FlushingTests({ control }) {
+export function LeadsFlushingTests({ control }) {
   return (
-    <AccordionItem value="item-4">
-      <AccordionTrigger>Flushing Tests</AccordionTrigger>
+    <AccordionItem value="item-4b"> {/* Use a unique value */}
+      <AccordionTrigger>Lead-ins Flushing Tests</AccordionTrigger>
       <AccordionContent className="p-4 space-y-6">
 
-        {/* --- Flushing Tests Subsection --- */}
+        {/* --- Lead-ins Flushing Tests Subsection --- */}
         <div>
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div className="space-y-6">
                 <FormField
                   control={control}
-                  name="flushingTests.undergroundPipingStandard"
+                  name="leadsflushingTests.undergroundPipingStandard"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Piping Flushing Standard</FormLabel>
+                      <FormLabel>Lead-ins Flushing Standard</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., NFPA 24, Chapter 10" {...field} />
+                        <Input placeholder="e.g., NFPA 13, Section X" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -51,7 +52,7 @@ export function FlushingTests({ control }) {
                 />
                 <FormField
                   control={control}
-                  name="flushingTests.undergroundPipingStandardConform"
+                  name="leadsflushingTests.undergroundPipingStandardConform"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
@@ -61,7 +62,7 @@ export function FlushingTests({ control }) {
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Does flushing conform to standard?</FormLabel>
+                        <FormLabel>Does lead-in flushing conform to standard?</FormLabel>
                       </div>
                     </FormItem>
                   )}
@@ -69,13 +70,13 @@ export function FlushingTests({ control }) {
               </div>
               <FormField
                 control={control}
-                name="flushingTests.undergroundPipingStandardExplanation"
+                name="leadsflushingTests.undergroundPipingStandardExplanation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Flushing Standard Explanation</FormLabel>
+                    <FormLabel>Lead-ins Flushing Explanation</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="If flushing does not conform, explain here..."
+                        placeholder="If lead-in flushing does not conform, explain here..."
                         {...field}
                       />
                     </FormControl>
@@ -87,7 +88,7 @@ export function FlushingTests({ control }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={control}
-                name="flushingTests.flushingFlowObtained"
+                name="leadsflushingTests.flushingFlowObtained"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Flushing Flow Obtained From</FormLabel>
@@ -112,7 +113,7 @@ export function FlushingTests({ control }) {
               />
               <FormField
                 control={control}
-                name="flushingTests.openingType"
+                name="leadsflushingTests.openingType"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type of Opening</FormLabel>
@@ -126,8 +127,8 @@ export function FlushingTests({ control }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Hydrant butt">
-                          Hydrant butt
+                        <SelectItem value="Y connection to flange and spigot">
+                          Y connection to flange and spigot
                         </SelectItem>
                         <SelectItem value="Open pipe">Open pipe</SelectItem>
                       </SelectContent>
@@ -140,11 +141,6 @@ export function FlushingTests({ control }) {
           </div>
         </div>
         
-        {/*
-          TODO: Add subsections for Hydrostatic and Leakage tests here
-          using a <Separator /> between them.
-        */}
-
       </AccordionContent>
     </AccordionItem>
   );

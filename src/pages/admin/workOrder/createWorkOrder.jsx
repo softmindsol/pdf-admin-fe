@@ -399,12 +399,9 @@ export default function WorkOrderForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Credit Card">
-                            Credit Card
-                          </SelectItem>
+                          <SelectItem value="credit">Credit Card</SelectItem>
                           <SelectItem value="cash">Cash</SelectItem>
                           <SelectItem value="check">Check</SelectItem>
-                          <SelectItem value="invoice">Invoice</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
