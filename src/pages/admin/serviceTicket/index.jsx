@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import {
   useGetServiceTicketsQuery,
   useDeleteServiceTicketMutation,
+  useLazyGetSignedUrlQuery, // 1. Import the lazy query hook
 } from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react"; // Import Download icon
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { Toaster, toast } from "sonner"; // For user-friendly notifications
 
 // --- Shadcn UI Imports ---
 import {
@@ -28,13 +30,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTablePagination } from "@/components/pagination"; // Assuming this is a shared component
-import { Badge } from "@/components/ui/badge"; // Added for status display
+import { DataTablePagination } from "@/components/pagination";
+import { Badge } from "@/components/ui/badge";
 import { showDeleteConfirm } from "@/lib/swal";
 
 export default function ServiceTicketManagement() {
   const navigate = useNavigate();
   const [deleteServiceTicket] = useDeleteServiceTicketMutation();
+
+  // 2. Instantiate the lazy query hook for on-demand URL fetching
+  const [triggerGetSignedUrl, { isLoading: isDownloading }] =
+    useLazyGetSignedUrlQuery();
 
   // --- State Management for Filters ---
   const [page, setPage] = useState(1);
@@ -46,9 +52,9 @@ export default function ServiceTicketManagement() {
   // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
-      setPage(1); // Reset to first page on new search
+      setPage(1);
       setDebouncedSearch(searchTerm);
-    }, 500); // 500ms delay
+    }, 500);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
@@ -67,6 +73,50 @@ export default function ServiceTicketManagement() {
   const serviceTickets = response?.data?.serviceTickets || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
+
+  // 3. Create the handler function for downloading the PDF
+  const handleDownloadPdf = async (ticket) => {
+    if (!ticket.ticket) {
+      toast.error("No PDF found for this service ticket.");
+      return;
+    }
+
+    toast.loading("Preparing your download...");
+
+    try {
+      // Get the temporary, secure URL from the backend
+      const apiResponse = await triggerGetSignedUrl(ticket.ticket).unwrap();
+      const signedUrl = apiResponse.data.url;
+
+      // Fetch the file data from S3 as a blob
+      const fileResponse = await fetch(signedUrl);
+      if (!fileResponse.ok)
+        throw new Error("Could not fetch the file from S3.");
+      const blob = await fileResponse.blob();
+
+      // Create a local object URL to trigger the download
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.setAttribute(
+        "download",
+        `${ticket.jobName || "service-ticket"}.pdf`
+      );
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up the local URL
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
+
+      toast.dismiss();
+      toast.success("Download has started!");
+    } catch (error) {
+      console.error("Failed to download PDF:", error);
+      toast.dismiss();
+      toast.error("Could not download the PDF. Please try again.");
+    }
+  };
 
   // Function to render skeleton loaders
   const renderSkeletons = () => {
@@ -90,7 +140,7 @@ export default function ServiceTicketManagement() {
             <Skeleton className="h-4 w-24" />
           </TableCell>
           <TableCell>
-             <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-28" />
           </TableCell>
           <TableCell className="text-right">
             <Skeleton className="h-8 w-8 ml-auto" />
@@ -101,6 +151,7 @@ export default function ServiceTicketManagement() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
+      <Toaster richColors position="top-right" />
       {/* --- Header --- */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Service Tickets</h1>
@@ -111,17 +162,15 @@ export default function ServiceTicketManagement() {
 
       {/* --- Toolbar --- */}
       <div className="flex items-center justify-between space-x-2">
-        <div className="flex flex-1 items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by job, customer, technician..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8"
-            />
-          </div>
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search by job, customer..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8"
+          />
         </div>
         <Button onClick={() => navigate("/service-ticket/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -135,21 +184,7 @@ export default function ServiceTicketManagement() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]">
-                <Checkbox
-                  checked={
-                    Object.keys(rowSelection).length === serviceTickets.length &&
-                    serviceTickets.length > 0
-                  }
-                  onCheckedChange={(checked) => {
-                    const newSelection = {};
-                    if (checked) {
-                      serviceTickets.forEach(
-                        (ticket) => (newSelection[ticket._id] = true)
-                      );
-                    }
-                    setRowSelection(newSelection);
-                  }}
-                />
+                <Checkbox />
               </TableHead>
               <TableHead>Job Name</TableHead>
               <TableHead>Customer</TableHead>
@@ -172,42 +207,40 @@ export default function ServiceTicketManagement() {
               serviceTickets.map((ticket) => (
                 <TableRow key={ticket._id}>
                   <TableCell>
-                    <Checkbox
-                      checked={rowSelection[ticket._id] || false}
-                      onCheckedChange={(checked) => {
-                        const newSelection = { ...rowSelection };
-                        if (checked) {
-                          newSelection[ticket._id] = true;
-                        } else {
-                          delete newSelection[ticket._id];
-                        }
-                        setRowSelection(newSelection);
-                      }}
-                    />
+                    <Checkbox />
                   </TableCell>
-                  <TableCell className="font-medium">{ticket.jobName}</TableCell>
+                  <TableCell className="font-medium">
+                    {ticket.jobName}
+                  </TableCell>
                   <TableCell>{ticket.customerName}</TableCell>
                   <TableCell>{ticket.technicianName}</TableCell>
                   <TableCell>
-                    <Badge variant={ticket.workOrderStatus === 'Complete' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        ticket.workOrderStatus === "Complete"
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
                       {ticket.workOrderStatus}
                     </Badge>
                   </TableCell>
-                   <TableCell>
+                  <TableCell>
                     {format(new Date(ticket.completionDate), "PPP")}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                          onClick={() => navigate(`/service-ticket/${ticket._id}`)}
+                          onClick={() =>
+                            navigate(`/service-ticket/${ticket._id}`)
+                          }
                         >
                           View
                         </DropdownMenuItem>
@@ -218,13 +251,20 @@ export default function ServiceTicketManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
+                        {/* 4. Add the Download PDF menu item */}
+                        <DropdownMenuItem
+                          disabled={!ticket.ticket || isDownloading}
+                          onClick={() => handleDownloadPdf(ticket)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          <span>Download PDF</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() =>{
-                            showDeleteConfirm(async ()=>{
-                              await deleteServiceTicket(ticket._id).unwrap();
-                            })
-                          }
+                          onClick={() =>
+                            showDeleteConfirm(() =>
+                              deleteServiceTicket(ticket._id).unwrap()
+                            )
                           }
                           className="text-red-600"
                         >
@@ -253,7 +293,7 @@ export default function ServiceTicketManagement() {
         pageCount={pageCount}
         isLoading={isLoading || isFetching}
         selectedRowCount={Object.keys(rowSelection).length}
-        totalItems={pagination.totalDocuments || 0} // Using totalDocuments as per ApiFeatures
+        totalItems={pagination.totalDocuments || 0}
         currentPage={pagination.currentPage || 0}
       />
     </div>
