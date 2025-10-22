@@ -273,7 +273,7 @@ export const GlobalApi = createApi({
       invalidatesTags: ["ServiceTicket"],
     }),
 
-     createUndergroundTest: builder.mutation({
+    createUndergroundTest: builder.mutation({
       query: (body) => createPostRequest(`/admin/under-ground`, body),
       invalidatesTags: ["UndergroundTest"],
     }),
@@ -300,6 +300,13 @@ export const GlobalApi = createApi({
     deleteUndergroundTest: builder.mutation({
       query: (id) => createDeleteRequest(`/admin/under-ground/${id}`),
       invalidatesTags: ["UndergroundTest"],
+    }),
+    getSignedUrl: builder.query({
+      query: (key) => {
+        const params = new URLSearchParams({ key });
+        // Assuming your controller is mounted at /api/s3
+        return createRequest(`/file/pre-sign?${params.toString()}`);
+      },
     }),
   }),
 });
@@ -335,19 +342,18 @@ export const {
   useDeleteAboveGroundTestMutation,
 
   // 3. Export Underground Test Hooks
-   useCreateUndergroundTestMutation,
+  useCreateUndergroundTestMutation,
   useGetUndergroundTestsQuery,
   useGetUndergroundTestByIdQuery,
   useUpdateUndergroundTestMutation,
   useDeleteUndergroundTestMutation,
 
-  
   // 4.  Export Service Ticket Hooks
   useCreateServiceTicketMutation,
   useGetServiceTicketsQuery,
   useGetServiceTicketByIdQuery,
   useUpdateServiceTicketMutation,
   useDeleteServiceTicketMutation,
-
-
+  useGetSignedUrlQuery,
+  useLazyGetSignedUrlQuery,
 } = GlobalApi;

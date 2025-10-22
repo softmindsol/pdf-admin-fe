@@ -104,7 +104,7 @@ export default function Dashboard() {
           </h1>
           <p className="text-orange-dark/70 mt-2">Welcome back! Here's what's happening with your business today.</p>
         </div>
-
+        
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {dashboardStats.map((stat, index) => {

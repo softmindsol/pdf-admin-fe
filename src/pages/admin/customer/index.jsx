@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import {
   useGetCustomersQuery,
   useDeleteCustomerMutation,
-} from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
+  useLazyGetSignedUrlQuery, // CORRECT: This is the hook for on-demand actions
+} from "@/store/GlobalApi"; // Adjust path to your RTK Query API slice
+import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Toaster, toast } from "sonner"; // For user-friendly notifications
 
 // --- Shadcn UI Imports ---
 import {
@@ -27,30 +29,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTablePagination } from "@/components/pagination";
-import { showDeleteConfirm } from "@/lib/swal";
+import { DataTablePagination } from "@/components/pagination"; // Your custom pagination component
+import { showDeleteConfirm } from "@/lib/swal"; // Your custom Swal confirmation
 
 export default function CustomerManagement() {
   const navigate = useNavigate();
   const [deleteCustomer] = useDeleteCustomerMutation();
 
-  // --- State Management for Filters ---
+  // CORRECT: Call the lazy query hook, which returns an array [trigger, result]
+  const [triggerGetSignedUrl, { isLoading: isDownloading }] =
+    useLazyGetSignedUrlQuery();
+
+  // --- State Management for Filters and Selection ---
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
-  // Debounce search term
+  // Debounce search term to avoid excessive API calls
   useEffect(() => {
     const handler = setTimeout(() => {
-      setPage(1); // Reset to first page on new search
+      setPage(1); // Reset to the first page on a new search
       setDebouncedSearch(searchTerm);
     }, 500);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // --- Fetch Customers ---
+  // --- Fetch Customers Data ---
   const {
     data: response,
     isLoading,
@@ -66,6 +72,30 @@ export default function CustomerManagement() {
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
 
+  // --- Handler for Securely Downloading the PDF ---
+const handleDownloadPdf = async (customer) => {
+  if (!customer.ticket) {
+    toast.error("No PDF profile found for this customer.");
+    return;
+  }
+
+  try {
+    const apiResponse = await triggerGetSignedUrl(customer.ticket).unwrap();
+    const signedUrl = apiResponse.data.url;
+
+    // Simply open the secure URL in a new tab.
+    // The browser will use its PDF viewer.
+    window.open(signedUrl, '_blank', 'noopener,noreferrer');
+
+    // You can still provide feedback.
+    toast.success("Opening PDF profile...");
+  } catch (error) {
+    console.error("Failed to get signed URL:", error);
+    toast.error("Could not open the PDF. Please try again.");
+  }
+};
+
+  // --- UI Rendering ---
   const renderSkeletons = () => {
     return Array(limit)
       .fill(0)
@@ -95,6 +125,8 @@ export default function CustomerManagement() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
+      <Toaster richColors position="top-right" />
+
       {/* --- Header --- */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
@@ -105,18 +137,15 @@ export default function CustomerManagement() {
 
       {/* --- Toolbar --- */}
       <div className="flex items-center justify-between space-x-2">
-        <div className="flex flex-1 items-center space-x-2">
-          {/* Search Input */}
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by name, email, phone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8"
-            />
-          </div>
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search by name, email, phone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8"
+          />
         </div>
         <Button onClick={() => navigate("/customer/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -170,11 +199,8 @@ export default function CustomerManagement() {
                       checked={rowSelection[customer._id] || false}
                       onCheckedChange={(checked) => {
                         const newSelection = { ...rowSelection };
-                        if (checked) {
-                          newSelection[customer._id] = true;
-                        } else {
-                          delete newSelection[customer._id];
-                        }
+                        if (checked) newSelection[customer._id] = true;
+                        else delete newSelection[customer._id];
                         setRowSelection(newSelection);
                       }}
                     />
@@ -209,13 +235,20 @@ export default function CustomerManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={!customer.ticket || isDownloading}
+                          onClick={() => handleDownloadPdf(customer)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          <span>Download PDF</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => {
-                            showDeleteConfirm(async () => {
-                              await deleteCustomer(customer._id).unwrap();
-                            });
-                          }}
+                          onClick={() =>
+                            showDeleteConfirm(() =>
+                              deleteCustomer(customer._id).unwrap()
+                            )
+                          }
                           className="text-red-600"
                         >
                           Delete
@@ -236,6 +269,7 @@ export default function CustomerManagement() {
         </Table>
       </div>
 
+      {/* --- Pagination --- */}
       <DataTablePagination
         page={page}
         setPage={setPage}
