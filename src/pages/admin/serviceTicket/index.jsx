@@ -81,7 +81,6 @@ export default function ServiceTicketManagement() {
       return;
     }
 
-    toast.loading("Preparing your download...");
 
     try {
       // Get the temporary, secure URL from the backend
@@ -89,27 +88,9 @@ export default function ServiceTicketManagement() {
       const signedUrl = apiResponse.data.url;
 
       // Fetch the file data from S3 as a blob
-      const fileResponse = await fetch(signedUrl);
-      if (!fileResponse.ok)
-        throw new Error("Could not fetch the file from S3.");
-      const blob = await fileResponse.blob();
-
-      // Create a local object URL to trigger the download
-      const objectUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.setAttribute(
-        "download",
-        `${ticket.jobName || "service-ticket"}.pdf`
-      );
-      document.body.appendChild(link);
-      link.click();
-
-      // Clean up the local URL
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(objectUrl);
-
-      toast.dismiss();
+     window.open(signedUrl, '_blank', 'noopener,noreferrer');
+    
+        // You can still provide feedback.
       toast.success("Download has started!");
     } catch (error) {
       console.error("Failed to download PDF:", error);
@@ -151,7 +132,6 @@ export default function ServiceTicketManagement() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
-      <Toaster richColors position="top-right" />
       {/* --- Header --- */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Service Tickets</h1>
@@ -256,7 +236,7 @@ export default function ServiceTicketManagement() {
                           disabled={!ticket.ticket || isDownloading}
                           onClick={() => handleDownloadPdf(ticket)}
                         >
-                          <Download className="mr-2 h-4 w-4" />
+                          <Download className="mr-1 h-4 w-4" />
                           <span>Download PDF</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
