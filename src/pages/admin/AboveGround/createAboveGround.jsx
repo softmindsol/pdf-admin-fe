@@ -101,6 +101,7 @@ const dryPipeOperatingTestSchema = z.object({
     .optional(),
   alarmOperatedProperlyWithoutQOD: z.boolean().optional().default(true),
   alarmOperatedProperlyWithQOD: z.boolean().optional().default(true),
+  explain: z.string().optional().default(''),
 });
 
 const delugePreActionValveSchema = z.object({
@@ -190,7 +191,13 @@ const formSchema = z.object({
       .optional(),
   }),
   testing: z.object({
-    hydrostaticTest: z
+   backflowTest: z
+      .object({
+        meansUsed: z.string().optional().default(""),
+        wasFlowDemandCreated: z.enum(["Yes", "No", "N/A"]).nullable().optional(),
+      })
+      .optional(),
+       hydrostaticTest: z
       .object({
         pressurePsi: z.coerce.number().optional(),
         pressureBar: z.coerce.number().optional(),

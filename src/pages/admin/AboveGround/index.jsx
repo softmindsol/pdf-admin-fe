@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   useGetAboveGroundTestsQuery,
   useDeleteAboveGroundTestMutation,
+  useLazyGetSignedUrlQuery, // 1. Import the lazy query hook
 } from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react"; // 2. Import Download icon
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { toast } from "sonner"; // 3. Import toast for notifications
 
+// --- Shadcn UI Imports ---
 import {
   Table,
   TableBody,
@@ -32,15 +35,20 @@ import { showDeleteConfirm } from "@/lib/swal";
 
 export default function AboveGroundTestManagement() {
   const navigate = useNavigate();
-
   const [deleteAboveGroundTest] = useDeleteAboveGroundTestMutation();
 
+  // 4. Instantiate the lazy query hook
+  const [triggerGetSignedUrl, { isLoading: isDownloading }] =
+    useLazyGetSignedUrlQuery();
+
+  // --- State Management ---
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
+  // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
       setPage(1);
@@ -49,6 +57,7 @@ export default function AboveGroundTestManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
+  // --- Fetch Data ---
   const {
     data: response,
     isLoading,
@@ -64,6 +73,30 @@ export default function AboveGroundTestManagement() {
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
 
+  // 5. Create the handler function for downloading the PDF
+  const handleDownloadPdf = async (test) => {
+    // Assuming the PDF file key is stored in a field named 'pdfUrl' or similar
+    // You might need to adjust this based on your actual data structure
+    if (!test.ticket) {
+      toast.error("No PDF found for this test record.");
+      return;
+    }
+
+    try {
+      const apiResponse = await triggerGetSignedUrl(test.ticket).unwrap();
+      const signedUrl = apiResponse.data.url;
+
+      // Open the secure URL in a new tab to trigger the download
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+
+      toast.success("Download has started!");
+    } catch (error) {
+      console.error("Failed to download PDF:", error);
+      toast.error("Could not download the PDF. Please try again.");
+    }
+  };
+
+  // --- Render Skeletons ---
   const renderSkeletons = () => {
     return Array(limit)
       .fill(0)
@@ -105,17 +138,15 @@ export default function AboveGroundTestManagement() {
 
       {/* Toolbar */}
       <div className="flex items-center justify-between space-x-2">
-        <div className="flex flex-1 items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by property name, address..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8"
-            />
-          </div>
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search by property name, address..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8"
+          />
         </div>
         <Button onClick={() => navigate("/above-ground/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -158,8 +189,7 @@ export default function AboveGroundTestManagement() {
                   </TableCell>
                   <TableCell>{test.propertyDetails.propertyAddress}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {test.remarksAndSignatures?.sprinklerContractor?.name ||
-                      "N/A"}
+                    {test.remarksAndSignatures?.sprinklerContractor?.name || "N/A"}
                   </TableCell>
                   <TableCell>
                     {format(new Date(test.propertyDetails.date), "PP")}
@@ -185,9 +215,17 @@ export default function AboveGroundTestManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
 
-                        {/* --- 2. CALL THE DELETE MUTATION ON CLICK --- */}
+                        {/* 6. Add the Download PDF menu item */}
+                        <DropdownMenuItem
+                          disabled={!test.ticket || isDownloading}
+                          onClick={() => handleDownloadPdf(test)}
+                        >
+                          <Download className="mr-1 h-4 w-4" />
+                          <span>Download PDF</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
                             showDeleteConfirm(async () => {
@@ -214,21 +252,13 @@ export default function AboveGroundTestManagement() {
         </Table>
       </div>
 
-      {/* --- 3. AUTOMATIC DATA REFRESH --- */}
-      {/* 
-        When the `deleteAboveGroundTest` mutation is successful, RTK Query automatically
-        invalidates the "AboveGroundTest" tag (as configured in your GlobalApi slice).
-        This tells the `useGetAboveGroundTestsQuery` to re-fetch its data.
-        The table then re-renders with the updated list, and the deleted item is gone.
-        You do not need to manually remove the item from the state.
-      */}
       <DataTablePagination
         page={page}
         setPage={setPage}
         pageCount={pageCount}
         isLoading={isLoading || isFetching}
         selectedRowCount={Object.keys(rowSelection).length}
-        totalItems={pagination.totalAboveGroundTests || 0}
+        totalItems={pagination.totalDocuments || 0}
         currentPage={pagination.currentPage || 0}
       />
     </div>

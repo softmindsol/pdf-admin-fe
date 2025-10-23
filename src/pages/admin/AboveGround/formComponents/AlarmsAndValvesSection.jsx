@@ -484,6 +484,21 @@ export function AlarmsAndValvesSection({ control }) {
                         </div>
                       </TabsContent>
                     </Tabs>
+                      <FormField
+                      control={control}
+                      name={`alarmsAndValves.dryPipeOperatingTests.${index}.explain`}
+                      render={({ field }) => (
+                        <FormItem className="mt-4">
+                          <FormLabel>If no, explain</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Explain if alarm did not operate properly..." 
+                              {...field} 
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                     <Button
                       type="button"
                       variant="ghost"

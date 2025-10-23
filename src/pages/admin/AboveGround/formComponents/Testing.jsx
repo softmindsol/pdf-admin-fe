@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { BackflowTestSection } from "./backflow";
 
 export function TestingSection({ control }) {
   // Watch the value of 'doesEquipmentOperateProperly' to conditionally render the reason field
@@ -22,6 +23,8 @@ export function TestingSection({ control }) {
       <AccordionContent asChild>
         <Card className="border-none">
           <CardContent className="pt-6 space-y-8">
+                        <BackflowTestSection control={control} />
+
             {/* --- Sub-section 1: Hydrostatic Test --- */}
             <div>
               <h3 className="text-lg font-medium">Hydrostatic Test</h3>

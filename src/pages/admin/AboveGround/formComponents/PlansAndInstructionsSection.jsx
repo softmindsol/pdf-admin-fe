@@ -59,12 +59,7 @@ const AuthorityCreatableInput = ({ field }) => {
 
 // --- MAIN COMPONENT ---
 export function PlansAndInstructionsSection({ control, watch }) {
-  const conformsToPlans = watch(
-    "plansAndInstructions.plans.conformsToAcceptedPlans"
-  );
-  const personInstructed = watch(
-    "plansAndInstructions.instructions.isPersonInChargeInstructed"
-  );
+
 
   return (
     <AccordionItem value="plans-and-instructions">
@@ -140,7 +135,6 @@ export function PlansAndInstructionsSection({ control, watch }) {
               </div>
             </div>
 
-            {conformsToPlans === false && (
               <FormField
                 control={control}
                 name="plansAndInstructions.plans.deviationsExplanation"
@@ -157,7 +151,6 @@ export function PlansAndInstructionsSection({ control, watch }) {
                   </FormItem>
                 )}
               />
-            )}
 
             <Separator />
             
@@ -229,7 +222,6 @@ export function PlansAndInstructionsSection({ control, watch }) {
                 </FormItem>
               )}
             />
-            {personInstructed === false && (
               <FormField
                 control={control}
                 name="plansAndInstructions.instructions.instructionExplanation"
@@ -246,7 +238,6 @@ export function PlansAndInstructionsSection({ control, watch }) {
                   </FormItem>
                 )}
               />
-            )}
           </CardContent>
         </Card>
       </AccordionContent>
