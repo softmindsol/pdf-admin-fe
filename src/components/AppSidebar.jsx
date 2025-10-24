@@ -44,7 +44,6 @@ const sidebarNavItems = [
         icon: MdInventory,
         module: "department",
       },
-    
     ],
   },
   {
@@ -140,7 +139,7 @@ export function AppSidebar({
       }`}
     >
       {/* --- ALL YOUR JSX REMAINS UNCHANGED FROM HERE --- */}
-      <SidebarHeader className="p-4 border-b border-orange-200 bg-white/50 backdrop-blur-sm">
+      <SidebarHeader className=" min-w-16  p-4 border border-orange-200 bg-white/50 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           {isVisuallyExpanded && (
             <div
@@ -185,7 +184,6 @@ export function AppSidebar({
       <SidebarContent className="p-2 overflow-y-auto">
         <SidebarGroup>
           <SidebarMenu className="space-y-1">
-            {/* 4. MODIFICATION: Map over the new 'visibleNavItems' array instead of the original. */}
             {visibleNavItems.map((item, index) => {
               const Icon = item.icon;
               const isExpanded = expandedItems.has(index);

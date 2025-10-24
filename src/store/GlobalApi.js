@@ -47,7 +47,21 @@ const coreBaseQuery = fetchBaseQuery({
 
 const baseQueryWithAutoTokenSave = async (args, api, extraOptions) => {
   const result = await coreBaseQuery(args, api, extraOptions);
+ if (result.error && (result.error.status === 403 || result.error.status === 401)) {
+    console.error("Authorization error, logging out user.", result.error);
 
+    // 2. CLEAR ALL USER DATA FROM LOCAL STORAGE
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("role");
+
+    // 3. REDIRECT TO THE LOGIN PAGE
+    // This is a robust way to force a redirect outside of the React component lifecycle.
+     const formattedErrorMessage = String(result?.error?.data?.message) // Ensure it's a string
+      .toLowerCase()
+      .replace(/ /g, '-'); 
+    window.location.href = `/auth/login?error=${formattedErrorMessage}`;
+  }
   if (result.data?.data?.token) {
     localStorage.setItem("token", result.data.data.token);
     localStorage.setItem("user_id", result.data.data.user_id);
@@ -149,6 +163,7 @@ export const GlobalApi = createApi({
         customerName,
         jobNumber,
         technicianName,
+        department
       }) => {
         const params = new URLSearchParams({
           page,
@@ -157,6 +172,7 @@ export const GlobalApi = createApi({
           ...(customerName && { customerName }),
           ...(jobNumber && { jobNumber }),
           ...(technicianName && { technicianName }),
+          ...(department && { department }),
         });
         return createRequest(`/admin/work-order?${params.toString()}`);
       },
@@ -182,11 +198,12 @@ export const GlobalApi = createApi({
       invalidatesTags: ["Customer"],
     }),
     getCustomers: builder.query({
-      query: ({ page = 1, limit = 10, search }) => {
+      query: ({ page = 1, limit = 10, search , department}) => {
         const params = new URLSearchParams({
           page,
           limit,
           ...(search && { search }),
+          ...(department && { department }),
         });
         return createRequest(`/admin/customer-ticket?${params.toString()}`);
       },
@@ -211,11 +228,12 @@ export const GlobalApi = createApi({
       invalidatesTags: ["AboveGroundTest"],
     }),
     getAboveGroundTests: builder.query({
-      query: ({ page = 1, limit = 10, search }) => {
+      query: ({ page = 1, limit = 10, search, department }) => {
         const params = new URLSearchParams({
           page,
           limit,
           ...(search && { search }),
+          ...(department && { department }),
         });
         return createRequest(`/admin/above-ground?${params.toString()}`);
       },
@@ -246,11 +264,13 @@ export const GlobalApi = createApi({
         jobName,
         customerName,
         technicianName,
+        department
       }) => {
         const params = new URLSearchParams({
           page,
           limit,
           ...(search && { search }),
+          ...(department && { department }),
           ...(jobName && { jobName }),
           ...(customerName && { customerName }),
           ...(technicianName && { technicianName }),
@@ -278,11 +298,12 @@ export const GlobalApi = createApi({
       invalidatesTags: ["UndergroundTest"],
     }),
     getUndergroundTests: builder.query({
-      query: ({ page = 1, limit = 10, search }) => {
+      query: ({ page = 1, limit = 10, search, department }) => {
         const params = new URLSearchParams({
           page,
           limit,
           ...(search && { search }),
+          ...(department && { department }),
         });
         return createRequest(`/admin/under-ground?${params.toString()}`);
       },

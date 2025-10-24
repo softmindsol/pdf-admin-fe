@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   useGetAboveGroundTestsQuery,
   useDeleteAboveGroundTestMutation,
-  useLazyGetSignedUrlQuery, // 1. Import the lazy query hook
+  useLazyGetSignedUrlQuery,
+  useGetDepartmentsQuery, // 1. Import hook to get departments
 } from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react"; // 2. Import Download icon
+import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { toast } from "sonner"; // 3. Import toast for notifications
+import {  toast } from "sonner";
 
 // --- Shadcn UI Imports ---
 import {
@@ -30,14 +31,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select, // 2. Import Select components
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
 import { showDeleteConfirm } from "@/lib/swal";
+import { getUserData } from "@/lib/auth"; // 3. Import auth utility
 
 export default function AboveGroundTestManagement() {
   const navigate = useNavigate();
   const [deleteAboveGroundTest] = useDeleteAboveGroundTestMutation();
-
-  // 4. Instantiate the lazy query hook
   const [triggerGetSignedUrl, { isLoading: isDownloading }] =
     useLazyGetSignedUrlQuery();
 
@@ -46,7 +53,9 @@ export default function AboveGroundTestManagement() {
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState(""); // 4. Add state for department filter
   const [rowSelection, setRowSelection] = useState({});
+  const user = getUserData(); // Get current user's data
 
   // Debounce search term
   useEffect(() => {
@@ -57,7 +66,12 @@ export default function AboveGroundTestManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // --- Fetch Data ---
+  // 5. Fetch all departments for the filter dropdown
+  const { data: departmentResponse, isLoading: areDepartmentsLoading } =
+    useGetDepartmentsQuery({ page: 0 }); // Get all departments
+  const departments = departmentResponse?.data?.departments || [];
+
+  // 6. Update the main query to include the department filter
   const {
     data: response,
     isLoading,
@@ -67,36 +81,30 @@ export default function AboveGroundTestManagement() {
     page,
     limit,
     search: debouncedSearch,
+    ...(departmentFilter &&
+      departmentFilter !== "all" && { department: departmentFilter }),
   });
 
   const aboveGroundTests = response?.data?.aboveGroundTests || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
 
-  // 5. Create the handler function for downloading the PDF
   const handleDownloadPdf = async (test) => {
-    // Assuming the PDF file key is stored in a field named 'pdfUrl' or similar
-    // You might need to adjust this based on your actual data structure
     if (!test.ticket) {
       toast.error("No PDF found for this test record.");
       return;
     }
-
     try {
       const apiResponse = await triggerGetSignedUrl(test.ticket).unwrap();
       const signedUrl = apiResponse.data.url;
-
-      // Open the secure URL in a new tab to trigger the download
       window.open(signedUrl, "_blank", "noopener,noreferrer");
-
-      toast.success("Download has started!");
+      toast.success("Opening PDF...");
     } catch (error) {
       console.error("Failed to download PDF:", error);
-      toast.error("Could not download the PDF. Please try again.");
+      toast.error("Could not open the PDF. Please try again.");
     }
   };
 
-  // --- Render Skeletons ---
   const renderSkeletons = () => {
     return Array(limit)
       .fill(0)
@@ -116,6 +124,9 @@ export default function AboveGroundTestManagement() {
           </TableCell>
           <TableCell>
             <Skeleton className="h-4 w-28" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
           </TableCell>
           <TableCell className="text-right">
             <Skeleton className="h-8 w-8 ml-auto" />
@@ -138,15 +149,42 @@ export default function AboveGroundTestManagement() {
 
       {/* Toolbar */}
       <div className="flex items-center justify-between space-x-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search by property name, address..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8"
-          />
+        <div className="flex flex-1 items-center space-x-2">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by property name, address..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-8"
+            />
+          </div>
+
+          {/* 7. Add Department Filter (visible to admins only) */}
+          {user?.role === "admin" && (
+            <Select
+              value={departmentFilter}
+              onValueChange={(value) => {
+                setDepartmentFilter(value);
+                setPage(1);
+              }}
+              disabled={areDepartmentsLoading}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <Button onClick={() => navigate("/above-ground/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -166,6 +204,7 @@ export default function AboveGroundTestManagement() {
               <TableHead>Address</TableHead>
               <TableHead>Contractor</TableHead>
               <TableHead>Date of Test</TableHead>
+              <TableHead>Created By</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -174,7 +213,7 @@ export default function AboveGroundTestManagement() {
               renderSkeletons()
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   Failed to load data.
                 </TableCell>
               </TableRow>
@@ -189,11 +228,13 @@ export default function AboveGroundTestManagement() {
                   </TableCell>
                   <TableCell>{test.propertyDetails.propertyAddress}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {test.remarksAndSignatures?.sprinklerContractor?.name || "N/A"}
+                    {test.remarksAndSignatures?.sprinklerContractor?.name ||
+                      "N/A"}
                   </TableCell>
                   <TableCell>
                     {format(new Date(test.propertyDetails.date), "PP")}
                   </TableCell>
+                  <TableCell>{test.createdBy?.username || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -210,13 +251,11 @@ export default function AboveGroundTestManagement() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            navigate(`/above-ground/${test._id}/update`)
+                            navigate(`/above-ground/update/${test._id}`)
                           }
                         >
                           Edit
                         </DropdownMenuItem>
-
-                        {/* 6. Add the Download PDF menu item */}
                         <DropdownMenuItem
                           disabled={!test.ticket || isDownloading}
                           onClick={() => handleDownloadPdf(test)}
@@ -224,7 +263,6 @@ export default function AboveGroundTestManagement() {
                           <Download className="mr-1 h-4 w-4" />
                           <span>Download PDF</span>
                         </DropdownMenuItem>
-
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -243,7 +281,7 @@ export default function AboveGroundTestManagement() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>

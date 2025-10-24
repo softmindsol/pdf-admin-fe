@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   useGetServiceTicketsQuery,
   useDeleteServiceTicketMutation,
-  useLazyGetSignedUrlQuery, // 1. Import the lazy query hook
+  useLazyGetSignedUrlQuery,
+  useGetDepartmentsQuery, // 1. Import hook to get departments
 } from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react"; // Import Download icon
+import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { Toaster, toast } from "sonner"; // For user-friendly notifications
+import {  toast } from "sonner";
 
 // --- Shadcn UI Imports ---
 import {
@@ -30,15 +31,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select, // 2. Import Select components
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
 import { Badge } from "@/components/ui/badge";
 import { showDeleteConfirm } from "@/lib/swal";
+import { getUserData } from "@/lib/auth"; // 3. Import auth utility
 
 export default function ServiceTicketManagement() {
   const navigate = useNavigate();
   const [deleteServiceTicket] = useDeleteServiceTicketMutation();
-
-  // 2. Instantiate the lazy query hook for on-demand URL fetching
   const [triggerGetSignedUrl, { isLoading: isDownloading }] =
     useLazyGetSignedUrlQuery();
 
@@ -47,7 +54,9 @@ export default function ServiceTicketManagement() {
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState(""); // 4. Add state for department filter
   const [rowSelection, setRowSelection] = useState({});
+  const user = getUserData(); // Get current user's data
 
   // Debounce search term
   useEffect(() => {
@@ -58,7 +67,12 @@ export default function ServiceTicketManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // --- Fetch Service Tickets ---
+  // 5. Fetch all departments for the filter dropdown
+  const { data: departmentResponse, isLoading: areDepartmentsLoading } =
+    useGetDepartmentsQuery({ page: 0 });
+  const departments = departmentResponse?.data?.departments || [];
+
+  // 6. Update the main query to include the department filter
   const {
     data: response,
     isLoading,
@@ -68,38 +82,30 @@ export default function ServiceTicketManagement() {
     page,
     limit,
     search: debouncedSearch,
+    ...(departmentFilter &&
+      departmentFilter !== "all" && { department: departmentFilter }),
   });
 
   const serviceTickets = response?.data?.serviceTickets || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
 
-  // 3. Create the handler function for downloading the PDF
   const handleDownloadPdf = async (ticket) => {
     if (!ticket.ticket) {
       toast.error("No PDF found for this service ticket.");
       return;
     }
-
-
     try {
-      // Get the temporary, secure URL from the backend
       const apiResponse = await triggerGetSignedUrl(ticket.ticket).unwrap();
       const signedUrl = apiResponse.data.url;
-
-      // Fetch the file data from S3 as a blob
-     window.open(signedUrl, '_blank', 'noopener,noreferrer');
-    
-        // You can still provide feedback.
-      toast.success("Download has started!");
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+      toast.success("Opening PDF...");
     } catch (error) {
       console.error("Failed to download PDF:", error);
-      toast.dismiss();
-      toast.error("Could not download the PDF. Please try again.");
+      toast.error("Could not open the PDF. Please try again.");
     }
   };
 
-  // Function to render skeleton loaders
   const renderSkeletons = () => {
     return Array(limit)
       .fill(0)
@@ -123,6 +129,9 @@ export default function ServiceTicketManagement() {
           <TableCell>
             <Skeleton className="h-4 w-28" />
           </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
           <TableCell className="text-right">
             <Skeleton className="h-8 w-8 ml-auto" />
           </TableCell>
@@ -142,15 +151,42 @@ export default function ServiceTicketManagement() {
 
       {/* --- Toolbar --- */}
       <div className="flex items-center justify-between space-x-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search by job, customer..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8"
-          />
+        <div className="flex flex-1 items-center space-x-2">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by job, customer..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-8"
+            />
+          </div>
+
+          {/* 7. Add Department Filter (visible to admins only) */}
+          {user?.role === "admin" && (
+            <Select
+              value={departmentFilter}
+              onValueChange={(value) => {
+                setDepartmentFilter(value);
+                setPage(1);
+              }}
+              disabled={areDepartmentsLoading}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <Button onClick={() => navigate("/service-ticket/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -171,6 +207,7 @@ export default function ServiceTicketManagement() {
               <TableHead>Technician</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Completion Date</TableHead>
+              <TableHead>Created By</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -179,7 +216,7 @@ export default function ServiceTicketManagement() {
               renderSkeletons()
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   Failed to load data.
                 </TableCell>
               </TableRow>
@@ -208,6 +245,7 @@ export default function ServiceTicketManagement() {
                   <TableCell>
                     {format(new Date(ticket.completionDate), "PPP")}
                   </TableCell>
+                  <TableCell>{ticket.createdBy?.username || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -231,7 +269,6 @@ export default function ServiceTicketManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
-                        {/* 4. Add the Download PDF menu item */}
                         <DropdownMenuItem
                           disabled={!ticket.ticket || isDownloading}
                           onClick={() => handleDownloadPdf(ticket)}
@@ -257,7 +294,7 @@ export default function ServiceTicketManagement() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>

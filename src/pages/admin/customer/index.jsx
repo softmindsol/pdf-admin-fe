@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import {
   useGetCustomersQuery,
   useDeleteCustomerMutation,
-  useLazyGetSignedUrlQuery, // CORRECT: This is the hook for on-demand actions
-} from "@/store/GlobalApi"; // Adjust path to your RTK Query API slice
+  useLazyGetSignedUrlQuery,
+  useGetDepartmentsQuery, // 1. Import hook to get departments
+} from "@/store/GlobalApi";
 import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Toaster, toast } from "sonner"; // For user-friendly notifications
+import { toast } from "sonner";
 
 // --- Shadcn UI Imports ---
 import {
@@ -29,14 +30,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTablePagination } from "@/components/pagination"; // Your custom pagination component
-import { showDeleteConfirm } from "@/lib/swal"; // Your custom Swal confirmation
+import {
+  Select, // 2. Import Select components
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DataTablePagination } from "@/components/pagination";
+import { showDeleteConfirm } from "@/lib/swal";
+import { getUserData } from "@/lib/auth"; // 3. Import auth utility
 
 export default function CustomerManagement() {
   const navigate = useNavigate();
   const [deleteCustomer] = useDeleteCustomerMutation();
-
-  // CORRECT: Call the lazy query hook, which returns an array [trigger, result]
   const [triggerGetSignedUrl, { isLoading: isDownloading }] =
     useLazyGetSignedUrlQuery();
 
@@ -45,18 +52,25 @@ export default function CustomerManagement() {
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState(""); // 4. Add state for department filter
   const [rowSelection, setRowSelection] = useState({});
+  const user = getUserData(); // Get current user's data
 
-  // Debounce search term to avoid excessive API calls
+  // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
-      setPage(1); // Reset to the first page on a new search
+      setPage(1);
       setDebouncedSearch(searchTerm);
     }, 500);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // --- Fetch Customers Data ---
+  // 5. Fetch all departments for the filter dropdown
+  const { data: departmentResponse, isLoading: areDepartmentsLoading } =
+    useGetDepartmentsQuery({ page: 0 }); // Get all departments
+  const departments = departmentResponse?.data?.departments || [];
+
+  // 6. Update the main query to include the department filter
   const {
     data: response,
     isLoading,
@@ -66,66 +80,48 @@ export default function CustomerManagement() {
     page,
     limit,
     search: debouncedSearch,
+    ...(departmentFilter &&
+      departmentFilter !== "all" && { department: departmentFilter }),
   });
 
   const customers = response?.data?.customers || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
 
-  // --- Handler for Securely Downloading the PDF ---
-const handleDownloadPdf = async (customer) => {
-  if (!customer.ticket) {
-    toast.error("No PDF profile found for this customer.");
-    return;
-  }
+  const handleDownloadPdf = async (customer) => {
+    if (!customer.ticket) {
+      toast.error("No PDF profile found for this customer.");
+      return;
+    }
+    try {
+      const apiResponse = await triggerGetSignedUrl(customer.ticket).unwrap();
+      const signedUrl = apiResponse.data.url;
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+      toast.success("Opening PDF profile...");
+    } catch (error) {
+      console.error("Failed to get signed URL:", error);
+      toast.error("Could not open the PDF. Please try again.");
+    }
+  };
 
-  try {
-    const apiResponse = await triggerGetSignedUrl(customer.ticket).unwrap();
-    const signedUrl = apiResponse.data.url;
-
-    // Simply open the secure URL in a new tab.
-    // The browser will use its PDF viewer.
-    window.open(signedUrl, '_blank', 'noopener,noreferrer');
-
-    // You can still provide feedback.
-    toast.success("Opening PDF profile...");
-  } catch (error) {
-    console.error("Failed to get signed URL:", error);
-    toast.error("Could not open the PDF. Please try again.");
-  }
-};
-
-  // --- UI Rendering ---
   const renderSkeletons = () => {
     return Array(limit)
       .fill(0)
       .map((_, index) => (
         <TableRow key={index}>
-          <TableCell className="w-[40px]">
-            <Skeleton className="h-4 w-4" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-40" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-32" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-48" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-32" />
-          </TableCell>
-          <TableCell className="text-right">
-            <Skeleton className="h-8 w-8 ml-auto" />
-          </TableCell>
+          <TableCell className="w-[40px]"><Skeleton className="h-4 w-4" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+          <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
         </TableRow>
       ));
   };
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
-      <Toaster richColors position="top-right" />
 
       {/* --- Header --- */}
       <div>
@@ -137,15 +133,42 @@ const handleDownloadPdf = async (customer) => {
 
       {/* --- Toolbar --- */}
       <div className="flex items-center justify-between space-x-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search by name, email, phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8"
-          />
+        <div className="flex flex-1 items-center space-x-2">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by name, email, phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-8"
+            />
+          </div>
+
+          {/* 7. Add Department Filter (visible to admins only) */}
+          {user?.role === "admin" && (
+            <Select
+              value={departmentFilter}
+              onValueChange={(value) => {
+                setDepartmentFilter(value);
+                setPage(1);
+              }}
+              disabled={areDepartmentsLoading}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <Button onClick={() => navigate("/customer/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -179,6 +202,7 @@ const handleDownloadPdf = async (customer) => {
               <TableHead>Phone Number</TableHead>
               <TableHead>Email for Reports</TableHead>
               <TableHead>Building Name</TableHead>
+              <TableHead>Created By</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -187,7 +211,7 @@ const handleDownloadPdf = async (customer) => {
               renderSkeletons()
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   Failed to load data.
                 </TableCell>
               </TableRow>
@@ -213,6 +237,7 @@ const handleDownloadPdf = async (customer) => {
                     {customer.emailForInspectionReports}
                   </TableCell>
                   <TableCell>{customer.buildingName}</TableCell>
+                  <TableCell>{customer.createdBy?.username || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -260,7 +285,7 @@ const handleDownloadPdf = async (customer) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>
@@ -276,7 +301,7 @@ const handleDownloadPdf = async (customer) => {
         pageCount={pageCount}
         isLoading={isLoading || isFetching}
         selectedRowCount={Object.keys(rowSelection).length}
-        totalItems={pagination.totalCustomers || 0}
+        totalItems={pagination.totalDocuments || 0}
         currentPage={pagination.currentPage || 0}
       />
     </div>

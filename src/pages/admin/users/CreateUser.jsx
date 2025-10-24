@@ -36,6 +36,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import { getUserData } from "@/lib/auth";
 
 // --- Zod Validation Schema ---
 const formSchema = z
@@ -72,7 +73,8 @@ export default function CreateUser() {
   const { data: departmentResponse, isLoading: areDepartmentsLoading } =
     useGetDepartmentsQuery({ page: 0 });
   const departments = departmentResponse?.data?.departments || [];
-
+const user=  getUserData();
+  console.log("🚀 ~ CreateUser ~ user:", user)
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -197,7 +199,7 @@ export default function CreateUser() {
               </div>
 
               {/* --- Role & Department --- */}
-              <div className="grid sm:grid-cols-2 gap-4">
+             {!user?.department &&  <div className="grid sm:grid-cols-2 gap-4">
               
                 {/* --- REPLACED: Department Input with Select Dropdown --- */}
                 <FormField
@@ -234,7 +236,7 @@ export default function CreateUser() {
                     </FormItem>
                   )}
                 />
-              </div>
+              </div>}
 
               <Separator />
 

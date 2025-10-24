@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   useGetWorkOrdersQuery,
   useDeleteWorkOrderMutation,
+  useLazyGetSignedUrlQuery,
+  useGetDepartmentsQuery,
 } from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
-// --- Shadcn UI Imports ---
 import {
   Table,
   TableBody,
@@ -28,30 +30,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
 import { showDeleteConfirm } from "@/lib/swal";
+import { getUserData } from "@/lib/auth";
 
 export default function WorkOrderManagement() {
   const navigate = useNavigate();
   const [deleteWorkOrder] = useDeleteWorkOrderMutation();
 
-  // --- State Management for Filters ---
+  const [triggerGetSignedUrl, { isLoading: isDownloading }] =
+    useLazyGetSignedUrlQuery();
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
+  const user = getUserData();
 
-  // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
-      setPage(1); // Reset to first page on new search
+      setPage(1);
       setDebouncedSearch(searchTerm);
     }, 500);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // --- Fetch Work Orders ---
+  const { data: departmentResponse, isLoading: areDepartmentsLoading } =
+    useGetDepartmentsQuery({ page: 0 });
+  const departments = departmentResponse?.data?.departments || [];
+
   const {
     data: response,
     isLoading,
@@ -61,11 +77,29 @@ export default function WorkOrderManagement() {
     page,
     limit,
     search: debouncedSearch,
+    ...(departmentFilter &&
+      departmentFilter !== "all" && { department: departmentFilter }),
   });
 
   const workOrders = response?.data?.workOrders || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
+
+  const handleDownloadPdf = async (workOrder) => {
+    if (!workOrder.ticket) {
+      toast.error("No PDF ticket found for this work order.");
+      return;
+    }
+    try {
+      const apiResponse = await triggerGetSignedUrl(workOrder.ticket).unwrap();
+      const signedUrl = apiResponse.data.url;
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+      toast.success("Opening PDF ticket...");
+    } catch (error) {
+      console.error("Failed to get signed URL for PDF:", error);
+      toast.error("Could not open the PDF. Please try again.");
+    }
+  };
 
   const renderSkeletons = () => {
     return Array(limit)
@@ -106,8 +140,10 @@ export default function WorkOrderManagement() {
         </p>
       </div>
 
+      {/* --- Toolbar --- */}
       <div className="flex items-center justify-between space-x-2">
         <div className="flex flex-1 items-center space-x-2">
+          {/* Search Input */}
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -118,6 +154,30 @@ export default function WorkOrderManagement() {
               className="w-full pl-8"
             />
           </div>
+
+          {/* 7. Add the Department Filter Dropdown (visible to admins only) */}
+          {user?.role === "admin" && (
+            <Select
+              value={departmentFilter}
+              onValueChange={(value) => {
+                setDepartmentFilter(value);
+                setPage(1);
+              }}
+              disabled={areDepartmentsLoading}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <Button onClick={() => navigate("/work-order/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -125,6 +185,7 @@ export default function WorkOrderManagement() {
         </Button>
       </div>
 
+      {/* --- Data Table --- */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -149,6 +210,7 @@ export default function WorkOrderManagement() {
               <TableHead>Technician</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Payment Method</TableHead>
+              <TableHead>Created By</TableHead> {/* Optional: Add createdBy */}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -157,7 +219,7 @@ export default function WorkOrderManagement() {
               renderSkeletons()
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   Failed to load data.
                 </TableCell>
               </TableRow>
@@ -187,6 +249,7 @@ export default function WorkOrderManagement() {
                   <TableCell className="capitalize">
                     {wo.paymentMethod}
                   </TableCell>
+                  <TableCell>{wo.createdBy?.username || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -209,12 +272,19 @@ export default function WorkOrderManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={!wo.ticket || isDownloading}
+                          onClick={() => handleDownloadPdf(wo)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          <span>Download PDF</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={async () => {
-                            showDeleteConfirm(() => {
-                              deleteWorkOrder(wo._id).unwrap();
-                            });
+                          onClick={() => {
+                            showDeleteConfirm(() =>
+                              deleteWorkOrder(wo._id).unwrap()
+                            );
                           }}
                           className="text-red-600"
                         >
@@ -227,7 +297,7 @@ export default function WorkOrderManagement() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>
@@ -242,7 +312,7 @@ export default function WorkOrderManagement() {
         pageCount={pageCount}
         isLoading={isLoading || isFetching}
         selectedRowCount={Object.keys(rowSelection).length}
-        totalItems={pagination.totalWorkOrders || 0}
+        totalItems={pagination.totalDocuments || 0}
         currentPage={pagination.currentPage || 0}
       />
     </div>

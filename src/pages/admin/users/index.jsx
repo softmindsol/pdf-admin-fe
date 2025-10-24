@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
 import { showDeleteConfirm } from "@/lib/swal";
+import { getUserData } from "@/lib/auth";
 
 export default function UsersManagement() {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ export default function UsersManagement() {
   const [roleFilter, setRoleFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState(""); // --- ADDED: State for department filter
   const [rowSelection, setRowSelection] = useState({});
-
+const user=getUserData()
   // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -163,14 +164,14 @@ export default function UsersManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              {!user?.department && <SelectItem value="admin">Admin</SelectItem>}
               <SelectItem value="manager">Manager</SelectItem>
               <SelectItem value="user">User</SelectItem>
             </SelectContent>
           </Select>
 
           {/* --- ADDED: Department Filter --- */}
-          <Select
+        {!user?.department &&   <Select
             value={departmentFilter}
             onValueChange={(value) => {
               setDepartmentFilter(value);
@@ -189,7 +190,7 @@ export default function UsersManagement() {
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+          </Select>}
         </div>
         <Button onClick={() => navigate("/user/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />

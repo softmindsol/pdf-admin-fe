@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
+import {  toast } from "sonner";
 
 import {
   useGetUndergroundTestsQuery,
   useDeleteUndergroundTestMutation,
+  useLazyGetSignedUrlQuery,
+  useGetDepartmentsQuery, // 1. Import hook to get departments
 } from "@/store/GlobalApi";
 import { showDeleteConfirm } from "@/lib/swal";
+import { getUserData } from "@/lib/auth"; // 2. Import auth utility
 
+// --- UI Component Imports ---
 import {
   Table,
   TableBody,
@@ -29,17 +34,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select, // 3. Import Select components
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
 
 export default function UndergroundTestManagement() {
   const navigate = useNavigate();
 
+  // --- State Management ---
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState(""); // 4. Add state for department filter
   const [rowSelection, setRowSelection] = useState({});
+  const user = getUserData(); // Get current user's data
 
+  // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
       setPage(1);
@@ -48,7 +64,17 @@ export default function UndergroundTestManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
+  // --- RTK Query Hooks ---
   const [deleteUndergroundTest] = useDeleteUndergroundTestMutation();
+  const [triggerGetSignedUrl, { isLoading: isDownloading }] =
+    useLazyGetSignedUrlQuery();
+
+  // 5. Fetch all departments for the filter dropdown
+  const { data: departmentResponse, isLoading: areDepartmentsLoading } =
+    useGetDepartmentsQuery({ page: 0 });
+  const departments = departmentResponse?.data?.departments || [];
+
+  // 6. Update the main query to include the department filter
   const {
     data: response,
     isLoading,
@@ -58,11 +84,29 @@ export default function UndergroundTestManagement() {
     page,
     limit,
     search: debouncedSearch,
+    ...(departmentFilter &&
+      departmentFilter !== "all" && { department: departmentFilter }),
   });
 
   const undergroundTests = response?.data?.undergroundTests || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
+
+  const handleDownloadPdf = async (test) => {
+    if (!test.ticket) {
+      toast.error("No PDF report found for this test.");
+      return;
+    }
+    try {
+      const apiResponse = await triggerGetSignedUrl(test.ticket).unwrap();
+      const signedUrl = apiResponse.data.url;
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+      toast.success("Opening PDF report...");
+    } catch (error) {
+      console.error("Failed to get signed URL for PDF:", error);
+      toast.error("Could not open the PDF. Please try again.");
+    }
+  };
 
   const renderSkeletons = () => {
     return Array(limit)
@@ -84,6 +128,9 @@ export default function UndergroundTestManagement() {
           <TableCell>
             <Skeleton className="h-4 w-28" />
           </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
           <TableCell className="text-right">
             <Skeleton className="h-8 w-8 ml-auto" />
           </TableCell>
@@ -100,10 +147,10 @@ export default function UndergroundTestManagement() {
           Manage all underground fire protection system tests.
         </p>
       </div>
-
       {/* Toolbar */}
       <div className="flex items-center justify-between space-x-2">
         <div className="flex flex-1 items-center space-x-2">
+          {/* Search Input */}
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -114,13 +161,36 @@ export default function UndergroundTestManagement() {
               className="w-full pl-8"
             />
           </div>
+
+          {/* 7. Add Department Filter (visible to admins only) */}
+          {user?.role === "admin" && (
+            <Select
+              value={departmentFilter}
+              onValueChange={(value) => {
+                setDepartmentFilter(value);
+                setPage(1);
+              }}
+              disabled={areDepartmentsLoading}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <Button onClick={() => navigate("/under-ground/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add New Test
         </Button>
       </div>
-
       {/* Data Table */}
       <div className="rounded-md border">
         <Table>
@@ -133,6 +203,7 @@ export default function UndergroundTestManagement() {
               <TableHead>Address</TableHead>
               <TableHead>Contractor</TableHead>
               <TableHead>Date of Test</TableHead>
+              <TableHead>Created By</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -141,7 +212,7 @@ export default function UndergroundTestManagement() {
               renderSkeletons()
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   Failed to load data. Please try again.
                 </TableCell>
               </TableRow>
@@ -161,6 +232,7 @@ export default function UndergroundTestManagement() {
                   <TableCell>
                     {format(new Date(test.propertyDetails.date), "PP")}
                   </TableCell>
+                  <TableCell>{test.createdBy?.username || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -182,6 +254,13 @@ export default function UndergroundTestManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={!test.ticket || isDownloading}
+                          onClick={() => handleDownloadPdf(test)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          <span>Download PDF</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -200,7 +279,7 @@ export default function UndergroundTestManagement() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>
@@ -208,7 +287,6 @@ export default function UndergroundTestManagement() {
           </TableBody>
         </Table>
       </div>
-
       {/* Pagination */}
       <DataTablePagination
         page={page}
@@ -216,7 +294,7 @@ export default function UndergroundTestManagement() {
         pageCount={pageCount}
         isLoading={isLoading || isFetching}
         selectedRowCount={Object.keys(rowSelection).length}
-        totalItems={pagination.totalUndergroundTests || 0}
+        totalItems={pagination.totalDocuments || 0}
         currentPage={pagination.currentPage || 0}
       />
     </div>

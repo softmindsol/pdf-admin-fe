@@ -15,7 +15,7 @@ const ProtectedRoute = ({ moduleName, children }) => {
     return children;
   }
 
-  const hasPermission = allowedForms.includes(moduleName);
+  const hasPermission = allowedForms.includes(moduleName)|| "user";
 
   if (hasPermission) {
     return children;

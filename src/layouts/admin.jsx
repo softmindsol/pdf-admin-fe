@@ -36,8 +36,7 @@ export default function AdminLayout() {
         "serviceTicket",
       ];
     } else {
-      // For other roles, use the list from their token.
-      allowedModules = userData.allowedForms || [];
+ allowedModules = [...(userData?.allowedForms ?? []), "user"];
     }
   }
 
@@ -45,6 +44,7 @@ export default function AdminLayout() {
     setIsCollapsed((prevState) => !prevState);
     setIsHovering(false);
   };
+
 
   const handleMouseEnter = () => {
     if (isCollapsed) {
