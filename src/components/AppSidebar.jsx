@@ -18,10 +18,12 @@ import {
   MdPushPin,
   MdExpandMore,
   MdExpandLess,
+  MdLogout, // 1. Import the logout icon
 } from "react-icons/md";
 import { FileBarChart } from "lucide-react";
 
 const sidebarNavItems = [
+  // ... (your existing sidebarNavItems array remains unchanged)
   {
     label: "Dashboard",
     to: "/",
@@ -99,20 +101,23 @@ export function AppSidebar({
 
   const isVisuallyExpanded = !isCollapsed || isHovering;
 
+  // 2. Create the logout handler function
+  const handleLogout = () => {
+    localStorage.clear(); // Clears all session data, tokens, etc.
+    navigate("/auth/login");
+  };
+
   const visibleNavItems = sidebarNavItems
     .map((item) => {
       if (!item.children) {
         return item;
       }
-
       const visibleChildren = item.children.filter((child) =>
         allowedModules.includes(child.module)
       );
-
       if (visibleChildren.length > 0) {
         return { ...item, children: visibleChildren };
       }
-
       return null;
     })
     .filter(Boolean);
@@ -134,19 +139,16 @@ export function AppSidebar({
     <Sidebar
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`bg-gradient-to-b from-orange-50 to-orange-100 border-r border-orange-200 transition-all duration-300 fixed left-0 top-0 h-full z-50 ${
+      className={`bg-gradient-to-b from-orange-50 to-orange-100 border-r border-orange-200 transition-all duration-300 fixed left-0 top-0 h-full z-50 flex flex-col ${
         isVisuallyExpanded ? "w-64" : "w-16"
       }`}
     >
-      {/* --- ALL YOUR JSX REMAINS UNCHANGED FROM HERE --- */}
-      <SidebarHeader className=" min-w-16  p-4 border border-orange-200 bg-white/50 backdrop-blur-sm">
+      <SidebarHeader className="p-4 border-b border-orange-200 bg-white/50 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           {isVisuallyExpanded && (
             <div
-              onClick={() => {
-                navigate("/");
-              }}
-              className="flex items-center space-x-2"
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-2 cursor-pointer"
             >
               <img
                 src="/logofull.svg"
@@ -158,11 +160,9 @@ export function AppSidebar({
           {!isVisuallyExpanded && (
             <img
               src="/logo.svg"
-              onClick={() => {
-                navigate("/");
-              }}
+              onClick={() => navigate("/")}
               alt="Logo"
-              className="h-8 w-8 mx-auto"
+              className="h-8 w-8 mx-auto cursor-pointer"
             />
           )}
           {isVisuallyExpanded && (
@@ -181,13 +181,14 @@ export function AppSidebar({
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-2 overflow-y-auto">
-        <SidebarGroup>
+      {/* 3. Use flex-col to push logout button to the bottom */}
+      <SidebarContent className="flex-1 flex flex-col p-2 overflow-y-auto">
+        {/* Main navigation group */}
+        <SidebarGroup className="flex-grow">
           <SidebarMenu className="space-y-1">
             {visibleNavItems.map((item, index) => {
               const Icon = item.icon;
               const isExpanded = expandedItems.has(index);
-
               const isActive =
                 item.to === "/"
                   ? location.pathname === "/"
@@ -201,7 +202,7 @@ export function AppSidebar({
                         onClick={() =>
                           isVisuallyExpanded && toggleExpanded(index)
                         }
-                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 group
+                        className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 group
                           ${
                             isVisuallyExpanded
                               ? "justify-between"
@@ -209,7 +210,7 @@ export function AppSidebar({
                           }
                           hover:bg-orange-200 hover:text-orange-800 text-orange-700
                           ${
-                            isExpanded && isVisuallyExpanded
+                            isActive && isVisuallyExpanded
                               ? "bg-orange-200 text-orange-800"
                               : ""
                           }
@@ -222,50 +223,35 @@ export function AppSidebar({
                             <span className="font-medium">{item.label}</span>
                           )}
                         </div>
-                        {isVisuallyExpanded && (
-                          <div className="flex-shrink-0">
-                            {isExpanded ? (
-                              <MdExpandLess size={16} />
-                            ) : (
-                              <MdExpandMore size={16} />
-                            )}
-                          </div>
-                        )}
+                        {isVisuallyExpanded &&
+                          (isExpanded ? (
+                            <MdExpandLess size={16} />
+                          ) : (
+                            <MdExpandMore size={16} />
+                          ))}
                       </SidebarMenuButton>
 
                       {isExpanded && isVisuallyExpanded && (
-                        <div className="ml-4 mt-1 space-y-1">
+                        <div className="ml-4 pl-2 border-l-2 border-orange-200 mt-1 space-y-1">
                           <SidebarMenu>
-                            {item.children.map((child, childIndex) => {
-                              const ChildIcon = child.icon;
-                              const isChildActive =
-                                location.pathname.startsWith(child.to);
-
-                              return (
-                                <SidebarMenuItem key={childIndex}>
-                                  <SidebarMenuButton
-                                    onClick={() => navigate(child.to)}
-                                    className={`w-full flex items-center space-x-3 p-2.5 rounded-md text-sm
-                                      hover:bg-orange-100 hover:text-orange-800 text-orange-600
-                                      transition-colors duration-200
-                                      ${
-                                        isChildActive
-                                          ? "bg-orange-200 text-orange-800 font-semibold"
-                                          : ""
-                                      }
-                                    `}
-                                  >
-                                    <ChildIcon
-                                      size={16}
-                                      className="flex-shrink-0"
-                                    />
-                                    <span className="font-medium">
-                                      {child.label}
-                                    </span>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              );
-                            })}
+                            {item.children.map((child, childIndex) => (
+                              <SidebarMenuItem key={childIndex}>
+                                <SidebarMenuButton
+                                  onClick={() => navigate(child.to)}
+                                  className={`w-full flex items-center space-x-3 p-2.5 rounded-md text-sm
+                                    hover:bg-orange-100 hover:text-orange-800 text-orange-600
+                                    transition-colors duration-200
+                                    ${
+                                      location.pathname.startsWith(child.to)
+                                        ? "bg-orange-200 text-orange-800 font-semibold"
+                                        : ""
+                                    }
+                                  `}
+                                >
+                                  <span>{child.label}</span>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+                            ))}
                           </SidebarMenu>
                         </div>
                       )}
@@ -281,7 +267,7 @@ export function AppSidebar({
                         }
                         hover:bg-orange-200 hover:text-orange-800 text-orange-700
                         ${
-                          isActive && !item.children
+                          isActive
                             ? "bg-orange-200 text-orange-800 font-semibold"
                             : ""
                         }
@@ -299,7 +285,32 @@ export function AppSidebar({
             })}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* 4. Logout Button group at the bottom */}
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={handleLogout}
+                className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 text-red-600 hover:bg-red-100 hover:text-red-800
+                  ${
+                    isVisuallyExpanded
+                      ? "justify-start space-x-3"
+                      : "justify-center"
+                  }
+                `}
+                title={!isVisuallyExpanded ? "Logout" : undefined}
+              >
+                <MdLogout size={20} className="flex-shrink-0" />
+                {isVisuallyExpanded && (
+                  <span className="font-medium">Logout</span>
+                )}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter className="p-4 border-t border-orange-200 bg-white/30 backdrop-blur-sm">
         {isVisuallyExpanded ? (
           <div className="text-center">
