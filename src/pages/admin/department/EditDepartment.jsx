@@ -208,8 +208,8 @@ export default function EditDepartment() {
                       selectedManagers.length - VISIBLE_MANAGERS_LIMIT;
 
                     return (
-                      <FormItem>
-                        <FormLabel>Managers</FormLabel>
+                      <FormItem className={''}>
+                        <FormLabel className={'py-3'}>Managers</FormLabel>
                         <div className="flex flex-col gap-3">
                           <div className="min-h-[40px] w-full rounded-md border border-input p-2 flex items-center gap-2">
                             {selectedManagers.length > 0 ? (
