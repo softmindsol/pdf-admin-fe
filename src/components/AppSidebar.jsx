@@ -20,7 +20,9 @@ import {
   MdExpandLess,
   MdLogout,
 } from "react-icons/md";
-import { FileBarChart } from "lucide-react";
+import { GrUserSettings } from "react-icons/gr";
+
+import { FileBarChart, Settings } from "lucide-react";
 
 const sidebarNavItems = [
   {
@@ -87,7 +89,7 @@ const sidebarNavItems = [
   {
     label: "Profile",
     to: "/profile",
-    icon: MdPeople,
+    icon: GrUserSettings,
     children: [
       {
         label: "Change Password",
