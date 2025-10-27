@@ -251,7 +251,7 @@ export default function AboveGroundTestManagement() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            navigate(`/above-ground/update/${test._id}`)
+                            navigate(`/above-ground/${test._id}/update`)
                           }
                         >
                           Edit
