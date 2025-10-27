@@ -110,6 +110,8 @@ function FormDescription({
   );
 }
 
+// In your components/ui/form.jsx file
+
 function FormMessage({
   className,
   ...props
@@ -117,17 +119,20 @@ function FormMessage({
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message ?? "") : props.children
 
-  if (!body) {
-    return null
-  }
+  // 1. REMOVED: The conditional null return.
+  // We want the component to always render to reserve space.
+  // if (!body) {
+  //   return null
+  // }
 
   return (
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
+      className={cn("text-destructive text-sm font-medium", className)} // Added font-medium for better visibility
       {...props}>
-      {body}
+      {/* 2. MODIFIED: Render the message, or a non-breaking space as a placeholder. */}
+      {body || <>&nbsp;</>}
     </p>
   );
 }
