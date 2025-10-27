@@ -18,12 +18,11 @@ import {
   MdPushPin,
   MdExpandMore,
   MdExpandLess,
-  MdLogout, // 1. Import the logout icon
+  MdLogout,
 } from "react-icons/md";
 import { FileBarChart } from "lucide-react";
 
 const sidebarNavItems = [
-  // ... (your existing sidebarNavItems array remains unchanged)
   {
     label: "Dashboard",
     to: "/",
@@ -31,7 +30,7 @@ const sidebarNavItems = [
   },
   {
     label: "Manage",
-    to: "/manage",
+    to: "/manage", // This path is a general prefix for its children
     icon: MdPeople,
     children: [
       {
@@ -50,7 +49,7 @@ const sidebarNavItems = [
   },
   {
     label: "Documents",
-    to: "/docs",
+    to: "/docs", // This path is a general prefix for its children
     icon: FileBarChart,
     children: [
       {
@@ -95,15 +94,29 @@ export function AppSidebar({
   handleMouseLeave,
   allowedModules = [],
 }) {
-  const [expandedItems, setExpandedItems] = useState(new Set());
   const location = useLocation();
   const navigate = useNavigate();
 
+  const getInitialExpandedItems = () => {
+    const activeParentIndex = sidebarNavItems.findIndex(
+      (item) =>
+        item.children &&
+        item.children.some(
+          (child) => child.to !== "/" && location.pathname.startsWith(child.to)
+        )
+    );
+    if (activeParentIndex !== -1) {
+      return new Set([activeParentIndex]);
+    }
+    return new Set();
+  };
+
+  const [expandedItems, setExpandedItems] = useState(getInitialExpandedItems);
+
   const isVisuallyExpanded = !isCollapsed || isHovering;
 
-  // 2. Create the logout handler function
   const handleLogout = () => {
-    localStorage.clear(); // Clears all session data, tokens, etc.
+    localStorage.clear();
     navigate("/auth/login");
   };
 
@@ -181,18 +194,23 @@ export function AppSidebar({
         </div>
       </SidebarHeader>
 
-      {/* 3. Use flex-col to push logout button to the bottom */}
       <SidebarContent className="flex-1 flex flex-col p-2 overflow-y-auto">
-        {/* Main navigation group */}
         <SidebarGroup className="flex-grow">
           <SidebarMenu className="space-y-1">
             {visibleNavItems.map((item, index) => {
               const Icon = item.icon;
               const isExpanded = expandedItems.has(index);
-              const isActive =
-                item.to === "/"
-                  ? location.pathname === "/"
-                  : location.pathname.startsWith(item.to) && item.to !== "/";
+
+              // --- MODIFICATION START ---
+              // Determine if a parent item is active. It's active if any of its children's routes
+              // match the start of the current URL path.
+              // For items without children, it's active if its 'to' path matches exactly.
+              const isActive = item.children
+                ? item.children.some((child) =>
+                    location.pathname.startsWith(child.to)
+                  )
+                : location.pathname === item.to;
+              // --- MODIFICATION END ---
 
               return (
                 <SidebarMenuItem key={index}>
@@ -210,8 +228,9 @@ export function AppSidebar({
                           }
                           hover:bg-orange-200 hover:text-orange-800 text-orange-700
                           ${
-                            isActive && isVisuallyExpanded
-                              ? "bg-orange-200 text-orange-800"
+                            // This now correctly highlights the parent even when collapsed
+                            isActive
+                              ? "bg-orange-200 text-orange-800 font-semibold"
                               : ""
                           }
                         `}
@@ -257,6 +276,7 @@ export function AppSidebar({
                       )}
                     </>
                   ) : (
+                    // Logic for single menu items remains the same
                     <SidebarMenuButton
                       onClick={() => navigate(item.to)}
                       className={`w-full flex items-center p-3 rounded-lg transition-all duration-200
@@ -286,7 +306,6 @@ export function AppSidebar({
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* 4. Logout Button group at the bottom */}
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>

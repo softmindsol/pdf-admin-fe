@@ -303,7 +303,7 @@ const user=getUserData()
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>
