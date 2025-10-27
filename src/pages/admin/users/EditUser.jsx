@@ -39,8 +39,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 // --- Zod Validation Schema ---
 const formSchema = z
   .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters."),
-    lastName: z.string().min(2, "Last name must be at least 2 characters."),
+    firstName: z
+      .string()
+      .min(2, "First name must be at least 2 characters.")
+      .regex(/^[a-zA-Z]+$/, "First name can only contain letters."),
+
+    lastName: z
+      .string()
+      .min(2, "Last name must be at least 2 characters.")
+      .regex(/^[a-zA-Z]+$/, "Last name can only contain letters."),
     username: z.string().min(3, "Username must be at least 3 characters."),
     status: z.enum(["active", "inactive"]),
     role: z.enum(["user", "manager", "admin"], {
@@ -98,7 +105,7 @@ export default function EditUser() {
   useEffect(() => {
     if (user) {
       console.log("Fetched user data:", user); // Debug fetched data
-      
+
       // Validate and set proper values
       const validRole = ["user", "manager", "admin"].includes(user.role)
         ? user.role
@@ -119,7 +126,7 @@ export default function EditUser() {
 
       console.log("Setting form data:", formData); // Debug form data
       form.reset(formData);
-      
+
       // Force update the form values to ensure selects are properly set
       setTimeout(() => {
         form.setValue("role", validRole);
@@ -133,11 +140,11 @@ export default function EditUser() {
     console.log("Submitting form with values:", values); // Debug submitted values
     const payload = { ...values };
     if (!payload.password) {
-        delete payload.confirmPassword;
+      delete payload.confirmPassword;
       delete payload.password;
     }
     if (payload.password) {
-        delete payload.confirmPassword;
+      delete payload.confirmPassword;
     }
 
     try {
@@ -205,7 +212,8 @@ export default function EditUser() {
         <CardHeader>
           <CardTitle>User Information</CardTitle>
           <CardDescription>
-            Make changes to the user's profile here. Click save when you're done.
+            Make changes to the user's profile here. Click save when you're
+            done.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -255,7 +263,6 @@ export default function EditUser() {
               />
 
               <div className="grid sm:grid-cols-2 gap-4">
-               
                 <FormField
                   control={form.control}
                   name="status"

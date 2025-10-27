@@ -41,8 +41,15 @@ import { getUserData } from "@/lib/auth";
 // --- Zod Validation Schema ---
 const formSchema = z
   .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters."),
-    lastName: z.string().min(2, "Last name must be at least 2 characters."),
+    firstName: z
+      .string()
+      .min(2, "First name must be at least 2 characters.")
+      .regex(/^[a-zA-Z]+$/, "First name can only contain letters."),
+
+    lastName: z
+      .string()
+      .min(2, "Last name must be at least 2 characters.")
+      .regex(/^[a-zA-Z]+$/, "Last name can only contain letters."),
     username: z.string().min(3, "Username must be at least 3 characters."),
     email: z
       .string()
@@ -73,8 +80,8 @@ export default function CreateUser() {
   const { data: departmentResponse, isLoading: areDepartmentsLoading } =
     useGetDepartmentsQuery({ page: 0 });
   const departments = departmentResponse?.data?.departments || [];
-const user=  getUserData();
-  console.log("🚀 ~ CreateUser ~ user:", user)
+  const user = getUserData();
+  console.log("🚀 ~ CreateUser ~ user:", user);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -199,44 +206,45 @@ const user=  getUserData();
               </div>
 
               {/* --- Role & Department --- */}
-             {!user?.department &&  <div className="grid sm:grid-cols-2 gap-4">
-              
-                {/* --- REPLACED: Department Input with Select Dropdown --- */}
-                <FormField
-                  control={form.control}
-                  name="department"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Department (Optional)</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={areDepartmentsLoading}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a department" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {areDepartmentsLoading ? (
-                            <SelectItem value="loading" disabled>
-                              Loading...
-                            </SelectItem>
-                          ) : (
-                            departments.map((dept) => (
-                              <SelectItem key={dept._id} value={dept._id}>
-                                {dept.name}
+              {!user?.department && (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* --- REPLACED: Department Input with Select Dropdown --- */}
+                  <FormField
+                    control={form.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department (Optional)</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={areDepartmentsLoading}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a department" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {areDepartmentsLoading ? (
+                              <SelectItem value="loading" disabled>
+                                Loading...
                               </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>}
+                            ) : (
+                              departments.map((dept) => (
+                                <SelectItem key={dept._id} value={dept._id}>
+                                  {dept.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               <Separator />
 
@@ -251,8 +259,7 @@ const user=  getUserData();
                       <FormControl>
                         <div className="relative">
                           <Input
-                          placeholder="*********"
-
+                            placeholder="*********"
                             type={showPassword ? "text" : "password"}
                             {...field}
                             className="pr-10"
@@ -285,7 +292,7 @@ const user=  getUserData();
                       <FormControl>
                         <div className="relative">
                           <Input
-                          placeholder="*********"
+                            placeholder="*********"
                             type={showConfirmPassword ? "text" : "password"}
                             {...field}
                             className="pr-10"
