@@ -251,6 +251,8 @@ const user=  getUserData();
                       <FormControl>
                         <div className="relative">
                           <Input
+                          placeholder="*********"
+
                             type={showPassword ? "text" : "password"}
                             {...field}
                             className="pr-10"
@@ -283,6 +285,7 @@ const user=  getUserData();
                       <FormControl>
                         <div className="relative">
                           <Input
+                          placeholder="*********"
                             type={showConfirmPassword ? "text" : "password"}
                             {...field}
                             className="pr-10"
