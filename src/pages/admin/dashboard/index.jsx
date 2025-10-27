@@ -170,41 +170,7 @@ export default function Dashboard() {
           </div>
 
           {/* Recent Activity Card */}
-          <div className="bg-gradient-to-br from-white to-orange-50 rounded-xl shadow-lg border border-orange-200/50 p-6 backdrop-blur-sm">
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-orange-light to-orange-dark bg-clip-text text-transparent mb-4">
-              Recent Activity
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-gradient-to-r from-orange-light to-orange-dark rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-orange-dark">New ticket #2847 created</p>
-                  <p className="text-xs text-orange-dark/60">2 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-gradient-to-r from-orange-300 to-orange-600 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-orange-dark">Worker John Doe assigned to task</p>
-                  <p className="text-xs text-orange-dark/60">15 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-gradient-to-r from-orange-400 to-orange-700 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-orange-dark">Monthly report generated</p>
-                  <p className="text-xs text-orange-dark/60">1 hour ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-gradient-to-r from-orange-500 to-orange-800 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-orange-dark">Manager Sarah updated project status</p>
-                  <p className="text-xs text-orange-dark/60">3 hours ago</p>
-                </div>
-              </div>
-            </div>
-          </div>
+         
         </div>
       </div>
     </>

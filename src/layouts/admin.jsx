@@ -60,25 +60,26 @@ export default function AdminLayout() {
 
   return (
     <SidebarProvider>
-      <div className="relative h-screen w-screen ">
-        <AppSidebar
-          isCollapsed={isCollapsed}
-          toggleCollapse={toggleCollapse}
-          isHovering={isHovering}
-          handleMouseEnter={handleMouseEnter}
-          handleMouseLeave={handleMouseLeave}
-          // --- NEW: Pass the allowed modules as a prop ---
-          allowedModules={allowedModules}
-        />
-
-        <main
-          className={`overflow-y-auto p-4 transition-all duration-300 w-full max-w-7xl mx-auto min-h-full
-            ${isVisuallyExpanded ? "ml-64" : "ml-16"}`}
-        >
-          <Suspense fallback={<Loader />}>
-            <Outlet />
-          </Suspense>
-        </main>
+      <div className="container">
+        <div className="relative h-screen w-screen ">
+          <AppSidebar
+            isCollapsed={isCollapsed}
+            toggleCollapse={toggleCollapse}
+            isHovering={isHovering}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseLeave={handleMouseLeave}
+            // --- NEW: Pass the allowed modules as a prop ---
+            allowedModules={allowedModules}
+          />
+          <main
+            className={`overflow-y-auto p-4 transition-all duration-300  max-w-7xl mx-auto min-h-full
+              ${isVisuallyExpanded ? "ml-64 w-[70%]" : "ml-16 w-[90%]"}`}
+          >
+            <Suspense fallback={<Loader />}>
+              <Outlet />
+            </Suspense>
+          </main>
+        </div>
       </div>
     </SidebarProvider>
   );
