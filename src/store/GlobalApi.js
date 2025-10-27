@@ -329,6 +329,13 @@ export const GlobalApi = createApi({
         return createRequest(`/file/pre-sign?${params.toString()}`);
       },
     }),
+     changePassword: builder.mutation({
+      query: (body) => createPostRequest(`/auth/change-password`, body),
+    }),
+
+    changeUsername: builder.mutation({
+      query: (body) => createPostRequest(`/auth/change-username`, body),
+    }),
   }),
 });
 
@@ -377,4 +384,6 @@ export const {
   useDeleteServiceTicketMutation,
   useGetSignedUrlQuery,
   useLazyGetSignedUrlQuery,
+  useChangePasswordMutation,
+  useChangeUsernameMutation,
 } = GlobalApi;

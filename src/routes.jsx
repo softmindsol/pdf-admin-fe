@@ -29,6 +29,8 @@ import ViewServiceTicket from "./pages/admin/serviceTicket/viewServiceTicket";
 import UndergroundTestManagement from "./pages/admin/underGround"; // Renamed for consistency
 import ViewUndergroundTest from "./pages/admin/underGround/view";
 import UndergroundTestForm from "./pages/admin/underGround/createUpdateUnderground";
+import ChangePassword from "./pages/settings/Changepassword";
+import ChangeUsername from "./pages/settings/ChangeUsername";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -286,6 +288,22 @@ export const router = createBrowserRouter([
           <ProtectedRoute moduleName="underGround">
             <ViewUndergroundTest />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: "change-password",
+        element: (
+          // <ProtectedRoute moduleName="underGround">
+            <ChangePassword />
+          // </ProtectedRoute>
+        ),
+      },
+       {
+        path: "change-username",
+        element: (
+          // <ProtectedRoute moduleName="underGround">
+            <ChangeUsername />
+          // </ProtectedRoute>
         ),
       },
     ],

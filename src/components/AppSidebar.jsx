@@ -30,7 +30,7 @@ const sidebarNavItems = [
   },
   {
     label: "Manage",
-    to: "/manage", // This path is a general prefix for its children
+    to: "/manage",
     icon: MdPeople,
     children: [
       {
@@ -49,7 +49,7 @@ const sidebarNavItems = [
   },
   {
     label: "Documents",
-    to: "/docs", // This path is a general prefix for its children
+    to: "/docs",
     icon: FileBarChart,
     children: [
       {
@@ -84,6 +84,23 @@ const sidebarNavItems = [
       },
     ],
   },
+  {
+    label: "Profile",
+    to: "/profile",
+    icon: MdPeople,
+    children: [
+      {
+        label: "Change Password",
+        to: "/change-password",
+        icon: MdPeople,
+      },
+      {
+        label: "Change Username",
+        to: "/change-username", // <-- CORRECTED PATH
+        icon: MdInventory,
+      },
+    ],
+  },
 ];
 
 export function AppSidebar({
@@ -101,9 +118,7 @@ export function AppSidebar({
     const activeParentIndex = sidebarNavItems.findIndex(
       (item) =>
         item.children &&
-        item.children.some(
-          (child) => child.to !== "/" && location.pathname.startsWith(child.to)
-        )
+        item.children.some((child) => location.pathname.startsWith(child.to))
     );
     if (activeParentIndex !== -1) {
       return new Set([activeParentIndex]);
@@ -112,7 +127,6 @@ export function AppSidebar({
   };
 
   const [expandedItems, setExpandedItems] = useState(getInitialExpandedItems);
-
   const isVisuallyExpanded = !isCollapsed || isHovering;
 
   const handleLogout = () => {
@@ -120,25 +134,43 @@ export function AppSidebar({
     navigate("/auth/login");
   };
 
+  // --- MODIFIED & IMPROVED FILTERING LOGIC ---
   const visibleNavItems = sidebarNavItems
     .map((item) => {
+      // Items without children (like Dashboard) are always included.
       if (!item.children) {
         return item;
       }
-      const visibleChildren = item.children.filter((child) =>
-        allowedModules.includes(child.module)
-      );
-      if (visibleChildren.length > 0) {
-        return { ...item, children: visibleChildren };
+
+      // Check if this item's children are controlled by modules.
+      const isModuleRestricted = item.children.some((child) => child.module);
+
+      if (isModuleRestricted) {
+        // If they are module-restricted, filter them based on user permissions.
+        const visibleChildren = item.children.filter((child) =>
+          allowedModules.includes(child.module)
+        );
+
+        // If any children are visible, show the parent with its visible children.
+        if (visibleChildren.length > 0) {
+          return { ...item, children: visibleChildren };
+        }
+        // Otherwise, hide the parent completely.
+        return null;
+      } else {
+        // If the item is not module-restricted (like "Profile"), always show it.
+        return item;
       }
-      return null;
     })
-    .filter(Boolean);
+    .filter(Boolean); // Clean up any null entries from the array.
 
   const toggleExpanded = (index) => {
     const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(index)) newExpanded.delete(index);
-    else newExpanded.add(index);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
     setExpandedItems(newExpanded);
   };
 
@@ -201,16 +233,11 @@ export function AppSidebar({
               const Icon = item.icon;
               const isExpanded = expandedItems.has(index);
 
-              // --- MODIFICATION START ---
-              // Determine if a parent item is active. It's active if any of its children's routes
-              // match the start of the current URL path.
-              // For items without children, it's active if its 'to' path matches exactly.
               const isActive = item.children
                 ? item.children.some((child) =>
                     location.pathname.startsWith(child.to)
                   )
                 : location.pathname === item.to;
-              // --- MODIFICATION END ---
 
               return (
                 <SidebarMenuItem key={index}>
@@ -220,20 +247,15 @@ export function AppSidebar({
                         onClick={() =>
                           isVisuallyExpanded && toggleExpanded(index)
                         }
-                        className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 group
-                          ${
-                            isVisuallyExpanded
-                              ? "justify-between"
-                              : "justify-center"
-                          }
-                          hover:bg-orange-200 hover:text-orange-800 text-orange-700
-                          ${
-                            // This now correctly highlights the parent even when collapsed
-                            isActive
-                              ? "bg-orange-200 text-orange-800 font-semibold"
-                              : ""
-                          }
-                        `}
+                        className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 group ${
+                          isVisuallyExpanded
+                            ? "justify-between"
+                            : "justify-center"
+                        } hover:bg-orange-200 hover:text-orange-800 text-orange-700 ${
+                          isActive
+                            ? "bg-orange-200 text-orange-800 font-semibold"
+                            : ""
+                        }`}
                         title={!isVisuallyExpanded ? item.label : undefined}
                       >
                         <div className="flex items-center space-x-3">
@@ -257,15 +279,11 @@ export function AppSidebar({
                               <SidebarMenuItem key={childIndex}>
                                 <SidebarMenuButton
                                   onClick={() => navigate(child.to)}
-                                  className={`w-full flex items-center space-x-3 p-2.5 rounded-md text-sm
-                                    hover:bg-orange-100 hover:text-orange-800 text-orange-600
-                                    transition-colors duration-200
-                                    ${
-                                      location.pathname.startsWith(child.to)
-                                        ? "bg-orange-200 text-orange-800 font-semibold"
-                                        : ""
-                                    }
-                                  `}
+                                  className={`w-full flex items-center space-x-3 p-2.5 rounded-md text-sm hover:bg-orange-100 hover:text-orange-800 text-orange-600 transition-colors duration-200 ${
+                                    location.pathname.startsWith(child.to)
+                                      ? "bg-orange-200 text-orange-800 font-semibold"
+                                      : ""
+                                  }`}
                                 >
                                   <span>{child.label}</span>
                                 </SidebarMenuButton>
@@ -276,22 +294,17 @@ export function AppSidebar({
                       )}
                     </>
                   ) : (
-                    // Logic for single menu items remains the same
                     <SidebarMenuButton
                       onClick={() => navigate(item.to)}
-                      className={`w-full flex items-center p-3 rounded-lg transition-all duration-200
-                        ${
-                          isVisuallyExpanded
-                            ? "justify-start space-x-3"
-                            : "justify-center"
-                        }
-                        hover:bg-orange-200 hover:text-orange-800 text-orange-700
-                        ${
-                          isActive
-                            ? "bg-orange-200 text-orange-800 font-semibold"
-                            : ""
-                        }
-                      `}
+                      className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
+                        isVisuallyExpanded
+                          ? "justify-start space-x-3"
+                          : "justify-center"
+                      } hover:bg-orange-200 hover:text-orange-800 text-orange-700 ${
+                        isActive
+                          ? "bg-orange-200 text-orange-800 font-semibold"
+                          : ""
+                      }`}
                       title={!isVisuallyExpanded ? item.label : undefined}
                     >
                       <Icon size={20} className="flex-shrink-0" />
@@ -311,13 +324,11 @@ export function AppSidebar({
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={handleLogout}
-                className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 text-red-600 hover:bg-red-100 hover:text-red-800
-                  ${
-                    isVisuallyExpanded
-                      ? "justify-start space-x-3"
-                      : "justify-center"
-                  }
-                `}
+                className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 text-red-600 hover:bg-red-100 hover:text-red-800 ${
+                  isVisuallyExpanded
+                    ? "justify-start space-x-3"
+                    : "justify-center"
+                }`}
                 title={!isVisuallyExpanded ? "Logout" : undefined}
               >
                 <MdLogout size={20} className="flex-shrink-0" />
