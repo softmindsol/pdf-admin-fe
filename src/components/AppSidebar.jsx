@@ -21,9 +21,10 @@ import {
   MdLogout,
 } from "react-icons/md";
 import { GrUserSettings } from "react-icons/gr";
+import { FileBarChart } from "lucide-react";
+import { getUserData } from "@/lib/auth";
 
-import { FileBarChart, Settings } from "lucide-react";
-
+// sidebarNavItems definition remains the same...
 const sidebarNavItems = [
   {
     label: "Dashboard",
@@ -98,7 +99,7 @@ const sidebarNavItems = [
       },
       {
         label: "Change Username",
-        to: "/change-username", // <-- CORRECTED PATH
+        to: "/change-username",
         icon: MdInventory,
       },
     ],
@@ -115,8 +116,10 @@ export function AppSidebar({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = getUserData(); // User data is fetched here
 
   const getInitialExpandedItems = () => {
+    // ... (rest of the function is unchanged)
     const activeParentIndex = sidebarNavItems.findIndex(
       (item) =>
         item.children &&
@@ -136,37 +139,29 @@ export function AppSidebar({
     navigate("/auth/login");
   };
 
-  // --- MODIFIED & IMPROVED FILTERING LOGIC ---
   const visibleNavItems = sidebarNavItems
     .map((item) => {
-      // Items without children (like Dashboard) are always included.
+      // ... (filtering logic is unchanged)
       if (!item.children) {
         return item;
       }
-
-      // Check if this item's children are controlled by modules.
       const isModuleRestricted = item.children.some((child) => child.module);
-
       if (isModuleRestricted) {
-        // If they are module-restricted, filter them based on user permissions.
         const visibleChildren = item.children.filter((child) =>
           allowedModules.includes(child.module)
         );
-
-        // If any children are visible, show the parent with its visible children.
         if (visibleChildren.length > 0) {
           return { ...item, children: visibleChildren };
         }
-        // Otherwise, hide the parent completely.
         return null;
       } else {
-        // If the item is not module-restricted (like "Profile"), always show it.
         return item;
       }
     })
-    .filter(Boolean); // Clean up any null entries from the array.
+    .filter(Boolean);
 
   const toggleExpanded = (index) => {
+    // ... (function is unchanged)
     const newExpanded = new Set(expandedItems);
     if (newExpanded.has(index)) {
       newExpanded.delete(index);
@@ -190,6 +185,7 @@ export function AppSidebar({
         isVisuallyExpanded ? "w-64" : "w-16"
       }`}
     >
+      {/* --- HEADER (Unchanged) --- */}
       <SidebarHeader className="p-4 border-b border-orange-200 bg-white/50 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           {isVisuallyExpanded && (
@@ -228,8 +224,10 @@ export function AppSidebar({
         </div>
       </SidebarHeader>
 
+      {/* --- CONTENT (Navigation & User Profile) --- */}
       <SidebarContent className="flex-1 flex flex-col p-2 overflow-y-auto">
         <SidebarGroup className="flex-grow">
+          {/* ... (Navigation menu mapping logic is unchanged) ... */}
           <SidebarMenu className="space-y-1">
             {visibleNavItems.map((item, index) => {
               const Icon = item.icon;
@@ -321,28 +319,67 @@ export function AppSidebar({
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={handleLogout}
-                className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 text-red-600 hover:bg-red-100 hover:text-red-800 ${
-                  isVisuallyExpanded
-                    ? "justify-start space-x-3"
-                    : "justify-center"
-                }`}
-                title={!isVisuallyExpanded ? "Logout" : undefined}
-              >
-                <MdLogout size={20} className="flex-shrink-0" />
-                {isVisuallyExpanded && (
-                  <span className="font-medium">Logout</span>
-                )}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+        {/* --- START: NEW USER PROFILE SECTION --- */}
+        <SidebarGroup className="mt-auto pt-2 border-t border-orange-200">
+          <SidebarMenuItem>
+            <div
+              className={`w-full flex items-center p-2 transition-all duration-200 ${
+                isVisuallyExpanded ? "justify-start" : "justify-center"
+              }`}
+            >
+              {/* Avatar with initials */}
+              <div className="flex-shrink-0 w-9 h-9 bg-orange-500 text-white flex items-center justify-center rounded-full font-bold text-sm">
+                {user?.firstName?.charAt(0).toUpperCase()}
+                {user?.lastName?.charAt(0).toUpperCase()}
+              </div>
+
+              {/* User Info - shown only when expanded */}
+              {isVisuallyExpanded && (
+                <div className="ml-3 text-left overflow-hidden">
+                  <p
+                    className="text-sm font-semibold text-orange-900 truncate"
+                    title={`${user?.firstName} ${user?.lastName}`}
+                  >
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p
+                    className="text-xs text-orange-700 truncate uppercase"
+                    title={user?.role}
+                  >
+                    {user?.role}
+                  </p>
+                  <p
+                    className="text-xs text-orange-700 truncate"
+                    title={user?.departmentName}
+                  >
+                    {user?.departmentName} (@{user?.username})
+                  </p>
+                </div>
+              )}
+            </div>
+          </SidebarMenuItem>
+          {/* --- END: NEW USER PROFILE SECTION --- */}
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className={`w-full flex items-center p-3 rounded-lg bg-red-100 transition-all duration-200 text-red-600 hover:bg-red-200 hover:text-red-800 ${
+                isVisuallyExpanded
+                  ? "justify-start space-x-3"
+                  : "justify-center"
+              }`}
+              title={!isVisuallyExpanded ? "Logout" : undefined}
+            >
+              <MdLogout size={20} className="flex-shrink-0" />
+              {isVisuallyExpanded && (
+                <span className="font-medium">Logout</span>
+              )}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarGroup>
       </SidebarContent>
 
+      {/* --- FOOTER (Unchanged) --- */}
       <SidebarFooter className="p-4 border-t border-orange-200 bg-white/30 backdrop-blur-sm">
         {isVisuallyExpanded ? (
           <div className="text-center">
