@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { getUserData } from "@/lib/auth";
+import { toast } from "sonner";
 
 // --- Zod Validation Schema ---
 const formSchema = z
@@ -104,6 +105,7 @@ export default function CreateUser() {
 
     try {
       await createUser(payload).unwrap();
+      toast.success("User created.")
       navigate("/user");
     } catch (err) {
       if (err.data?.errors?.[0]?.username) {
