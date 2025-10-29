@@ -38,6 +38,7 @@ export function HydrantsAndValves({ control }) {
                       type="number"
                       placeholder="e.g., 5"
                       {...field}
+                      min={0}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>

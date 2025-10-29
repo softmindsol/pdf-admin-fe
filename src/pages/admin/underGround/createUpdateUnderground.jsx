@@ -32,63 +32,71 @@ import { HydrantsAndValves } from "./formComponents/hydrantsAndControlValves";
 import { RemarksAndSignatures } from "./formComponents/remarksAndSignatures";
 import { LeadsFlushingTests } from "./formComponents/leadsFlushing";
 
-const signatureSchema = z.object({
-  signed: z.string().optional().default(""),
-  title: z.string().optional().default(""),
-  date: z.string().optional().default(""),
+const noSpecialChars = z.string().regex(/^[a-zA-Z0-9\s.,'&#-()/]*$/, {
+  message: "Field contains invalid characters.",
 });
+
+const signatureSchema = z.object({
+  // Applied validation to signature fields
+  signed: noSpecialChars.optional().default(""),
+  title: noSpecialChars.optional().default(""),
+  date: z.string().optional().default(""), // Date fields are kept as plain strings
+});
+
+const REALISTIC_MAX_VALUE = 100000;
 
 const formSchema = z.object({
   propertyDetails: z.object({
-    propertyName: z.string().min(1, "Property name is required."),
+    propertyName: noSpecialChars.min(1, "Property name is required."),
     date: z.string().optional().default(""),
-    propertyAddress: z.string().min(1, "Property address is required."),
+    propertyAddress: noSpecialChars.min(1, "Property address is required."),
   }),
 
   plans: z.object({
-    acceptedByApprovingAuthorities: z.array(z.string()).optional().default([]),
-    address: z.string().optional().default(""),
+    acceptedByApprovingAuthorities: z.array(noSpecialChars).optional().default([]),
+    address: noSpecialChars.optional().default(""),
     installationConformsToAcceptedPlans: z.boolean().optional().default(true),
     equipmentUsedIsApproved: z.boolean().optional().default(true),
-    deviationsExplanation: z.string().optional().default(""),
+    deviationsExplanation: noSpecialChars.optional().default(""),
   }),
 
   instructions: z.object({
     personInChargeInstructed: z.boolean().optional().default(true),
-    instructionExplanation: z.string().optional().default(""),
+    instructionExplanation: noSpecialChars.optional().default(""),
     instructionsAndCareChartsLeft: z.boolean().optional().default(true),
-    chartsExplanation: z.string().optional().default(""),
+    chartsExplanation: noSpecialChars.optional().default(""),
   }),
 
-  suppliesBuildingsNames: z.array(z.string()).optional().default([]),
+  suppliesBuildingsNames: z.array(noSpecialChars).optional().default([]),
 
   undergroundPipesAndJoints: z.object({
-    pipeTypesAndClass: z.string().optional().default(""),
-    typeJoint: z.string().optional().default(""),
-    pipeStandard: z.string().optional().default(""),
+    pipeTypesAndClass: noSpecialChars.optional().default(""),
+    typeJoint: noSpecialChars.optional().default(""),
+    pipeStandard: noSpecialChars.optional().default(""),
     pipeStandardConform: z.boolean().optional().default(true),
-    fittingStandard: z.string().optional().default(""),
+    fittingStandard: noSpecialChars.optional().default(""),
     fittingStandardConform: z.boolean().optional().default(true),
-    fittingStandardExplanation: z.string().optional().default(""),
-    jointsStandard: z.string().optional().default(""),
+    fittingStandardExplanation: noSpecialChars.optional().default(""),
+    jointsStandard: noSpecialChars.optional().default(""),
     jointsStandardConform: z.boolean().optional().default(true),
-    jointsStandardExplanation: z.string().optional().default(""),
+    jointsStandardExplanation: noSpecialChars.optional().default(""),
   }),
 
   flushingTests: z.object({
-    undergroundPipingStandard: z.string().optional().default(""),
+    undergroundPipingStandard: noSpecialChars.optional().default(""),
     undergroundPipingStandardConform: z.boolean().optional().default(true),
-    undergroundPipingStandardExplanation: z.string().optional().default(""),
+    undergroundPipingStandardExplanation: noSpecialChars.optional().default(""),
     flushingFlowObtained: z
       .enum(["Public water", "Tank or reservoir", "Fire pump"])
       .nullable()
       .optional(),
     openingType: z.enum(["Hydrant butt", "Open pipe"]).nullable().optional(),
   }),
+
   leadsflushingTests: z.object({
-    undergroundPipingStandard: z.string().optional().default(""),
+    undergroundPipingStandard: noSpecialChars.optional().default(""),
     undergroundPipingStandardConform: z.boolean().optional().default(true),
-    undergroundPipingStandardExplanation: z.string().optional().default(""),
+    undergroundPipingStandardExplanation: noSpecialChars.optional().default(""),
     flushingFlowObtained: z
       .enum(["Public water", "Tank or reservoir", "Fire pump"])
       .nullable()
@@ -100,31 +108,67 @@ const formSchema = z.object({
   }),
 
   hydrostaticTest: z.object({
-    testedAtPSI: z.coerce.number().optional(),
-    testedHours: z.coerce.number().optional(),
+    testedAtPSI: z.coerce
+      .number({
+        required_error: "Test At (PSI) is required.",
+        invalid_type_error: "Test At (PSI) must be a number.",
+      })
+      .int({ message: "PSI must be a whole number." })
+      .nonnegative({ message: "PSI cannot be a negative number." })
+      .max(REALISTIC_MAX_VALUE, { message: "PSI value is unrealistically high." })
+      .optional(),
+
+    testedHours: z.coerce
+      .number({
+        required_error: "Tested For (Hours) is required.",
+        invalid_type_error: "Tested For (Hours) must be a number.",
+      })
+      .int({ message: "Hours must be a whole number." })
+      .nonnegative({ message: "Hours cannot be a negative number." })
+      .max(REALISTIC_MAX_VALUE, { message: "Hours value is unrealistically high." })
+      .optional(),
+
     jointsCovered: z.boolean().optional().default(false),
   }),
 
   leakageTest: z.object({
-    leakeageGallons: z.coerce.number().optional(),
-    leakageHours: z.coerce.number().optional(),
-    allowableLeakageGallons: z.coerce.number().optional(),
-    allowableLeakageHours: z.coerce.number().optional(),
+    leakeageGallons: z.coerce
+      .number({
+        required_error: "Leakage Gallons is required.",
+        invalid_type_error: "Leakage Gallons must be a number.",
+      })
+      .int({ message: "Gallons must be a whole number." })
+      .nonnegative({ message: "Gallons cannot be a negative number." })
+      .max(REALISTIC_MAX_VALUE, { message: "Gallons value is unrealistically high." })
+      .optional(),
+
+    leakageHours: z.coerce
+      .number({
+        required_error: "Leakage Hours is required.",
+        invalid_type_error: "Leakage Hours must be a number.",
+      })
+      .int({ message: "Hours must be a whole number." })
+      .nonnegative({ message: "Hours cannot be a negative number." })
+      .max(REALISTIC_MAX_VALUE, { message: "Hours value is unrealistically high." })
+      .optional(),
+      
+    allowableLeakageGallons: z.coerce.number().nonnegative().optional(),
+    allowableLeakageHours: z.coerce.number().nonnegative().optional(),
     forwardFlowTestPerformed: z.boolean().optional().default(false),
   }),
 
   hydrantsAndControlValves: z.object({
-    numberOfHydrants: z.coerce.number().optional(),
-    hydrantMakeAndType: z.string().optional().default(""),
+    numberOfHydrants: z.coerce.number().min(0).optional(),
+    hydrantMakeAndType: noSpecialChars.optional().default(""),
     allOperateSatisfactorily: z.boolean().optional().default(true),
     waterControlValvesLeftWideOpen: z.boolean().optional().default(true),
-    valvesNotOpenExplanation: z.string().optional().default(""),
+    valvesNotOpenExplanation: noSpecialChars.optional().default(""),
     hoseThreadsInterchangeable: z.boolean().optional().default(true),
   }),
 
   remarks: z.object({
     dateLeftInService: z.string().optional().default(""),
-    nameOfInstallingContractor: z.string().optional().default(""),
+    nameOfInstallingContractor: noSpecialChars.optional().default(""),
   }),
 
   signatures: z.object({
@@ -132,7 +176,7 @@ const formSchema = z.object({
     forInstallingContractor: signatureSchema.optional(),
   }),
 
-  additionalNotes: z.string().optional().default(""),
+  additionalNotes: noSpecialChars.optional().default(""),
 });
 
 export default function UndergroundTestForm() {

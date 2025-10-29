@@ -148,7 +148,7 @@ export function PlansAndInstructionsSection({ control }) {
                       <FormControl>
                         <Textarea
                           placeholder="If the installation deviates from the accepted plans, explain here..."
-                          className="resize-y"
+                          className="resize-y max-h-36"
                           {...field}
                         />
                       </FormControl>
@@ -210,7 +210,9 @@ export function PlansAndInstructionsSection({ control }) {
                       <FormItem>
                         <FormLabel>Instruction Explanation</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Describe the instructions given..." {...field} />
+                          <Textarea placeholder="Describe the instructions given..." 
+                          className="resize-y max-h-36"
+                          {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -223,7 +225,10 @@ export function PlansAndInstructionsSection({ control }) {
                       <FormItem>
                         <FormLabel>Charts Explanation</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Describe the charts left on premises..." {...field} />
+                          <Textarea placeholder="Describe the charts left on premises..."
+                          className="resize-y max-h-36"
+                          
+                          {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
