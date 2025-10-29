@@ -254,7 +254,7 @@ const user=getUserData()
                   </TableCell>
                   <TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    @{user.username}
+                    {user.username}
                   </TableCell>
                   <TableCell className="capitalize">{user.role}</TableCell>
                   <TableCell className="capitalize">{user?.department?.name || "N/A"}</TableCell>
