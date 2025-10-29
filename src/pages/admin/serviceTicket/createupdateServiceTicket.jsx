@@ -35,37 +35,71 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
+const nameRegex = /^[a-zA-Z -]*$/;
+
 const formSchema = z.object({
-  jobName: z.string().min(2, "Job name is required."),
-  customerName: z.string().min(2, "Customer name is required."),
+  jobName: z.string()
+    .min(2, "Job name is required.")
+    .refine((val) => nameRegex.test(val), {
+      message: "Job name should only contain letters, spaces and '-' .",
+    }),
+
+  customerName: z.string()
+    .min(2, "Customer name is required.")
+    .refine((val) => nameRegex.test(val), {
+      message: "Customer name should only contain letters, spaces and '-' .",
+    }),
+
   emailAddress: z.string().email("A valid email address is required."),
-  phoneNumber: z.string().min(10, "A valid phone number is required."),
+
+  phoneNumber: z.string()
+    .min(1, { message: "A valid phone number is required." })
+    .transform(val => val.replace(/\D/g, ''))
+    .refine(val => val.length >= 10 && val.length <= 15, {
+      message: "Phone number must contain between 10 and 15 digits.",
+    }),
+    
   jobLocation: z.string().min(5, "A valid job location is required."),
 
   workDescription: z
     .string()
     .min(10, "A detailed work description is required."),
+
   materials: z
     .array(
       z.object({
-        quantity: z.coerce.number().min(1, "Qty must be at least 1."),
+        quantity: z.coerce
+          .number({ invalid_type_error: "Quantity must be a number." })
+          .int({ message: "Quantity must be a whole number." })
+          .positive({ message: "Quantity must be a positive number." }),
         material: z.string().min(2, "Material description is required."),
       })
     )
     .optional(),
 
-  technicianName: z.string().min(2, "Technician name is required."),
-  technicianContactNumber: z
-    .string()
-    .min(10, "A valid contact number is required."),
+  technicianName: z.string()
+    .min(2, "Technician name is required.")
+    .refine((val) => nameRegex.test(val), {
+      message: "Technician name should only contain letters, spaces and '-' .",
+    }),
+
+  technicianContactNumber: z.string()
+    .min(1, { message: "A valid phone number is required." })
+    .transform(val => val.replace(/\D/g, ''))
+    .refine(val => val.length >= 10 && val.length <= 15, {
+      message: "Phone number must contain between 10 and 15 digits.",
+    }),
+    
   stHours: z.coerce.number().min(0).default(0),
   otHours: z.coerce.number().min(0).default(0),
 
   applySalesTax: z.boolean().default(false),
   workOrderStatus: z.enum(["Not Complete", "System Out of Order", "Complete"]),
+  
   completionDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "A valid completion date is required.",
   }),
+
   customerSignature: z.string().optional(),
 });
 
@@ -203,7 +237,7 @@ export default function ServiceTicketForm() {
       </div>
 
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               {/* --- Job & Customer Information Section --- */}

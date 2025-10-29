@@ -129,7 +129,7 @@ function FormMessage({
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive text-sm font-medium", className)} // Added font-medium for better visibility
+      className={cn("text-destructive text-sm font-medium truncate", className)} // Added font-medium for better visibility
       {...props}>
       {/* 2. MODIFIED: Render the message, or a non-breaking space as a placeholder. */}
       {body || <>&nbsp;</>}
