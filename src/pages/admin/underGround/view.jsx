@@ -27,19 +27,28 @@ import {
 } from "@/components/ui/accordion";
 import { showDeleteConfirm } from "@/lib/swal";
 
-// --- Helper Components & Functions (reusable from your other component) ---
+// --- Helper Components & Functions ---
 
-const DetailItem = ({ label, value, children, className = "" }) => (
-  <div className={className}>
-    <p className="text-sm font-medium text-gray-500">{label}</p>
-    <div className="mt-1 text-base text-gray-900 break-words">
-      {value ?? children ?? "N/A"}
+const DetailItem = ({ label, value, children, className = "" }) => {
+  const content = value ?? children;
+  // Display -- for null, undefined, or empty strings.
+  const displayContent =
+    content === null || content === undefined || content === ""
+      ? "--"
+      : content;
+
+  return (
+    <div className={className}>
+      <p className="text-sm font-medium text-gray-500">{label}</p>
+      <div className="mt-1 text-base text-gray-900 break-words">
+        {displayContent}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
+  if (!dateString) return "--"; // <-- Changed
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -47,7 +56,12 @@ const formatDate = (dateString) => {
   });
 };
 
-const formatBoolean = (value) => (value ? "Yes" : "No");
+const formatBoolean = (value) => {
+  if (value === null || typeof value === "undefined") {
+    return "--"; // <-- Added check for null/undefined
+  }
+  return value ? "Yes" : "No";
+};
 
 // --- Main Component ---
 
@@ -141,7 +155,7 @@ export default function ViewUndergroundTest() {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">
-              {testData.propertyDetails?.propertyName}
+              {testData.propertyDetails?.propertyName || "--"}
             </CardTitle>
             <CardDescription>
               Underground Test Report conducted on{" "}
@@ -392,17 +406,17 @@ export default function ViewUndergroundTest() {
                       <DetailItem
                         label="Leakage (Gallons/Hours)"
                         value={`${
-                          testData.leakageTest?.leakeageGallons ?? "N/A"
+                          testData.leakageTest?.leakeageGallons ?? "--"
                         } gal / ${
-                          testData.leakageTest?.leakageHours ?? "N/A"
+                          testData.leakageTest?.leakageHours ?? "--"
                         } hrs`}
                       />
                       <DetailItem
                         label="Allowable Leakage (Gallons/Hours)"
                         value={`${
-                          testData.leakageTest?.allowableLeakageGallons ?? "N/A"
+                          testData.leakageTest?.allowableLeakageGallons ?? "--"
                         } gal / ${
-                          testData.leakageTest?.allowableLeakageHours ?? "N/A"
+                          testData.leakageTest?.allowableLeakageHours ?? "--"
                         } hrs`}
                       />
                       <DetailItem
@@ -426,9 +440,7 @@ export default function ViewUndergroundTest() {
                   />
                   <DetailItem
                     label="Hydrant Make & Type"
-                    value={
-                      testData.hydrantsAndControlValves?.hydrantMakeAndType
-                    }
+                    value={testData.hydrantsAndControlVales?.hydrantMakeAndType}
                   />
                   <DetailItem
                     label="All Operate Satisfactorily?"
@@ -536,7 +548,7 @@ export default function ViewUndergroundTest() {
           <CardFooter className="flex-col items-start text-xs text-gray-500 space-y-1 pt-6">
             <p>
               Created On: {formatDate(testData.createdAt)} by{" "}
-              {testData.createdBy?.username || "N/A"}
+              {testData.createdBy?.username || "--"}
             </p>
             <p>Last Updated: {formatDate(testData.updatedAt)}</p>
             <p className="pt-2">Test ID: {testData._id}</p>
