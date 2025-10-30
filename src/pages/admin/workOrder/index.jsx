@@ -48,12 +48,18 @@ export default function WorkOrderManagement() {
   const [triggerGetSignedUrl, { isLoading: isDownloading }] =
     useLazyGetSignedUrlQuery();
 
+  // --- Filter States ---
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
+
+  // 1. ADDED: State for date filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   const user = getUserData();
 
   useEffect(() => {
@@ -68,6 +74,7 @@ export default function WorkOrderManagement() {
     useGetDepartmentsQuery({ page: 0 });
   const departments = departmentResponse?.data?.departments || [];
 
+  // 2. UPDATED: Pass date filters to the RTK Query hook
   const {
     data: response,
     isLoading,
@@ -79,6 +86,8 @@ export default function WorkOrderManagement() {
     search: debouncedSearch,
     ...(departmentFilter &&
       departmentFilter !== "all" && { department: departmentFilter }),
+    ...(startDate && { startDate }), // Pass startDate if it exists
+    ...(endDate && { endDate }), // Pass endDate if it exists
   });
 
   const workOrders = response?.data?.workOrders || [];
@@ -139,12 +148,18 @@ export default function WorkOrderManagement() {
           Manage all work orders in the system.
         </p>
       </div>
-
-      {/* --- Toolbar --- */}
-      <div className="flex items-center justify-between space-x-2">
-        <div className="flex flex-1 items-center space-x-2">
+ <div className="flex justify-end">
+          <Button onClick={() => navigate("/work-order/new")}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Work Order
+          </Button>
+        </div>
+{/* --- Toolbar --- */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Filter Group: This container will grow and wrap its children */}
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[250px] max-w-xs sm:max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -155,7 +170,7 @@ export default function WorkOrderManagement() {
             />
           </div>
 
-          {/* 7. Add the Department Filter Dropdown (visible to admins only) */}
+          {/* Department Filter */}
           {user?.role === "admin" && (
             <Select
               value={departmentFilter}
@@ -178,11 +193,48 @@ export default function WorkOrderManagement() {
               </SelectContent>
             </Select>
           )}
+
+          {/* Date filter inputs */}
+          <div className="flex items-center space-x-2">
+            <label
+              htmlFor="startDate"
+              className="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >
+              From
+            </label>
+            <Input
+              id="startDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPage(1);
+              }}
+              className="w-[150px]"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <label
+              htmlFor="endDate"
+              className="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >
+              To
+            </label>
+            <Input
+              id="endDate"
+              type="date"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setPage(1);
+              }}
+              className="w-[150px]"
+            />
+          </div>
         </div>
-        <Button onClick={() => navigate("/work-order/new")}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Work Order
-        </Button>
+
+        {/* Action Button Container: Prevents the button from shrinking */}
+       
       </div>
 
       {/* --- Data Table --- */}
@@ -210,7 +262,8 @@ export default function WorkOrderManagement() {
               <TableHead>Technician</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Payment Method</TableHead>
-              <TableHead>Created By</TableHead> {/* Optional: Add createdBy */}
+              <TableHead>Created By</TableHead>
+              <TableHead>Created On</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -250,6 +303,7 @@ export default function WorkOrderManagement() {
                     {wo.paymentMethod}
                   </TableCell>
                   <TableCell>{wo.createdBy?.username || "N/A"}</TableCell>
+                  <TableCell>{format(new Date(wo.createdAt), "PP") || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

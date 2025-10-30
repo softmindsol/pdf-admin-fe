@@ -2,16 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
-import {  toast } from "sonner";
+import { toast } from "sonner";
 
 import {
   useGetUndergroundTestsQuery,
   useDeleteUndergroundTestMutation,
   useLazyGetSignedUrlQuery,
-  useGetDepartmentsQuery, // 1. Import hook to get departments
+  useGetDepartmentsQuery,
 } from "@/store/GlobalApi";
 import { showDeleteConfirm } from "@/lib/swal";
-import { getUserData } from "@/lib/auth"; // 2. Import auth utility
+import { getUserData } from "@/lib/auth";
 
 // --- UI Component Imports ---
 import {
@@ -35,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select, // 3. Import Select components
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -51,9 +51,14 @@ export default function UndergroundTestManagement() {
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState(""); // 4. Add state for department filter
+  const [departmentFilter, setDepartmentFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
-  const user = getUserData(); // Get current user's data
+  
+  // 1. ADDED: State for date filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
+  const user = getUserData();
 
   // Debounce search term
   useEffect(() => {
@@ -69,12 +74,11 @@ export default function UndergroundTestManagement() {
   const [triggerGetSignedUrl, { isLoading: isDownloading }] =
     useLazyGetSignedUrlQuery();
 
-  // 5. Fetch all departments for the filter dropdown
   const { data: departmentResponse, isLoading: areDepartmentsLoading } =
     useGetDepartmentsQuery({ page: 0 });
   const departments = departmentResponse?.data?.departments || [];
 
-  // 6. Update the main query to include the department filter
+  // 2. UPDATED: Pass date filters to the RTK Query hook
   const {
     data: response,
     isLoading,
@@ -84,8 +88,9 @@ export default function UndergroundTestManagement() {
     page,
     limit,
     search: debouncedSearch,
-    ...(departmentFilter &&
-      departmentFilter !== "all" && { department: departmentFilter }),
+    department: departmentFilter && departmentFilter !== "all" ? departmentFilter : undefined,
+    startDate, // Pass startDate state
+    endDate,   // Pass endDate state
   });
 
   const undergroundTests = response?.data?.undergroundTests || [];
@@ -113,27 +118,13 @@ export default function UndergroundTestManagement() {
       .fill(0)
       .map((_, index) => (
         <TableRow key={index}>
-          <TableCell className="w-[40px]">
-            <Skeleton className="h-4 w-4" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-40" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-48" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-32" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-28" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-24" />
-          </TableCell>
-          <TableCell className="text-right">
-            <Skeleton className="h-8 w-8 ml-auto" />
-          </TableCell>
+          <TableCell className="w-[40px]"><Skeleton className="h-4 w-4" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+          <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
         </TableRow>
       ));
   };
@@ -143,15 +134,15 @@ export default function UndergroundTestManagement() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Underground Tests</h1>
-        <p className="text-muted-foreground">
-          Manage all underground fire protection system tests.
-        </p>
+        <p className="text-muted-foreground">Manage all underground fire protection system tests.</p>
       </div>
-      {/* Toolbar */}
-      <div className="flex items-center justify-between space-x-2">
-        <div className="flex flex-1 items-center space-x-2">
+
+      {/* 3. UPDATED: Responsive Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Filter Group */}
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[250px] max-w-xs sm:max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -162,48 +153,65 @@ export default function UndergroundTestManagement() {
             />
           </div>
 
-          {/* 7. Add Department Filter (visible to admins only) */}
+          {/* Department Filter */}
           {user?.role === "admin" && (
             <Select
               value={departmentFilter}
-              onValueChange={(value) => {
-                setDepartmentFilter(value);
-                setPage(1);
-              }}
+              onValueChange={(value) => { setDepartmentFilter(value); setPage(1); }}
               disabled={areDepartmentsLoading}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a department" />
-              </SelectTrigger>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select a department" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept._id} value={dept._id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
+                {departments.map((dept) => (<SelectItem key={dept._id} value={dept._id}>{dept.name}</SelectItem>))}
               </SelectContent>
             </Select>
           )}
+
+          {/* Date filter inputs */}
+          <div className="flex items-center space-x-2">
+            <label htmlFor="startDate" className="text-sm font-medium text-muted-foreground whitespace-nowrap">From</label>
+            <Input
+              id="startDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+              className="w-[150px]"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <label htmlFor="endDate" className="text-sm font-medium text-muted-foreground whitespace-nowrap">To</label>
+            <Input
+              id="endDate"
+              type="date"
+              value={endDate}
+              onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+              className="w-[150px]"
+            />
+          </div>
         </div>
-        <Button onClick={() => navigate("/under-ground/new")}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add New Test
-        </Button>
+
+        {/* Action Button */}
+        <div className="flex-shrink-0">
+          <Button onClick={() => navigate("/under-ground/new")}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Test
+          </Button>
+        </div>
       </div>
+
       {/* Data Table */}
       <div className="rounded-md border">
         <Table>
+          {/* TableHeader and TableBody remain the same */}
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox />
-              </TableHead>
+              <TableHead className="w-[40px]"><Checkbox /></TableHead>
               <TableHead>Property Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Contractor</TableHead>
-              <TableHead>Date of Test</TableHead>
               <TableHead>Created By</TableHead>
+              <TableHead>Created on</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -211,65 +219,29 @@ export default function UndergroundTestManagement() {
             {isLoading || isFetching ? (
               renderSkeletons()
             ) : isError ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  Failed to load data. Please try again.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={7} className="h-24 text-center">Failed to load data.</TableCell></TableRow>
             ) : undergroundTests.length > 0 ? (
               undergroundTests.map((test) => (
                 <TableRow key={test._id}>
-                  <TableCell>
-                    <Checkbox />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {test.propertyDetails.propertyName}
-                  </TableCell>
+                  <TableCell><Checkbox /></TableCell>
+                  <TableCell className="font-medium">{test.propertyDetails.propertyName}</TableCell>
                   <TableCell>{test.propertyDetails.propertyAddress}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {test.remarks.nameOfInstallingContractor || "N/A"}
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(test.propertyDetails.date), "PP")}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground">{test.remarks.nameOfInstallingContractor || "N/A"}</TableCell>
                   <TableCell>{test.createdBy?.username || "N/A"}</TableCell>
+                  <TableCell>{format(new Date(test.createdAt), "PP")}</TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                     <DropdownMenu>
+                      <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => navigate(`/under-ground/${test._id}`)}
-                        >
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/under-ground/update/${test._id}`)
-                          }
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          disabled={!test.ticket || isDownloading}
-                          onClick={() => handleDownloadPdf(test)}
-                        >
+                        <DropdownMenuItem onClick={() => navigate(`/under-ground/${test._id}`)}>View</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/under-ground/update/${test._id}`)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem disabled={!test.ticket || isDownloading} onClick={() => handleDownloadPdf(test)}>
                           <Download className="mr-2 h-4 w-4" />
                           <span>Download PDF</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            showDeleteConfirm(async () => {
-                              await deleteUndergroundTest(test._id).unwrap();
-                            });
-                          }}
-                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                        >
+                        <DropdownMenuItem onClick={() => { showDeleteConfirm(() => deleteUndergroundTest(test._id).unwrap()); }} className="text-red-600 focus:text-red-600 focus:bg-red-50">
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -278,15 +250,12 @@ export default function UndergroundTestManagement() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  No results found.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={7} className="h-24 text-center">No results found.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
       {/* Pagination */}
       <DataTablePagination
         page={page}

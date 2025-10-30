@@ -3,12 +3,12 @@ import {
   useGetServiceTicketsQuery,
   useDeleteServiceTicketMutation,
   useLazyGetSignedUrlQuery,
-  useGetDepartmentsQuery, // 1. Import hook to get departments
+  useGetDepartmentsQuery,
 } from "@/store/GlobalApi";
 import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import {  toast } from "sonner";
+import { toast } from "sonner";
 
 // --- Shadcn UI Imports ---
 import {
@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select, // 2. Import Select components
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -41,7 +41,7 @@ import {
 import { DataTablePagination } from "@/components/pagination";
 import { Badge } from "@/components/ui/badge";
 import { showDeleteConfirm } from "@/lib/swal";
-import { getUserData } from "@/lib/auth"; // 3. Import auth utility
+import { getUserData } from "@/lib/auth";
 
 export default function ServiceTicketManagement() {
   const navigate = useNavigate();
@@ -54,9 +54,14 @@ export default function ServiceTicketManagement() {
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState(""); // 4. Add state for department filter
+  const [departmentFilter, setDepartmentFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
-  const user = getUserData(); // Get current user's data
+
+  // 1. ADDED: State for date filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
+  const user = getUserData();
 
   // Debounce search term
   useEffect(() => {
@@ -67,12 +72,11 @@ export default function ServiceTicketManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // 5. Fetch all departments for the filter dropdown
   const { data: departmentResponse, isLoading: areDepartmentsLoading } =
     useGetDepartmentsQuery({ page: 0 });
   const departments = departmentResponse?.data?.departments || [];
 
-  // 6. Update the main query to include the department filter
+  // 2. UPDATED: Pass date filters to the RTK Query hook
   const {
     data: response,
     isLoading,
@@ -82,8 +86,9 @@ export default function ServiceTicketManagement() {
     page,
     limit,
     search: debouncedSearch,
-    ...(departmentFilter &&
-      departmentFilter !== "all" && { department: departmentFilter }),
+    department: departmentFilter && departmentFilter !== "all" ? departmentFilter : undefined,
+    startDate, // Pass startDate state
+    endDate,   // Pass endDate state
   });
 
   const serviceTickets = response?.data?.serviceTickets || [];
@@ -111,30 +116,14 @@ export default function ServiceTicketManagement() {
       .fill(0)
       .map((_, index) => (
         <TableRow key={index}>
-          <TableCell className="w-[40px]">
-            <Skeleton className="h-4 w-4" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-40" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-32" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-32" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-24" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-28" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-4 w-24" />
-          </TableCell>
-          <TableCell className="text-right">
-            <Skeleton className="h-8 w-8 ml-auto" />
-          </TableCell>
+          <TableCell className="w-[40px]"><Skeleton className="h-4 w-4" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+          <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
         </TableRow>
       ));
   };
@@ -144,16 +133,15 @@ export default function ServiceTicketManagement() {
       {/* --- Header --- */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Service Tickets</h1>
-        <p className="text-muted-foreground">
-          Manage all service tickets in the system.
-        </p>
+        <p className="text-muted-foreground">Manage all service tickets in the system.</p>
       </div>
 
-      {/* --- Toolbar --- */}
-      <div className="flex items-center justify-between space-x-2">
-        <div className="flex flex-1 items-center space-x-2">
+      {/* 3. UPDATED: Responsive Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Filter Group */}
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[250px] max-w-xs sm:max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -164,34 +152,51 @@ export default function ServiceTicketManagement() {
             />
           </div>
 
-          {/* 7. Add Department Filter (visible to admins only) */}
+          {/* Department Filter */}
           {user?.role === "admin" && (
             <Select
               value={departmentFilter}
-              onValueChange={(value) => {
-                setDepartmentFilter(value);
-                setPage(1);
-              }}
+              onValueChange={(value) => { setDepartmentFilter(value); setPage(1); }}
               disabled={areDepartmentsLoading}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a department" />
-              </SelectTrigger>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select a department" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept._id} value={dept._id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
+                {departments.map((dept) => (<SelectItem key={dept._id} value={dept._id}>{dept.name}</SelectItem>))}
               </SelectContent>
             </Select>
           )}
+
+          {/* Date filter inputs */}
+          <div className="flex items-center space-x-2">
+            <label htmlFor="startDate" className="text-sm font-medium text-muted-foreground whitespace-nowrap">From</label>
+            <Input
+              id="startDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+              className="w-[150px]"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <label htmlFor="endDate" className="text-sm font-medium text-muted-foreground whitespace-nowrap">To</label>
+            <Input
+              id="endDate"
+              type="date"
+              value={endDate}
+              onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+              className="w-[150px]"
+            />
+          </div>
         </div>
-        <Button onClick={() => navigate("/service-ticket/new")}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Service Ticket
-        </Button>
+
+        {/* Action Button */}
+        <div className="flex-shrink-0">
+          <Button onClick={() => navigate("/service-ticket/new")}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Service Ticket
+          </Button>
+        </div>
       </div>
 
       {/* --- Data Table --- */}
@@ -199,15 +204,14 @@ export default function ServiceTicketManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox />
-              </TableHead>
+              <TableHead className="w-[40px]"><Checkbox /></TableHead>
               <TableHead>Job Name</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Technician</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Completion Date</TableHead>
               <TableHead>Created By</TableHead>
+              <TableHead>Created on</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -215,76 +219,35 @@ export default function ServiceTicketManagement() {
             {isLoading || isFetching ? (
               renderSkeletons()
             ) : isError ? (
-              <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
-                  Failed to load data.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={8} className="h-24 text-center">Failed to load data.</TableCell></TableRow>
             ) : serviceTickets.length > 0 ? (
               serviceTickets.map((ticket) => (
                 <TableRow key={ticket._id}>
-                  <TableCell>
-                    <Checkbox />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {ticket.jobName}
-                  </TableCell>
+                  <TableCell><Checkbox /></TableCell>
+                  <TableCell className="font-medium">{ticket.jobName}</TableCell>
                   <TableCell>{ticket.customerName}</TableCell>
                   <TableCell>{ticket.technicianName}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        ticket.workOrderStatus === "Complete"
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
+                    <Badge variant={ticket.workOrderStatus === "Complete" ? "default" : "secondary"}>
                       {ticket.workOrderStatus}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    {format(new Date(ticket.completionDate), "PPP")}
-                  </TableCell>
+                  <TableCell>{format(new Date(ticket.completionDate), "PPP")}</TableCell>
                   <TableCell>{ticket.createdBy?.username || "N/A"}</TableCell>
+                  <TableCell>{format(new Date(ticket.createdAt), "PPP") || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/service-ticket/${ticket._id}`)
-                          }
-                        >
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/service-ticket/update/${ticket._id}`)
-                          }
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          disabled={!ticket.ticket || isDownloading}
-                          onClick={() => handleDownloadPdf(ticket)}
-                        >
+                        <DropdownMenuItem onClick={() => navigate(`/service-ticket/${ticket._id}`)}>View</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/service-ticket/update/${ticket._id}`)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem disabled={!ticket.ticket || isDownloading} onClick={() => handleDownloadPdf(ticket)}>
                           <Download className="mr-1 h-4 w-4" />
                           <span>Download PDF</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() =>
-                            showDeleteConfirm(() =>
-                              deleteServiceTicket(ticket._id).unwrap()
-                            )
-                          }
-                          className="text-red-600"
-                        >
+                        <DropdownMenuItem onClick={() => showDeleteConfirm(() => deleteServiceTicket(ticket._id).unwrap())} className="text-red-600">
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -293,11 +256,7 @@ export default function ServiceTicketManagement() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
-                  No results found.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={8} className="h-24 text-center">No results found.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

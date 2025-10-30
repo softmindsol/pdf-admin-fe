@@ -3,12 +3,12 @@ import {
   useGetAboveGroundTestsQuery,
   useDeleteAboveGroundTestMutation,
   useLazyGetSignedUrlQuery,
-  useGetDepartmentsQuery, // 1. Import hook to get departments
+  useGetDepartmentsQuery,
 } from "@/store/GlobalApi";
 import { MoreHorizontal, PlusCircle, Search, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import {  toast } from "sonner";
+import { toast } from "sonner";
 
 // --- Shadcn UI Imports ---
 import {
@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select, // 2. Import Select components
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
 import { showDeleteConfirm } from "@/lib/swal";
-import { getUserData } from "@/lib/auth"; // 3. Import auth utility
+import { getUserData } from "@/lib/auth";
 
 export default function AboveGroundTestManagement() {
   const navigate = useNavigate();
@@ -53,9 +53,14 @@ export default function AboveGroundTestManagement() {
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState(""); // 4. Add state for department filter
+  const [departmentFilter, setDepartmentFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
-  const user = getUserData(); // Get current user's data
+
+  // 1. ADDED: State for date filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const user = getUserData();
 
   // Debounce search term
   useEffect(() => {
@@ -66,12 +71,11 @@ export default function AboveGroundTestManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // 5. Fetch all departments for the filter dropdown
   const { data: departmentResponse, isLoading: areDepartmentsLoading } =
-    useGetDepartmentsQuery({ page: 0 }); // Get all departments
+    useGetDepartmentsQuery({ page: 0 });
   const departments = departmentResponse?.data?.departments || [];
 
-  // 6. Update the main query to include the department filter
+  // 2. UPDATED: Pass date filters to the RTK Query hook
   const {
     data: response,
     isLoading,
@@ -81,8 +85,12 @@ export default function AboveGroundTestManagement() {
     page,
     limit,
     search: debouncedSearch,
-    ...(departmentFilter &&
-      departmentFilter !== "all" && { department: departmentFilter }),
+    department:
+      departmentFilter && departmentFilter !== "all"
+        ? departmentFilter
+        : undefined,
+    startDate, // Pass startDate state
+    endDate, // Pass endDate state
   });
 
   const aboveGroundTests = response?.data?.aboveGroundTests || [];
@@ -147,11 +155,12 @@ export default function AboveGroundTestManagement() {
         </p>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between space-x-2">
-        <div className="flex flex-1 items-center space-x-2">
+      {/* 3. UPDATED: Responsive Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Filter Group */}
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[250px] max-w-xs sm:max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -162,7 +171,7 @@ export default function AboveGroundTestManagement() {
             />
           </div>
 
-          {/* 7. Add Department Filter (visible to admins only) */}
+          {/* Department Filter */}
           {user?.role === "admin" && (
             <Select
               value={departmentFilter}
@@ -185,11 +194,53 @@ export default function AboveGroundTestManagement() {
               </SelectContent>
             </Select>
           )}
+
+          {/* Date filter inputs */}
+          <div className="flex items-center space-x-2">
+            <label
+              htmlFor="startDate"
+              className="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >
+              From
+            </label>
+            <Input
+              id="startDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPage(1);
+              }}
+              className="w-[150px]"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <label
+              htmlFor="endDate"
+              className="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >
+              To
+            </label>
+            <Input
+              id="endDate"
+              type="date"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setPage(1);
+              }}
+              className="w-[150px]"
+            />
+          </div>
         </div>
-        <Button onClick={() => navigate("/above-ground/new")}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add New Test
-        </Button>
+
+        {/* Action Button */}
+        <div className="flex-shrink-0">
+          <Button onClick={() => navigate("/above-ground/new")}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Test
+          </Button>
+        </div>
       </div>
 
       {/* Data Table */}
@@ -203,8 +254,8 @@ export default function AboveGroundTestManagement() {
               <TableHead>Property Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Contractor</TableHead>
-              <TableHead>Date of Test</TableHead>
               <TableHead>Created By</TableHead>
+              <TableHead>Created on</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -231,10 +282,10 @@ export default function AboveGroundTestManagement() {
                     {test.remarksAndSignatures?.sprinklerContractor?.name ||
                       "N/A"}
                   </TableCell>
-                  <TableCell>
-                    {format(new Date(test.propertyDetails.date), "PP")}
-                  </TableCell>
                   <TableCell>{test.createdBy?.username || "N/A"}</TableCell>
+                  <TableCell>
+                    {format(new Date(test.createdAt), "PP")}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -266,9 +317,9 @@ export default function AboveGroundTestManagement() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
-                            showDeleteConfirm(async () => {
-                              await deleteAboveGroundTest(test._id).unwrap();
-                            });
+                            showDeleteConfirm(() =>
+                              deleteAboveGroundTest(test._id).unwrap()
+                            );
                           }}
                           className="text-red-600"
                         >
@@ -290,6 +341,7 @@ export default function AboveGroundTestManagement() {
         </Table>
       </div>
 
+      {/* Pagination */}
       <DataTablePagination
         page={page}
         setPage={setPage}

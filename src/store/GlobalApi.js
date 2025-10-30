@@ -155,29 +155,37 @@ export const GlobalApi = createApi({
       query: (body) => createPostRequest(`/admin/work-order`, body),
       invalidatesTags: ["WorkOrder"],
     }),
-    getWorkOrders: builder.query({
-      query: ({
-        page = 1,
-        limit = 10,
-        search,
-        customerName,
-        jobNumber,
-        technicianName,
-        department
-      }) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-          ...(search && { search }),
-          ...(customerName && { customerName }),
-          ...(jobNumber && { jobNumber }),
-          ...(technicianName && { technicianName }),
-          ...(department && { department }),
-        });
-        return createRequest(`/admin/work-order?${params.toString()}`);
-      },
-      providesTags: ["WorkOrder"],
-    }),
+// In your RTK Query slice file (e.g., workOrderApi.js)
+
+getWorkOrders: builder.query({
+  query: ({
+    page = 1,
+    limit = 10,
+    search,
+    customerName,
+    jobNumber,
+    technicianName,
+    department,
+    // Add the new date parameters
+    startDate,
+    endDate,
+  }) => {
+    const params = new URLSearchParams({
+      page,
+      limit,
+      ...(search && { search }),
+      ...(customerName && { customerName }),
+      ...(jobNumber && { jobNumber }),
+      ...(technicianName && { technicianName }),
+      ...(department && { department }),
+      // Add the date filters with the correct backend keys
+      ...(startDate && { 'createdAt[gte]': startDate }),
+      ...(endDate && { 'createdAt[lte]': endDate }),
+    });
+    return createRequest(`/admin/work-order?${params.toString()}`);
+  },
+  providesTags: ["WorkOrder"],
+}),
     getWorkOrderById: builder.query({
       query: (id) => createRequest(`/admin/work-order/${id}`),
       providesTags: (result, error, id) => [{ type: "WorkOrder", id }],
@@ -197,18 +205,36 @@ export const GlobalApi = createApi({
       query: (body) => createPostRequest(`/admin/customer-ticket`, body),
       invalidatesTags: ["Customer"],
     }),
-    getCustomers: builder.query({
-      query: ({ page = 1, limit = 10, search , department}) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-          ...(search && { search }),
-          ...(department && { department }),
-        });
-        return createRequest(`/admin/customer-ticket?${params.toString()}`);
-      },
-      providesTags: ["Customer"],
-    }),
+ // In your RTK Query slice file (e.g., GlobalApi.js)
+
+getCustomers: builder.query({
+  // Use a more robust function to build the query string from args
+  query: (args) => {
+    // Build a clean parameters object, ignoring any falsy values
+    const queryParams = {};
+    Object.entries(args).forEach(([key, value]) => {
+      if (value) {
+        // Map frontend state keys to backend query keys
+        if (key === 'startDate') {
+          queryParams['createdAt[gte]'] = value;
+        } else if (key === 'endDate') {
+          queryParams['createdAt[lte]'] = value;
+        } else {
+          queryParams[key] = value;
+        }
+      }
+    });
+
+    // Ensure default pagination if not provided
+    if (!queryParams.page) queryParams.page = 1;
+    if (!queryParams.limit) queryParams.limit = 10;
+    
+    const params = new URLSearchParams(queryParams);
+    // Ensure the endpoint matches your backend routes
+    return createRequest(`/admin/customer-ticket?${params.toString()}`); 
+  },
+  providesTags: ["Customer"],
+}),
     getCustomerById: builder.query({
       query: (id) => createRequest(`/admin/customer-ticket/${id}`),
       providesTags: (result, error, id) => [{ type: "Customer", id }],
@@ -227,18 +253,35 @@ export const GlobalApi = createApi({
       query: (body) => createPostRequest(`/admin/above-ground`, body),
       invalidatesTags: ["AboveGroundTest"],
     }),
-    getAboveGroundTests: builder.query({
-      query: ({ page = 1, limit = 10, search, department }) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-          ...(search && { search }),
-          ...(department && { department }),
-        });
-        return createRequest(`/admin/above-ground?${params.toString()}`);
-      },
-      providesTags: ["AboveGroundTest"],
-    }),
+// In your RTK Query slice file (e.g., GlobalApi.js)
+
+getAboveGroundTests: builder.query({
+  // Use a more robust function to build the query string from args
+  query: (args) => {
+    // Build a clean parameters object, ignoring any falsy values
+    const queryParams = {};
+    Object.entries(args).forEach(([key, value]) => {
+      if (value) {
+        // Map frontend state keys to backend query keys
+        if (key === 'startDate') {
+          queryParams['propertyDetails.date[gte]'] = value;
+        } else if (key === 'endDate') {
+          queryParams['propertyDetails.date[lte]'] = value;
+        } else {
+          queryParams[key] = value;
+        }
+      }
+    });
+
+    // Ensure default pagination if not provided
+    if (!queryParams.page) queryParams.page = 1;
+    if (!queryParams.limit) queryParams.limit = 10;
+    
+    const params = new URLSearchParams(queryParams);
+    return createRequest(`/admin/above-ground?${params.toString()}`);
+  },
+  providesTags: ["AboveGroundTest"],
+}),
     getAboveGroundTestById: builder.query({
       query: (id) => createRequest(`/admin/above-ground/${id}`),
       providesTags: (result, error, id) => [{ type: "AboveGroundTest", id }],
@@ -256,29 +299,35 @@ export const GlobalApi = createApi({
       query: (body) => createPostRequest(`/admin/service-ticket`, body),
       invalidatesTags: ["ServiceTicket"],
     }),
-    getServiceTickets: builder.query({
-      query: ({
-        page = 1,
-        limit = 10,
-        search,
-        jobName,
-        customerName,
-        technicianName,
-        department
-      }) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-          ...(search && { search }),
-          ...(department && { department }),
-          ...(jobName && { jobName }),
-          ...(customerName && { customerName }),
-          ...(technicianName && { technicianName }),
-        });
-        return createRequest(`/admin/service-ticket?${params.toString()}`);
-      },
-      providesTags: ["ServiceTicket"],
-    }),
+    // In your RTK Query slice file (e.g., GlobalApi.js)
+
+getServiceTickets: builder.query({
+  // Use a more robust function to build the query string from args
+  query: (args) => {
+    // Build a clean parameters object, ignoring any falsy values
+    const queryParams = {};
+    Object.entries(args).forEach(([key, value]) => {
+      if (value) {
+        // Map frontend state keys to backend query keys
+        if (key === 'startDate') {
+          queryParams['completionDate[gte]'] = value;
+        } else if (key === 'endDate') {
+          queryParams['completionDate[lte]'] = value;
+        } else {
+          queryParams[key] = value;
+        }
+      }
+    });
+
+    // Ensure default pagination if not provided
+    if (!queryParams.page) queryParams.page = 1;
+    if (!queryParams.limit) queryParams.limit = 10;
+    
+    const params = new URLSearchParams(queryParams);
+    return createRequest(`/admin/service-ticket?${params.toString()}`);
+  },
+  providesTags: ["ServiceTicket"],
+}),
     getServiceTicketById: builder.query({
       query: (id) => createRequest(`/admin/service-ticket/${id}`),
       providesTags: (result, error, id) => [{ type: "ServiceTicket", id }],
@@ -297,18 +346,35 @@ export const GlobalApi = createApi({
       query: (body) => createPostRequest(`/admin/under-ground`, body),
       invalidatesTags: ["UndergroundTest"],
     }),
-    getUndergroundTests: builder.query({
-      query: ({ page = 1, limit = 10, search, department }) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-          ...(search && { search }),
-          ...(department && { department }),
-        });
-        return createRequest(`/admin/under-ground?${params.toString()}`);
-      },
-      providesTags: ["UndergroundTest"],
-    }),
+// In your RTK Query slice file (e.g., GlobalApi.js)
+
+getUndergroundTests: builder.query({
+  // Use a more robust function to build the query string from args
+  query: (args) => {
+    // Build a clean parameters object, ignoring any falsy values
+    const queryParams = {};
+    Object.entries(args).forEach(([key, value]) => {
+      if (value) {
+        // Map frontend state keys to backend query keys
+        if (key === 'startDate') {
+          queryParams['propertyDetails.date[gte]'] = value;
+        } else if (key === 'endDate') {
+          queryParams['propertyDetails.date[lte]'] = value;
+        } else {
+          queryParams[key] = value;
+        }
+      }
+    });
+
+    // Ensure default pagination if not provided
+    if (!queryParams.page) queryParams.page = 1;
+    if (!queryParams.limit) queryParams.limit = 10;
+    
+    const params = new URLSearchParams(queryParams);
+    return createRequest(`/admin/under-ground?${params.toString()}`);
+  },
+  providesTags: ["UndergroundTest"],
+}),
     getUndergroundTestById: builder.query({
       query: (id) => createRequest(`/admin/under-ground/${id}`),
       providesTags: (result, error, id) => [{ type: "UndergroundTest", id }],
@@ -350,6 +416,7 @@ export const {
   useGetDepartmentByIdQuery,
   useUpdateDepartmentMutation,
   useFormsQuery,
+  // work order
   useCreateWorkOrderMutation,
   useGetWorkOrdersQuery,
   useGetWorkOrderByIdQuery,
