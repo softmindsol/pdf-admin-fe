@@ -47,7 +47,10 @@ const coreBaseQuery = fetchBaseQuery({
 
 const baseQueryWithAutoTokenSave = async (args, api, extraOptions) => {
   const result = await coreBaseQuery(args, api, extraOptions);
- if (result.error && (result.error.status === 403 || result.error.status === 401)) {
+  if (
+    result.error &&
+    (result.error.status === 403 || result.error.status === 401)
+  ) {
     console.error("Authorization error, logging out user.", result.error);
 
     // 2. CLEAR ALL USER DATA FROM LOCAL STORAGE
@@ -57,9 +60,9 @@ const baseQueryWithAutoTokenSave = async (args, api, extraOptions) => {
 
     // 3. REDIRECT TO THE LOGIN PAGE
     // This is a robust way to force a redirect outside of the React component lifecycle.
-     const formattedErrorMessage = String(result?.error?.data?.message) // Ensure it's a string
+    const formattedErrorMessage = String(result?.error?.data?.message) // Ensure it's a string
       .toLowerCase()
-      .replace(/ /g, '-'); 
+      .replace(/ /g, "-");
     window.location.href = `/auth/login?error=${formattedErrorMessage}`;
   }
   if (result.data?.data?.token) {
@@ -155,37 +158,37 @@ export const GlobalApi = createApi({
       query: (body) => createPostRequest(`/admin/work-order`, body),
       invalidatesTags: ["WorkOrder"],
     }),
-// In your RTK Query slice file (e.g., workOrderApi.js)
+    // In your RTK Query slice file (e.g., workOrderApi.js)
 
-getWorkOrders: builder.query({
-  query: ({
-    page = 1,
-    limit = 10,
-    search,
-    customerName,
-    jobNumber,
-    technicianName,
-    department,
-    // Add the new date parameters
-    startDate,
-    endDate,
-  }) => {
-    const params = new URLSearchParams({
-      page,
-      limit,
-      ...(search && { search }),
-      ...(customerName && { customerName }),
-      ...(jobNumber && { jobNumber }),
-      ...(technicianName && { technicianName }),
-      ...(department && { department }),
-      // Add the date filters with the correct backend keys
-      ...(startDate && { 'createdAt[gte]': startDate }),
-      ...(endDate && { 'createdAt[lte]': endDate }),
-    });
-    return createRequest(`/admin/work-order?${params.toString()}`);
-  },
-  providesTags: ["WorkOrder"],
-}),
+    getWorkOrders: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search,
+        customerName,
+        jobNumber,
+        technicianName,
+        department,
+        // Add the new date parameters
+        startDate,
+        endDate,
+      }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+          ...(customerName && { customerName }),
+          ...(jobNumber && { jobNumber }),
+          ...(technicianName && { technicianName }),
+          ...(department && { department }),
+          // Add the date filters with the correct backend keys
+          ...(startDate && { "createdAt[gte]": startDate }),
+          ...(endDate && { "createdAt[lte]": endDate }),
+        });
+        return createRequest(`/admin/work-order?${params.toString()}`);
+      },
+      providesTags: ["WorkOrder"],
+    }),
     getWorkOrderById: builder.query({
       query: (id) => createRequest(`/admin/work-order/${id}`),
       providesTags: (result, error, id) => [{ type: "WorkOrder", id }],
@@ -205,36 +208,36 @@ getWorkOrders: builder.query({
       query: (body) => createPostRequest(`/admin/customer-ticket`, body),
       invalidatesTags: ["Customer"],
     }),
- // In your RTK Query slice file (e.g., GlobalApi.js)
+    // In your RTK Query slice file (e.g., GlobalApi.js)
 
-getCustomers: builder.query({
-  // Use a more robust function to build the query string from args
-  query: (args) => {
-    // Build a clean parameters object, ignoring any falsy values
-    const queryParams = {};
-    Object.entries(args).forEach(([key, value]) => {
-      if (value) {
-        // Map frontend state keys to backend query keys
-        if (key === 'startDate') {
-          queryParams['createdAt[gte]'] = value;
-        } else if (key === 'endDate') {
-          queryParams['createdAt[lte]'] = value;
-        } else {
-          queryParams[key] = value;
-        }
-      }
-    });
+    getCustomers: builder.query({
+      // Use a more robust function to build the query string from args
+      query: (args) => {
+        // Build a clean parameters object, ignoring any falsy values
+        const queryParams = {};
+        Object.entries(args).forEach(([key, value]) => {
+          if (value) {
+            // Map frontend state keys to backend query keys
+            if (key === "startDate") {
+              queryParams["createdAt[gte]"] = value;
+            } else if (key === "endDate") {
+              queryParams["createdAt[lte]"] = value;
+            } else {
+              queryParams[key] = value;
+            }
+          }
+        });
 
-    // Ensure default pagination if not provided
-    if (!queryParams.page) queryParams.page = 1;
-    if (!queryParams.limit) queryParams.limit = 10;
-    
-    const params = new URLSearchParams(queryParams);
-    // Ensure the endpoint matches your backend routes
-    return createRequest(`/admin/customer-ticket?${params.toString()}`); 
-  },
-  providesTags: ["Customer"],
-}),
+        // Ensure default pagination if not provided
+        if (!queryParams.page) queryParams.page = 1;
+        if (!queryParams.limit) queryParams.limit = 10;
+
+        const params = new URLSearchParams(queryParams);
+        // Ensure the endpoint matches your backend routes
+        return createRequest(`/admin/customer-ticket?${params.toString()}`);
+      },
+      providesTags: ["Customer"],
+    }),
     getCustomerById: builder.query({
       query: (id) => createRequest(`/admin/customer-ticket/${id}`),
       providesTags: (result, error, id) => [{ type: "Customer", id }],
@@ -253,35 +256,35 @@ getCustomers: builder.query({
       query: (body) => createPostRequest(`/admin/above-ground`, body),
       invalidatesTags: ["AboveGroundTest"],
     }),
-// In your RTK Query slice file (e.g., GlobalApi.js)
+    // In your RTK Query slice file (e.g., GlobalApi.js)
 
-getAboveGroundTests: builder.query({
-  // Use a more robust function to build the query string from args
-  query: (args) => {
-    // Build a clean parameters object, ignoring any falsy values
-    const queryParams = {};
-    Object.entries(args).forEach(([key, value]) => {
-      if (value) {
-        // Map frontend state keys to backend query keys
-        if (key === 'startDate') {
-          queryParams['propertyDetails.date[gte]'] = value;
-        } else if (key === 'endDate') {
-          queryParams['propertyDetails.date[lte]'] = value;
-        } else {
-          queryParams[key] = value;
-        }
-      }
-    });
+    getAboveGroundTests: builder.query({
+      // Use a more robust function to build the query string from args
+      query: (args) => {
+        // Build a clean parameters object, ignoring any falsy values
+        const queryParams = {};
+        Object.entries(args).forEach(([key, value]) => {
+          if (value) {
+            // Map frontend state keys to backend query keys
+            if (key === "startDate") {
+              queryParams["propertyDetails.date[gte]"] = value;
+            } else if (key === "endDate") {
+              queryParams["propertyDetails.date[lte]"] = value;
+            } else {
+              queryParams[key] = value;
+            }
+          }
+        });
 
-    // Ensure default pagination if not provided
-    if (!queryParams.page) queryParams.page = 1;
-    if (!queryParams.limit) queryParams.limit = 10;
-    
-    const params = new URLSearchParams(queryParams);
-    return createRequest(`/admin/above-ground?${params.toString()}`);
-  },
-  providesTags: ["AboveGroundTest"],
-}),
+        // Ensure default pagination if not provided
+        if (!queryParams.page) queryParams.page = 1;
+        if (!queryParams.limit) queryParams.limit = 10;
+
+        const params = new URLSearchParams(queryParams);
+        return createRequest(`/admin/above-ground?${params.toString()}`);
+      },
+      providesTags: ["AboveGroundTest"],
+    }),
     getAboveGroundTestById: builder.query({
       query: (id) => createRequest(`/admin/above-ground/${id}`),
       providesTags: (result, error, id) => [{ type: "AboveGroundTest", id }],
@@ -301,33 +304,33 @@ getAboveGroundTests: builder.query({
     }),
     // In your RTK Query slice file (e.g., GlobalApi.js)
 
-getServiceTickets: builder.query({
-  // Use a more robust function to build the query string from args
-  query: (args) => {
-    // Build a clean parameters object, ignoring any falsy values
-    const queryParams = {};
-    Object.entries(args).forEach(([key, value]) => {
-      if (value) {
-        // Map frontend state keys to backend query keys
-        if (key === 'startDate') {
-          queryParams['completionDate[gte]'] = value;
-        } else if (key === 'endDate') {
-          queryParams['completionDate[lte]'] = value;
-        } else {
-          queryParams[key] = value;
-        }
-      }
-    });
+    getServiceTickets: builder.query({
+      // Use a more robust function to build the query string from args
+      query: (args) => {
+        // Build a clean parameters object, ignoring any falsy values
+        const queryParams = {};
+        Object.entries(args).forEach(([key, value]) => {
+          if (value) {
+            // Map frontend state keys to backend query keys
+            if (key === "startDate") {
+              queryParams["completionDate[gte]"] = value;
+            } else if (key === "endDate") {
+              queryParams["completionDate[lte]"] = value;
+            } else {
+              queryParams[key] = value;
+            }
+          }
+        });
 
-    // Ensure default pagination if not provided
-    if (!queryParams.page) queryParams.page = 1;
-    if (!queryParams.limit) queryParams.limit = 10;
-    
-    const params = new URLSearchParams(queryParams);
-    return createRequest(`/admin/service-ticket?${params.toString()}`);
-  },
-  providesTags: ["ServiceTicket"],
-}),
+        // Ensure default pagination if not provided
+        if (!queryParams.page) queryParams.page = 1;
+        if (!queryParams.limit) queryParams.limit = 10;
+
+        const params = new URLSearchParams(queryParams);
+        return createRequest(`/admin/service-ticket?${params.toString()}`);
+      },
+      providesTags: ["ServiceTicket"],
+    }),
     getServiceTicketById: builder.query({
       query: (id) => createRequest(`/admin/service-ticket/${id}`),
       providesTags: (result, error, id) => [{ type: "ServiceTicket", id }],
@@ -346,35 +349,35 @@ getServiceTickets: builder.query({
       query: (body) => createPostRequest(`/admin/under-ground`, body),
       invalidatesTags: ["UndergroundTest"],
     }),
-// In your RTK Query slice file (e.g., GlobalApi.js)
+    // In your RTK Query slice file (e.g., GlobalApi.js)
 
-getUndergroundTests: builder.query({
-  // Use a more robust function to build the query string from args
-  query: (args) => {
-    // Build a clean parameters object, ignoring any falsy values
-    const queryParams = {};
-    Object.entries(args).forEach(([key, value]) => {
-      if (value) {
-        // Map frontend state keys to backend query keys
-        if (key === 'startDate') {
-          queryParams['propertyDetails.date[gte]'] = value;
-        } else if (key === 'endDate') {
-          queryParams['propertyDetails.date[lte]'] = value;
-        } else {
-          queryParams[key] = value;
-        }
-      }
-    });
+    getUndergroundTests: builder.query({
+      // Use a more robust function to build the query string from args
+      query: (args) => {
+        // Build a clean parameters object, ignoring any falsy values
+        const queryParams = {};
+        Object.entries(args).forEach(([key, value]) => {
+          if (value) {
+            // Map frontend state keys to backend query keys
+            if (key === "startDate") {
+              queryParams["propertyDetails.date[gte]"] = value;
+            } else if (key === "endDate") {
+              queryParams["propertyDetails.date[lte]"] = value;
+            } else {
+              queryParams[key] = value;
+            }
+          }
+        });
 
-    // Ensure default pagination if not provided
-    if (!queryParams.page) queryParams.page = 1;
-    if (!queryParams.limit) queryParams.limit = 10;
-    
-    const params = new URLSearchParams(queryParams);
-    return createRequest(`/admin/under-ground?${params.toString()}`);
-  },
-  providesTags: ["UndergroundTest"],
-}),
+        // Ensure default pagination if not provided
+        if (!queryParams.page) queryParams.page = 1;
+        if (!queryParams.limit) queryParams.limit = 10;
+
+        const params = new URLSearchParams(queryParams);
+        return createRequest(`/admin/under-ground?${params.toString()}`);
+      },
+      providesTags: ["UndergroundTest"],
+    }),
     getUndergroundTestById: builder.query({
       query: (id) => createRequest(`/admin/under-ground/${id}`),
       providesTags: (result, error, id) => [{ type: "UndergroundTest", id }],
@@ -395,12 +398,15 @@ getUndergroundTests: builder.query({
         return createRequest(`/file/pre-sign?${params.toString()}`);
       },
     }),
-     changePassword: builder.mutation({
+    changePassword: builder.mutation({
       query: (body) => createPostRequest(`/auth/change-password`, body),
     }),
 
     changeUsername: builder.mutation({
       query: (body) => createPostRequest(`/auth/change-username`, body),
+    }),
+    latestTickets: builder.query({
+      query: ({page=1, limit=10}) => createRequest(`/ticket/synced?page=${page}&limit=${limit}`),
     }),
   }),
 });
@@ -453,4 +459,5 @@ export const {
   useLazyGetSignedUrlQuery,
   useChangePasswordMutation,
   useChangeUsernameMutation,
+  useLatestTicketsQuery
 } = GlobalApi;
