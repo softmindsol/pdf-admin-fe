@@ -201,12 +201,11 @@ export default function UndergroundTestManagement() {
       </div>
 
       {/* Data Table */}
-      <div className="rounded-md border">
+      <div className="rounded-md border pl-1">
         <Table>
           {/* TableHeader and TableBody remain the same */}
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]"><Checkbox /></TableHead>
               <TableHead>Property Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Contractor</TableHead>
@@ -223,7 +222,6 @@ export default function UndergroundTestManagement() {
             ) : undergroundTests.length > 0 ? (
               undergroundTests.map((test) => (
                 <TableRow key={test._id}>
-                  <TableCell><Checkbox /></TableCell>
                   <TableCell className="font-medium">{test.propertyDetails.propertyName}</TableCell>
                   <TableCell>{test.propertyDetails.propertyAddress}</TableCell>
                   <TableCell className="text-muted-foreground">{test.remarks.nameOfInstallingContractor || "N/A"}</TableCell>

@@ -200,11 +200,10 @@ export default function ServiceTicketManagement() {
       </div>
 
       {/* --- Data Table --- */}
-      <div className="rounded-md border">
+      <div className="rounded-md border pl-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]"><Checkbox /></TableHead>
               <TableHead>Job Name</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Technician</TableHead>
@@ -223,7 +222,6 @@ export default function ServiceTicketManagement() {
             ) : serviceTickets.length > 0 ? (
               serviceTickets.map((ticket) => (
                 <TableRow key={ticket._id}>
-                  <TableCell><Checkbox /></TableCell>
                   <TableCell className="font-medium">{ticket.jobName}</TableCell>
                   <TableCell>{ticket.customerName}</TableCell>
                   <TableCell>{ticket.technicianName}</TableCell>

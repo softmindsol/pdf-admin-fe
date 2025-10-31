@@ -238,25 +238,11 @@ export default function WorkOrderManagement() {
       </div>
 
       {/* --- Data Table --- */}
-      <div className="rounded-md border">
+      <div className="rounded-md border pl-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox
-                  checked={
-                    Object.keys(rowSelection).length === workOrders.length &&
-                    workOrders.length > 0
-                  }
-                  onCheckedChange={(checked) => {
-                    const newSelection = {};
-                    if (checked) {
-                      workOrders.forEach((wo) => (newSelection[wo._id] = true));
-                    }
-                    setRowSelection(newSelection);
-                  }}
-                />
-              </TableHead>
+              
               <TableHead>Job Number</TableHead>
               <TableHead>Customer Name</TableHead>
               <TableHead>Technician</TableHead>
@@ -279,20 +265,7 @@ export default function WorkOrderManagement() {
             ) : workOrders.length > 0 ? (
               workOrders.map((wo) => (
                 <TableRow key={wo._id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={rowSelection[wo._id] || false}
-                      onCheckedChange={(checked) => {
-                        const newSelection = { ...rowSelection };
-                        if (checked) {
-                          newSelection[wo._id] = true;
-                        } else {
-                          delete newSelection[wo._id];
-                        }
-                        setRowSelection(newSelection);
-                      }}
-                    />
-                  </TableCell>
+                  
                   <TableCell className="font-medium">{wo.jobNumber}</TableCell>
                   <TableCell>{wo.customerName}</TableCell>
                   <TableCell className="text-muted-foreground">

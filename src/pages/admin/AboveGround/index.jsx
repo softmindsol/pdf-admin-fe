@@ -244,13 +244,11 @@ export default function AboveGroundTestManagement() {
       </div>
 
       {/* Data Table */}
-      <div className="rounded-md border">
+      <div className="rounded-md border pl-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox />
-              </TableHead>
+              
               <TableHead>Property Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Contractor</TableHead>
@@ -271,9 +269,7 @@ export default function AboveGroundTestManagement() {
             ) : aboveGroundTests.length > 0 ? (
               aboveGroundTests.map((test) => (
                 <TableRow key={test._id}>
-                  <TableCell>
-                    <Checkbox />
-                  </TableCell>
+                  
                   <TableCell className="font-medium">
                     {test.propertyDetails.propertyName}
                   </TableCell>

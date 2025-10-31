@@ -242,13 +242,11 @@ export default function CustomerManagement() {
       </div>
 
       {/* --- Data Table --- */}
-      <div className="rounded-md border">
+      <div className="rounded-md border pl-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox />
-              </TableHead>
+              
               <TableHead>Customer Name</TableHead>
               <TableHead>Phone Number</TableHead>
               <TableHead>Email for Reports</TableHead>
@@ -270,9 +268,7 @@ export default function CustomerManagement() {
             ) : customers.length > 0 ? (
               customers.map((customer) => (
                 <TableRow key={customer._id}>
-                  <TableCell>
-                    <Checkbox />
-                  </TableCell>
+                 
                   <TableCell className="font-medium">
                     {customer.customerName}
                   </TableCell>
