@@ -113,7 +113,6 @@ const formSchema = z.object({
         required_error: "Test At (PSI) is required.",
         invalid_type_error: "Test At (PSI) must be a number.",
       })
-      .int({ message: "PSI must be a whole number." })
       .nonnegative({ message: "PSI cannot be a negative number." })
       .max(REALISTIC_MAX_VALUE, { message: "PSI value is unrealistically high." })
       .optional(),
@@ -123,7 +122,6 @@ const formSchema = z.object({
         required_error: "Tested For (Hours) is required.",
         invalid_type_error: "Tested For (Hours) must be a number.",
       })
-      .int({ message: "Hours must be a whole number." })
       .nonnegative({ message: "Hours cannot be a negative number." })
       .max(REALISTIC_MAX_VALUE, { message: "Hours value is unrealistically high." })
       .optional(),
@@ -137,7 +135,6 @@ const formSchema = z.object({
         required_error: "Leakage Gallons is required.",
         invalid_type_error: "Leakage Gallons must be a number.",
       })
-      .int({ message: "Gallons must be a whole number." })
       .nonnegative({ message: "Gallons cannot be a negative number." })
       .max(REALISTIC_MAX_VALUE, { message: "Gallons value is unrealistically high." })
       .optional(),
@@ -147,7 +144,6 @@ const formSchema = z.object({
         required_error: "Leakage Hours is required.",
         invalid_type_error: "Leakage Hours must be a number.",
       })
-      .int({ message: "Hours must be a whole number." })
       .nonnegative({ message: "Hours cannot be a negative number." })
       .max(REALISTIC_MAX_VALUE, { message: "Hours value is unrealistically high." })
       .optional(),
