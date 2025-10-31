@@ -27,10 +27,20 @@ import { FinalChecksSection } from "./formComponents/FinalChecksSection";
 import { RemarksAndSignaturesSection } from "./formComponents/Remarks";
 import { NotesSection } from "./formComponents/Notes";
 
-const signatureSchema = z.object({
-  name: z.string().optional().default(""),
-  title: z.string().optional().default(""),
-  date: z.string().optional().default(""),
+ const signatureSchema = z.object({
+  name: z
+    .string()
+    .optional()
+    .default("")
+    .regex(/^[a-zA-Z0-9]*$/, "Name can only contain letters and numbers.") // Stricter: no spaces, no special chars
+    .transform((val) => val.trim()),
+  title: z
+    .string()
+    .optional()
+    .default("")
+    .regex(/^[a-zA-Z0-9]*$/, "Title can only contain letters and numbers.") // Stricter: no spaces, no special chars
+    .transform((val) => val.trim()),
+  date: z.string().optional().default(""), // This date field has no future date restriction
 });
 
 const sprinklerSchema = z.object({
@@ -263,12 +273,43 @@ const formSchema = z.object({
   remarksAndSignatures: z
     .object({
       remarks: z.string().optional().default(""),
-      dateLeftInService: z.string().optional().default(""),
-      sprinklerContractorName: z.string().optional().default(""),
+
+      // Validation for 'dateLeftInService' - no future dates
+      dateLeftInService: z
+        .string()
+        .optional() // It's optional, but if provided, it must be valid
+        .default("") // Default to empty string if not provided
+        .refine(
+          (dateString) => {
+            // Only validate if a non-empty string is provided
+            if (dateString === "") return true;
+
+            const selectedDate = new Date(dateString);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize today to start of day
+            return selectedDate.getTime() <= today.getTime();
+          },
+          {
+            message: "Date cannot be in the future.",
+          }
+        ),
+
+      // Validation for 'sprinklerContractorName' - no numbers or special characters, but allows spaces
+      sprinklerContractorName: z
+        .string()
+        .optional()
+        .default("")
+        .regex(
+          /^[a-zA-Z\s]*$/, // Allows letters (a-z, A-Z) and spaces only. '*' allows empty string.
+          "Sprinkler Contractor Name can only contain letters and spaces."
+        )
+        .transform((val) => val.trim()), // Trim whitespace for cleaner data
+
+      // These use the existing signatureSchema
       fireMarshalOrAHJ: signatureSchema.optional(),
       sprinklerContractor: signatureSchema.optional(),
     })
-    .optional(),
+    .optional(), // The entire remarksAndSignatures object is optional
   notes: z.string().optional().default(""),
 });
 

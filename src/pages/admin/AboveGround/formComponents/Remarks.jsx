@@ -9,9 +9,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { format, parseISO } from "date-fns";
 
 // A reusable component for the signature block to keep the code DRY
 const SignatureBlock = ({ control, name, title }) => {
+  const formatDateForInput = (dateString) => {
+  if (!dateString) return "";
+  try {
+    return format(parseISO(dateString), "yyyy-MM-dd");
+  } catch {
+    return "";
+  }
+};
+
+// ... inside your component where the Input is rendered ...
+
+// Calculate today's date in 'YYYY-MM-DD' format once
+const todayFormatted = formatDateForInput(new Date().toISOString());
   return (
     <div className="space-y-4 p-4 border rounded-lg">
       <h4 className="font-semibold text-center text-lg mb-4">{title}</h4>
@@ -59,7 +73,9 @@ const SignatureBlock = ({ control, name, title }) => {
             <FormLabel>Date</FormLabel>
             <FormControl>
               {/* Ensure value is not null/undefined for the date input */}
-              <Input type="date" {...field} value={field.value || ""} />
+              <Input type="date"  
+                max={todayFormatted} // Use the formatted today's date for the max attribute
+              {...field} value={field.value || ""} />
             </FormControl>
           </FormItem>
         )}

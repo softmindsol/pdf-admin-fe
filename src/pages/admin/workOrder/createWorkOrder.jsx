@@ -46,27 +46,110 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
+const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
+
+// For Phone Numbers: Allows digits, spaces, hyphens, and underscores
+const phoneNumberAllowedCharsRegex = /^[0-9\s\-_]+$/;
+
+// For Positive Numeric Decimals (and integers)
+// Allows 0 and positive numbers with optional decimals.
+// Use for fields like taxRate (can be 0).
+const nonNegativeDecimalRegex = /^(0|[1-9]\d*)(\.\d+)?$/;
+
+// For Strictly Positive Numeric Decimals (and integers)
+// Allows positive numbers with optional decimals (cannot be 0).
+// Use for fields like unitCost, totalCost.
+const positiveDecimalRegex = /^[1-9]\d*(\.\d+)?$|^0\.\d*[1-9]\d*$/; // Matches numbers > 0 (e.g., 0.01, 5, 5.5)
+
 const materialSchema = z.object({
   _id: z.string().optional(),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1."),
-  description: z.string().min(3, "Description is required."),
-  unitCost: z.coerce.number().min(0, "Unit cost cannot be negative."),
-  totalCost: z.coerce.number(),
-  taxRate: z.coerce.number().min(0, "Tax rate cannot be negative."),
+  description: z
+    .string()
+    .min(3, "Description is required.")
+    .max(500, "Description must not exceed 500 characters.") // Max length 500 characters
+    // Applying "no special characters" (using nameAllowedCharsRegex for simplicity)
+    // IMPORTANT: If description needs full flexibility for special chars like !,@,#, etc., remove this line.
+    .regex(
+      nameAllowedCharsRegex,
+      "Description can only contain letters, numbers, spaces, dots, and hyphens."
+    ),
+  // If you prefer to allow numbers in description: /^[a-zA-Z0-9\s\.\-]+$/
+  unitCost: z.coerce
+    .number()
+    .min(0.01, "Unit cost must be a positive number.") // Changed to 0.01 to explicitly disallow 0
+    .refine((val) => positiveDecimalRegex.test(val.toString()), {
+      // Strictly positive decimals
+      message: "Unit cost must be a positive number with optional decimals.",
+    }),
+  totalCost: z.coerce
+    .number()
+    .min(0.01, "Total cost must be a positive number.") // Changed to 0.01 to explicitly disallow 0
+    .refine((val) => positiveDecimalRegex.test(val.toString()), {
+      // Strictly positive decimals
+      message: "Total cost must be a positive number with optional decimals.",
+    }),
+  taxRate: z.coerce
+    .number()
+    .min(0, "Tax rate cannot be negative.") // Tax rate can be 0
+    .refine((val) => nonNegativeDecimalRegex.test(val.toString()), {
+      // Non-negative decimals
+      message: "Tax rate must be a non-negative number with optional decimals.",
+    }),
 });
 
 const formSchema = z.object({
-  customerName: z.string().min(2, "Customer name is required."),
-  emailAddress: z.string().email("Invalid email address."),
-  phoneNumber: z.string().min(10, "Phone number is required."),
-  jobNumber: z.string().min(1, "Job number is required."),
-  technicianName: z.string().min(2, "Technician name is required."),
-  contactNumber: z.string().min(10, "Contact number is required."),
-  paymentMethod: z.string().min(1, "Payment method is required."),
+  customerName: z
+    .string()
+    .min(2, "Customer name is required.")
+    .regex(
+      nameAllowedCharsRegex,
+      "Customer name can only contain letters, spaces, dots, and hyphens."
+    ),
+  emailAddress: z.string().email("Invalid email address."), // Email has its own specific format
+  phoneNumber: z
+    .string()
+    .min(10, "Phone number must be at least 10 characters.")
+    .max(15, "Phone number must not exceed 15 characters.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "Phone number can only contain numbers, spaces, hyphens, and underscores."
+    ),
+  jobNumber: z
+    .string()
+    .min(1, "Job number is required.")
+    // Job numbers often contain hyphens and numbers, potentially letters.
+    // Adjust this regex if you need specific format (e.g., allow alphanumeric and hyphens)
+    // For now, allowing typical name chars (letters, spaces, dots, hyphens)
+    .regex(
+      nameAllowedCharsRegex,
+      "Job number can only contain letters, spaces, dots, and hyphens."
+    ),
+  technicianName: z
+    .string()
+    .min(2, "Technician name is required.")
+    .regex(
+      nameAllowedCharsRegex,
+      "Technician name can only contain letters, spaces, dots, and hyphens."
+    ),
+  contactNumber: z
+    .string()
+    .min(10, "Contact number must be at least 10 characters.")
+    .max(15, "Contact number must not exceed 15 characters.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "Contact number can only contain numbers, spaces, hyphens, and underscores."
+    ),
+  paymentMethod: z
+    .string()
+    .min(1, "Payment method is required.")
+    .regex(
+      nameAllowedCharsRegex,
+      "Payment method can only contain letters, spaces, dots, and hyphens."
+    ),
   date: z.date({ required_error: "A date is required." }),
   materialList: z.array(materialSchema).optional(),
 });
-
 export default function WorkOrderForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -384,10 +467,11 @@ export default function WorkOrderForm() {
                 />
                 <FormField
                   control={control}
+                  className=""
                   name="paymentMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Method</FormLabel>
+                      <FormLabel className={"mt-2"}>Payment Method</FormLabel>
                       <Select
                         key={field.value}
                         onValueChange={field.onChange}
