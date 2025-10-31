@@ -27,290 +27,195 @@ import { FinalChecksSection } from "./formComponents/FinalChecksSection";
 import { RemarksAndSignaturesSection } from "./formComponents/Remarks";
 import { NotesSection } from "./formComponents/Notes";
 
+ const nameRegex = /^[a-zA-Z\s\.\-]+$/;
+
+// For Addresses: Allows letters, numbers, spaces, dots, commas, and hyphens.
+const addressRegex = /^[a-zA-Z0-9\s\.\,\-]+$/;
+
+// For Models/Makes/Types/Serials: Allows letters, numbers, hyphens, and underscores.
+const modelSerialRegex = /^[a-zA-Z0-9 \-\_]+$/;
+
+// For General Text/Explanations: Allows more punctuation but prevents most other special characters.
+const generalTextRegex = /^[a-zA-Z0-9\s\.\,\-\_()]+$/;
+
+// --- Helper for Optional String Validation ---
+// A function to create a Zod refinement for optional fields, preventing validation on empty strings.
+const optionalWithRegex = (regex, message) =>
+  z.string().optional().default("").refine(val => val === "" || regex.test(val), { message });
+
+// --- Sub-Schemas with Validation ---
+
  const signatureSchema = z.object({
-  name: z
-    .string()
-    .optional()
-    .default("")
-    .regex(/^[a-zA-Z0-9]*$/, "Name can only contain letters and numbers.") // Stricter: no spaces, no special chars
-    .transform((val) => val.trim()),
-  title: z
-    .string()
-    .optional()
-    .default("")
-    .regex(/^[a-zA-Z0-9]*$/, "Title can only contain letters and numbers.") // Stricter: no spaces, no special chars
-    .transform((val) => val.trim()),
-  date: z.string().optional().default(""), // This date field has no future date restriction
+  name: optionalWithRegex(nameRegex, "Name can only contain letters, spaces, dots, and hyphens."),
+  title: optionalWithRegex(nameRegex, "Title can only contain letters, spaces, dots, and hyphens."),
+  date: z.coerce.date().optional().nullable(),
 });
 
 const sprinklerSchema = z.object({
-  make: z.string().optional().default(""),
-  model: z.string().optional().default(""),
-  yearOfMfg: z.coerce.number().optional(),
-  orificeSize: z.string().optional().default(""),
-  quantity: z.coerce.number().optional(),
-  tempRating: z.string().optional().default(""),
+  make: optionalWithRegex(modelSerialRegex, "Make contains invalid characters."),
+  model: optionalWithRegex(modelSerialRegex, "Model contains invalid characters."),
+  yearOfMfg: z.coerce.number().optional().nullable(),
+  orificeSize: optionalWithRegex(modelSerialRegex, "Orifice Size contains invalid characters."),
+  quantity: z.coerce.number().positive("Quantity must be positive.").optional().nullable(),
+  tempRating: optionalWithRegex(modelSerialRegex, "Temp Rating contains invalid characters."),
 });
 
 const alarmDeviceSchema = z.object({
-  type: z.string().optional().default(""),
-  make: z.string().optional().default(""),
-  model: z.string().optional().default(""),
-  maxOperationTime: z
-    .object({
-      min: z.coerce.number().optional(),
-      sec: z.coerce.number().optional(),
-    })
-    .optional(),
+  type: optionalWithRegex(modelSerialRegex, "Type contains invalid characters."),
+  make: optionalWithRegex(modelSerialRegex, "Make contains invalid characters."),
+  model: optionalWithRegex(modelSerialRegex, "Model contains invalid characters."),
+  maxOperationTime: z.object({
+    min: z.coerce.number().optional().nullable(),
+    sec: z.coerce.number().optional().nullable(),
+  }).optional(),
 });
 
 const dryPipeOperatingTestSchema = z.object({
-  dryValve: z
-    .object({
-      make: z.string().optional().default(""),
-      model: z.string().optional().default(""),
-      serialNumber: z.string().optional().default(""),
-    })
-    .optional(),
-  qodValve: z
-    .object({
-      make: z.string().optional().default(""),
-      model: z.string().optional().default(""),
-      serialNumber: z.string().optional().default(""),
-    })
-    .optional(),
-  timeToTripWithoutQOD: z
-    .object({
-      min: z.coerce.number().optional(),
-      sec: z.coerce.number().optional(),
-    })
-    .optional(),
-  timeToTripWithQOD: z
-    .object({
-      min: z.coerce.number().optional(),
-      sec: z.coerce.number().optional(),
-    })
-    .optional(),
-  waterPressureWithoutQOD: z.coerce.number().optional(),
-  waterPressureWithQOD: z.coerce.number().optional(),
-  airPressureWithoutQOD: z.coerce.number().optional(),
-  airPressureWithQOD: z.coerce.number().optional(),
-  tripPointAirPressureWithoutQOD: z.coerce.number().optional(),
-  tripPointAirPressureWithQOD: z.coerce.number().optional(),
-  timeWaterReachedOutletWithoutQOD: z
-    .object({
-      min: z.coerce.number().optional(),
-      sec: z.coerce.number().optional(),
-    })
-    .optional(),
-  timeWaterReachedOutletWithQOD: z
-    .object({
-      min: z.coerce.number().optional(),
-      sec: z.coerce.number().optional(),
-    })
-    .optional(),
+  dryValve: z.object({
+    make: optionalWithRegex(modelSerialRegex, "Make contains invalid characters."),
+    model: optionalWithRegex(modelSerialRegex, "Model contains invalid characters."),
+    serialNumber: optionalWithRegex(modelSerialRegex, "Serial Number contains invalid characters."),
+  }).optional(),
+  qodValve: z.object({
+    make: optionalWithRegex(modelSerialRegex, "Make contains invalid characters."),
+    model: optionalWithRegex(modelSerialRegex, "Model contains invalid characters."),
+    serialNumber: optionalWithRegex(modelSerialRegex, "Serial Number contains invalid characters."),
+  }).optional(),
+  timeToTripWithoutQOD: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
+  timeToTripWithQOD: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
+  waterPressureWithoutQOD: z.coerce.number().optional().nullable(),
+  waterPressureWithQOD: z.coerce.number().optional().nullable(),
+  airPressureWithoutQOD: z.coerce.number().optional().nullable(),
+  airPressureWithQOD: z.coerce.number().optional().nullable(),
+  tripPointAirPressureWithoutQOD: z.coerce.number().optional().nullable(),
+  tripPointAirPressureWithQOD: z.coerce.number().optional().nullable(),
+  timeWaterReachedOutletWithoutQOD: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
+  timeWaterReachedOutletWithQOD: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
   alarmOperatedProperlyWithoutQOD: z.boolean().optional().default(true),
   alarmOperatedProperlyWithQOD: z.boolean().optional().default(true),
-  explain: z.string().optional().default(''),
+  explain: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
 });
 
 const delugePreActionValveSchema = z.object({
-  operation: z
-    .enum(["pneumatic", "electric", "hydraulic"])
-    .nullable()
-    .optional(),
+  operation: z.enum(["pneumatic", "electric", "hydraulic"]).nullable().optional(),
   isPipingSupervised: z.boolean().optional().default(false),
   isDetectingMediaSupervised: z.boolean().optional().default(false),
   operatesFromManualOrRemote: z.boolean().optional().default(true),
   isAccessibleForTesting: z.boolean().optional().default(true),
-  explanation: z.string().optional().default(""),
-  make: z.string().optional().default(""),
-  model: z.string().optional().default(""),
+  explanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
+  make: optionalWithRegex(modelSerialRegex, "Make contains invalid characters."),
+  model: optionalWithRegex(modelSerialRegex, "Model contains invalid characters."),
   doesSupervisionLossAlarmOperate: z.boolean().optional().default(true),
   doesValveReleaseOperate: z.boolean().optional().default(true),
-  maxTimeToOperateRelease: z
-    .object({
-      min: z.coerce.number().optional(),
-      sec: z.coerce.number().optional(),
-    })
-    .optional(),
+  maxTimeToOperateRelease: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
 });
 
 const pressureReducingValveTestSchema = z.object({
-  locationAndFloor: z.string().optional().default(""),
-  makeAndModel: z.string().optional().default(""),
-  setting: z.string().optional().default(""),
-  staticPressure: z
-    .object({
-      inlet: z.coerce.number().optional(),
-      outlet: z.coerce.number().optional(),
-    })
-    .optional(),
-  residualPressure: z
-    .object({
-      inlet: z.coerce.number().optional(),
-      outlet: z.coerce.number().optional(),
-    })
-    .optional(),
-  flowRate: z.coerce.number().optional(),
+  locationAndFloor: optionalWithRegex(addressRegex, "Location contains invalid characters."),
+  makeAndModel: optionalWithRegex(modelSerialRegex, "Make and Model contains invalid characters."),
+  setting: optionalWithRegex(generalTextRegex, "Setting contains invalid characters."),
+  staticPressure: z.object({ inlet: z.coerce.number().optional().nullable(), outlet: z.coerce.number().optional().nullable() }).optional(),
+  residualPressure: z.object({ inlet: z.coerce.number().optional().nullable(), outlet: z.coerce.number().optional().nullable() }).optional(),
+  flowRate: z.coerce.number().optional().nullable(),
 });
 
-const formSchema = z.object({
+
+// --- Main Form Schema ---
+
+ const formSchema = z.object({
   propertyDetails: z.object({
-    propertyName: z.string().min(1, "Property name is required."),
-    date: z.string().optional().default(""),
-    propertyAddress: z.string().optional().default(""),
+    propertyName: z.string().min(1, "Property name is required.").regex(nameRegex, "Property Name can only contain letters, spaces, dots, and hyphens."),
+    date: z.coerce.date().max(new Date(), { message: "Date cannot be in the future." }),
+    propertyAddress: optionalWithRegex(addressRegex, "Property Address contains invalid characters."),
     isNewInstallation: z.boolean().default(false),
     isModification: z.boolean().default(false),
   }),
   plansAndInstructions: z.object({
-    plans: z
-      .object({
-        acceptedByAuthorities: z.array(z.string()).optional().default([]),
-        address: z.string().optional().default(""),
-        conformsToAcceptedPlans: z.boolean().optional().default(true),
-        equipmentIsApproved: z.boolean().optional().default(true),
-        deviationsExplanation: z.string().optional().default(""),
-      })
-      .optional(),
-    instructions: z
-      .object({
-        isPersonInChargeInstructed: z.boolean().optional().default(true),
-        instructionExplanation: z.string().optional().default(""),
-        hasSystemComponentsInstructions: z.boolean().optional().default(true),
-        hasCareAndMaintenanceInstructions: z.boolean().optional().default(true),
-        hasNFPA25: z.boolean().optional().default(true),
-      })
-      .optional(),
+    plans: z.object({
+      acceptedByAuthorities: z.array(z.string()).optional().default([]),
+      address: optionalWithRegex(addressRegex, "Address contains invalid characters."),
+      conformsToAcceptedPlans: z.boolean().optional().default(true),
+      equipmentIsApproved: z.boolean().optional().default(true),
+      deviationsExplanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
+    }).optional(),
+    instructions: z.object({
+      isPersonInChargeInstructed: z.boolean().optional().default(true),
+      instructionExplanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
+      hasSystemComponentsInstructions: z.boolean().optional().default(true),
+      hasCareAndMaintenanceInstructions: z.boolean().optional().default(true),
+      hasNFPA25: z.boolean().optional().default(true),
+    }).optional(),
   }),
   systemComponents: z.object({
     sprinklers: z.array(sprinklerSchema).optional(),
-    pipeAndFittings: z
-      .object({
-        pipeType: z.string().optional().default(""),
-        fittingsType: z.string().optional().default(""),
-      })
-      .optional(),
+    pipeAndFittings: z.object({
+      pipeType: optionalWithRegex(modelSerialRegex, "Pipe Type contains invalid characters."),
+      fittingsType: optionalWithRegex(modelSerialRegex, "Fittings Type contains invalid characters."),
+    }).optional(),
   }),
   alarmsAndValves: z.object({
     alarmValvesOrFlowIndicators: z.array(alarmDeviceSchema).optional(),
     dryPipeOperatingTests: z.array(dryPipeOperatingTestSchema).optional(),
     delugeAndPreActionValves: z.array(delugePreActionValveSchema).optional(),
-    pressureReducingValveTests: z
-      .array(pressureReducingValveTestSchema)
-      .optional(),
+    pressureReducingValveTests: z.array(pressureReducingValveTestSchema).optional(),
   }),
   testing: z.object({
-   backflowTest: z
-      .object({
-        meansUsed: z.string().optional().default(""),
-        wasFlowDemandCreated: z.enum(["Yes", "No", "N/A"]).nullable().optional(),
-      })
-      .optional(),
-       hydrostaticTest: z
-      .object({
-        pressurePsi: z.coerce.number().optional(),
-        pressureBar: z.coerce.number().optional(),
-        durationHrs: z.coerce.number().optional(),
-      })
-      .optional(),
+    backflowTest: z.object({
+      meansUsed: optionalWithRegex(generalTextRegex, "Means Used contains invalid characters."),
+      wasFlowDemandCreated: z.enum(["Yes", "No", "N/A"]).nullable().optional(),
+    }).optional(),
+    hydrostaticTest: z.object({
+      pressurePsi: z.coerce.number().optional().nullable(),
+      pressureBar: z.coerce.number().optional().nullable(),
+      durationHrs: z.coerce.number().optional().nullable(),
+    }).optional(),
     isDryPipingPneumaticallyTested: z.boolean().optional().default(false),
     doesEquipmentOperateProperly: z.boolean().optional().default(true),
-    improperOperationReason: z.string().optional().default(""),
+    improperOperationReason: optionalWithRegex(generalTextRegex, "Reason contains invalid characters."),
     noCorrosiveChemicalsCertification: z.boolean().optional().default(true),
-    drainTest: z
-      .object({
-        gaugeReadingPsi: z.coerce.number().optional(),
-        gaugeReadingBar: z.coerce.number().optional(),
-        residualPressurePsi: z.coerce.number().optional(),
-        residualPressureBar: z.coerce.number().optional(),
-      })
-      .optional(),
-    undergroundPiping: z
-      .object({
-        isVerifiedByCertificate: z.boolean().optional().default(true),
-        wasFlushedByInstaller: z.boolean().optional().default(true),
-        explanation: z.string().optional().default(""),
-      })
-      .optional(),
-    powderDrivenFasteners: z
-      .object({
-        isTestingSatisfactory: z.boolean().optional().default(true),
-        explanation: z.string().optional().default(""),
-      })
-      .optional(),
-    blankTestingGaskets: z
-      .object({
-        numberUsed: z.coerce.number().optional(),
-        locations: z.string().optional().default(""),
-        numberRemoved: z.coerce.number().optional(),
-      })
-      .optional(),
+    drainTest: z.object({
+      gaugeReadingPsi: z.coerce.number().optional().nullable(),
+      gaugeReadingBar: z.coerce.number().optional().nullable(),
+      residualPressurePsi: z.coerce.number().optional().nullable(),
+      residualPressureBar: z.coerce.number().optional().nullable(),
+    }).optional(),
+    undergroundPiping: z.object({
+      isVerifiedByCertificate: z.boolean().optional().default(true),
+      wasFlushedByInstaller: z.boolean().optional().default(true),
+      explanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
+    }).optional(),
+    powderDrivenFasteners: z.object({
+      isTestingSatisfactory: z.boolean().optional().default(true),
+      explanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
+    }).optional(),
+    blankTestingGaskets: z.object({
+      numberUsed: z.coerce.number().optional().nullable(),
+      locations: optionalWithRegex(generalTextRegex, "Locations text contains invalid characters."),
+      numberRemoved: z.coerce.number().optional().nullable(),
+    }).optional(),
   }),
-  weldingAndCutouts: z
-    .object({
-      isWeldingPiping: z.boolean().optional().default(false),
-      certifications: z
-        .object({
-          awsB21Compliant: z.boolean().optional().default(true),
-          weldersQualified: z.boolean().optional().default(true),
-          qualityControlProcedureCompliant: z
-            .boolean()
-            .optional()
-            .default(true),
-        })
-        .optional(),
-      cutouts: z
-        .object({ hasRetrievalControl: z.boolean().optional().default(true) })
-        .optional(),
-    })
-    .optional(),
+  weldingAndCutouts: z.object({
+    isWeldingPiping: z.boolean().optional().default(false),
+    certifications: z.object({
+      awsB21Compliant: z.boolean().optional().default(true),
+      weldersQualified: z.boolean().optional().default(true),
+      qualityControlProcedureCompliant: z.boolean().optional().default(true),
+    }).optional(),
+    cutouts: z.object({ hasRetrievalControl: z.boolean().optional().default(true) }).optional(),
+  }).optional(),
   finalChecks: z.object({
     hasHydraulicDataNameplate: z.boolean().optional().default(true),
-    nameplateExplanation: z.string().optional().default(""),
+    nameplateExplanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
     areCapsAndStrapsRemoved: z.boolean().optional().default(true),
   }),
-  remarksAndSignatures: z
-    .object({
-      remarks: z.string().optional().default(""),
-
-      // Validation for 'dateLeftInService' - no future dates
-      dateLeftInService: z
-        .string()
-        .optional() // It's optional, but if provided, it must be valid
-        .default("") // Default to empty string if not provided
-        .refine(
-          (dateString) => {
-            // Only validate if a non-empty string is provided
-            if (dateString === "") return true;
-
-            const selectedDate = new Date(dateString);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalize today to start of day
-            return selectedDate.getTime() <= today.getTime();
-          },
-          {
-            message: "Date cannot be in the future.",
-          }
-        ),
-
-      // Validation for 'sprinklerContractorName' - no numbers or special characters, but allows spaces
-      sprinklerContractorName: z
-        .string()
-        .optional()
-        .default("")
-        .regex(
-          /^[a-zA-Z\s]*$/, // Allows letters (a-z, A-Z) and spaces only. '*' allows empty string.
-          "Sprinkler Contractor Name can only contain letters and spaces."
-        )
-        .transform((val) => val.trim()), // Trim whitespace for cleaner data
-
-      // These use the existing signatureSchema
-      fireMarshalOrAHJ: signatureSchema.optional(),
-      sprinklerContractor: signatureSchema.optional(),
-    })
-    .optional(), // The entire remarksAndSignatures object is optional
-  notes: z.string().optional().default(""),
+  remarksAndSignatures: z.object({
+    remarks: optionalWithRegex(generalTextRegex, "Remarks contains invalid characters."),
+    dateLeftInService: z.coerce.date().max(new Date(), { message: "Date cannot be in the future." }).optional().nullable(),
+    sprinklerContractorName: optionalWithRegex(nameRegex, "Contractor Name can only contain letters, spaces, dots, and hyphens."),
+    fireMarshalOrAHJ: signatureSchema.optional(),
+    sprinklerContractor: signatureSchema.optional(),
+  }).optional(),
+  notes: optionalWithRegex(generalTextRegex, "Notes contains invalid characters."),
 });
 
 export default function AboveGroundTestForm() {

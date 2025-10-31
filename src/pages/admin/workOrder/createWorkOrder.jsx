@@ -49,7 +49,7 @@ import { cn } from "@/lib/utils";
 const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
 
 // For Phone Numbers: Allows digits, spaces, hyphens, and underscores
-const phoneNumberAllowedCharsRegex = /^[0-9\s\-_]+$/;
+const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/;
 
 // For Positive Numeric Decimals (and integers)
 // Allows 0 and positive numbers with optional decimals.
@@ -113,18 +113,15 @@ const formSchema = z.object({
     .max(15, "Phone number must not exceed 15 characters.")
     .regex(
       phoneNumberAllowedCharsRegex,
-      "Phone number can only contain numbers, spaces, hyphens, and underscores."
+      "Phone number can only contain numbers."
     ),
   jobNumber: z
     .string()
-    .min(1, "Job number is required.")
+    .min(1, "Job number is required."),
     // Job numbers often contain hyphens and numbers, potentially letters.
     // Adjust this regex if you need specific format (e.g., allow alphanumeric and hyphens)
     // For now, allowing typical name chars (letters, spaces, dots, hyphens)
-    .regex(
-      nameAllowedCharsRegex,
-      "Job number can only contain letters, spaces, dots, and hyphens."
-    ),
+   
   technicianName: z
     .string()
     .min(2, "Technician name is required.")
@@ -138,7 +135,7 @@ const formSchema = z.object({
     .max(15, "Contact number must not exceed 15 characters.")
     .regex(
       phoneNumberAllowedCharsRegex,
-      "Contact number can only contain numbers, spaces, hyphens, and underscores."
+      "Contact number can only contain numbers."
     ),
   paymentMethod: z
     .string()

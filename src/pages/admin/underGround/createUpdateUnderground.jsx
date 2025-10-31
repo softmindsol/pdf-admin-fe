@@ -36,11 +36,20 @@ const noSpecialChars = z.string().regex(/^[a-zA-Z0-9\s.,'&#-()/]*$/, {
   message: "Field contains invalid characters.",
 });
 
+// A reusable schema for dates to prevent future date selection.
+const nonFutureDate = z.coerce // coerce will attempt to convert the string from the form input into a Date object
+  .date({
+    required_error: "A date is required.",
+    invalid_type_error: "That's not a valid date!",
+  })
+  .max(new Date(), { message: "Date cannot be in the future." });
+
 const signatureSchema = z.object({
   // Applied validation to signature fields
   signed: noSpecialChars.optional().default(""),
   title: noSpecialChars.optional().default(""),
-  date: z.string().optional().default(""), // Date fields are kept as plain strings
+  // Using the improved date schema here as well
+  date: nonFutureDate.optional().nullable(),
 });
 
 const REALISTIC_MAX_VALUE = 100000;
@@ -48,23 +57,36 @@ const REALISTIC_MAX_VALUE = 100000;
 const formSchema = z.object({
   propertyDetails: z.object({
     propertyName: noSpecialChars.min(1, "Property name is required."),
-    date: z.string().optional().default(""),
+    // IMPROVEMENT: Using the robust, non-future date validation
+    date: nonFutureDate,
     propertyAddress: noSpecialChars.min(1, "Property address is required."),
   }),
 
   plans: z.object({
-    acceptedByApprovingAuthorities: z.array(noSpecialChars).optional().default([]),
+    acceptedByApprovingAuthorities: z
+      .array(noSpecialChars)
+      .optional()
+      .default([]),
     address: noSpecialChars.optional().default(""),
     installationConformsToAcceptedPlans: z.boolean().optional().default(true),
     equipmentUsedIsApproved: z.boolean().optional().default(true),
-    deviationsExplanation: noSpecialChars.optional().default(""),
+    deviationsExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
   }),
 
   instructions: z.object({
     personInChargeInstructed: z.boolean().optional().default(true),
-    instructionExplanation: noSpecialChars.optional().default(""),
+    instructionExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
     instructionsAndCareChartsLeft: z.boolean().optional().default(true),
-    chartsExplanation: noSpecialChars.optional().default(""),
+    chartsExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
   }),
 
   suppliesBuildingsNames: z.array(noSpecialChars).optional().default([]),
@@ -76,16 +98,25 @@ const formSchema = z.object({
     pipeStandardConform: z.boolean().optional().default(true),
     fittingStandard: noSpecialChars.optional().default(""),
     fittingStandardConform: z.boolean().optional().default(true),
-    fittingStandardExplanation: noSpecialChars.optional().default(""),
+    fittingStandardExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
     jointsStandard: noSpecialChars.optional().default(""),
     jointsStandardConform: z.boolean().optional().default(true),
-    jointsStandardExplanation: noSpecialChars.optional().default(""),
+    jointsStandardExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
   }),
 
   flushingTests: z.object({
     undergroundPipingStandard: noSpecialChars.optional().default(""),
     undergroundPipingStandardConform: z.boolean().optional().default(true),
-    undergroundPipingStandardExplanation: noSpecialChars.optional().default(""),
+    undergroundPipingStandardExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
     flushingFlowObtained: z
       .enum(["Public water", "Tank or reservoir", "Fire pump"])
       .nullable()
@@ -96,7 +127,10 @@ const formSchema = z.object({
   leadsflushingTests: z.object({
     undergroundPipingStandard: noSpecialChars.optional().default(""),
     undergroundPipingStandardConform: z.boolean().optional().default(true),
-    undergroundPipingStandardExplanation: noSpecialChars.optional().default(""),
+    undergroundPipingStandardExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
     flushingFlowObtained: z
       .enum(["Public water", "Tank or reservoir", "Fire pump"])
       .nullable()
@@ -109,61 +143,70 @@ const formSchema = z.object({
 
   hydrostaticTest: z.object({
     testedAtPSI: z.coerce
-      .number({
-        required_error: "Test At (PSI) is required.",
-        invalid_type_error: "Test At (PSI) must be a number.",
+      .number({ invalid_type_error: "PSI must be a number." })
+      .nonnegative({ message: "PSI cannot be negative." })
+      .max(REALISTIC_MAX_VALUE, {
+        message: "PSI value is unrealistically high.",
       })
-      .nonnegative({ message: "PSI cannot be a negative number." })
-      .max(REALISTIC_MAX_VALUE, { message: "PSI value is unrealistically high." })
-      .optional(),
-
+      .optional()
+      .nullable(),
     testedHours: z.coerce
-      .number({
-        required_error: "Tested For (Hours) is required.",
-        invalid_type_error: "Tested For (Hours) must be a number.",
+      .number({ invalid_type_error: "Hours must be a number." })
+      .nonnegative({ message: "Hours cannot be negative." })
+      .max(REALISTIC_MAX_VALUE, {
+        message: "Hours value is unrealistically high.",
       })
-      .nonnegative({ message: "Hours cannot be a negative number." })
-      .max(REALISTIC_MAX_VALUE, { message: "Hours value is unrealistically high." })
-      .optional(),
-
+      .optional()
+      .nullable(),
     jointsCovered: z.boolean().optional().default(false),
   }),
 
   leakageTest: z.object({
     leakeageGallons: z.coerce
-      .number({
-        required_error: "Leakage Gallons is required.",
-        invalid_type_error: "Leakage Gallons must be a number.",
+      .number({ invalid_type_error: "Gallons must be a number." })
+      .nonnegative({ message: "Gallons cannot be negative." })
+      .max(REALISTIC_MAX_VALUE, {
+        message: "Gallons value is unrealistically high.",
       })
-      .nonnegative({ message: "Gallons cannot be a negative number." })
-      .max(REALISTIC_MAX_VALUE, { message: "Gallons value is unrealistically high." })
-      .optional(),
-
+      .optional()
+      .nullable(),
     leakageHours: z.coerce
-      .number({
-        required_error: "Leakage Hours is required.",
-        invalid_type_error: "Leakage Hours must be a number.",
+      .number({ invalid_type_error: "Hours must be a number." })
+      .nonnegative({ message: "Hours cannot be negative." })
+      .max(REALISTIC_MAX_VALUE, {
+        message: "Hours value is unrealistically high.",
       })
-      .nonnegative({ message: "Hours cannot be a negative number." })
-      .max(REALISTIC_MAX_VALUE, { message: "Hours value is unrealistically high." })
-      .optional(),
-      
-    allowableLeakageGallons: z.coerce.number().nonnegative().optional(),
-    allowableLeakageHours: z.coerce.number().nonnegative().optional(),
+      .optional()
+      .nullable(),
+    allowableLeakageGallons: z.coerce
+      .number()
+      .nonnegative()
+      .optional()
+      .nullable(),
+    allowableLeakageHours: z.coerce
+      .number()
+      .nonnegative()
+      .optional()
+      .nullable(),
     forwardFlowTestPerformed: z.boolean().optional().default(false),
   }),
 
   hydrantsAndControlValves: z.object({
-    numberOfHydrants: z.coerce.number().min(0).optional(),
+    // SUGGESTION: .nonnegative() is consistent with other number fields
+    numberOfHydrants: z.coerce.number().nonnegative().optional().nullable(),
     hydrantMakeAndType: noSpecialChars.optional().default(""),
     allOperateSatisfactorily: z.boolean().optional().default(true),
     waterControlValvesLeftWideOpen: z.boolean().optional().default(true),
-    valvesNotOpenExplanation: noSpecialChars.optional().default(""),
+    valvesNotOpenExplanation: noSpecialChars
+      .max(1000, "Explanation is too long.")
+      .optional()
+      .default(""),
     hoseThreadsInterchangeable: z.boolean().optional().default(true),
   }),
 
   remarks: z.object({
-    dateLeftInService: z.string().optional().default(""),
+    // IMPROVEMENT: Using the robust, non-future date validation
+    dateLeftInService: nonFutureDate.optional().nullable(),
     nameOfInstallingContractor: noSpecialChars.optional().default(""),
   }),
 
@@ -172,7 +215,10 @@ const formSchema = z.object({
     forInstallingContractor: signatureSchema.optional(),
   }),
 
-  additionalNotes: noSpecialChars.optional().default(""),
+  additionalNotes: noSpecialChars
+    .max(2000, "Notes are too long.")
+    .optional()
+    .default(""),
 });
 
 export default function UndergroundTestForm() {

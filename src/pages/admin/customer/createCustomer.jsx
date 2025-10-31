@@ -28,37 +28,92 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 
 // --- Zod Schema for Customer Form Validation ---
-const formSchema = z.object({
+const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
+
+// For Addresses: Allows letters, numbers, spaces, dots, hyphens, and commas.
+const addressAllowedCharsRegex = /^[a-zA-Z0-9\s\.\,\-]+$/;
+
+// For Phone Numbers: Allows digits, spaces, hyphens, and underscores.
+const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
+;
+
+ const formSchema = z.object({
   // Customer Information
-  customerName: z.string().min(2, "Customer name is required."),
-  phoneNumber: z.string().min(10, "A valid phone number is required."),
+  customerName: z
+    .string()
+    .min(2, "Customer name is required.")
+    .regex(nameAllowedCharsRegex, "Customer name can only contain letters, spaces, dots, and hyphens."),
+  phoneNumber: z
+    .string()
+    .min(10, "Phone number must be at least 10 characters.")
+    .max(15, "Phone number must not exceed 15 characters.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "Phone number can only contain numbers."
+    ),
   emailForInspectionReports: z.string().email("Invalid email address."),
 
   // On-Site Contact
-  onSiteContactName: z.string().min(2, "On-site contact name is required."),
+  onSiteContactName: z
+    .string()
+    .min(2, "On-site contact name is required.")
+    .regex(nameAllowedCharsRegex, "On-site contact name can only contain letters, spaces, dots, and hyphens."),
   onSitePhoneNumber: z
     .string()
-    .min(10, "A valid on-site phone number is required."),
+    .min(10, "On-site phone number must be at least 10 characters.")
+    .max(15, "On-site phone number must not exceed 15 characters.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "On-site phone number can only contain numbers."
+    ),
   onSiteEmailAddress: z.string().email("Invalid on-site email address."),
 
   // Site Information
-  buildingName: z.string().min(2, "Building name is required."),
-  typeOfSite: z.string().min(2, "Type of site is required."),
-  siteAddress: z.string().min(5, "A valid site address is required."),
+  buildingName: z
+    .string()
+    .min(2, "Building name is required.")
+    .regex(nameAllowedCharsRegex, "Building name can only contain letters, spaces, dots, and hyphens."),
+  typeOfSite: z
+    .string()
+    .min(2, "Type of site is required.")
+    .regex(nameAllowedCharsRegex, "Type of site can only contain letters, spaces, dots, and hyphens."),
+  siteAddress: z
+    .string()
+    .min(5, "A valid site address is required.")
+    .regex(addressAllowedCharsRegex, "Site address can only contain letters, numbers, spaces, dots, commas, and hyphens."),
 
   // Billing Information
-  billingName: z.string().min(2, "Billing name is required."),
+  billingName: z
+    .string()
+    .min(2, "Billing name is required.")
+    .regex(nameAllowedCharsRegex, "Billing name can only contain letters, spaces, dots, and hyphens."),
   billingContactNumber: z
     .string()
-    .min(10, "A valid billing contact number is required."),
+    .min(10, "Billing contact number must be at least 10 characters.")
+    .max(15, "Billing contact number must not exceed 15 characters.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "Billing contact number can only contain numbers."
+    ),
   billingEmailAddress: z.string().email("Invalid billing email address."),
 
   // Owner’s Information
-  ownerName: z.string().min(2, "Owner's name is required."),
+  ownerName: z
+    .string()
+    .min(2, "Owner's name is required.")
+    .regex(nameAllowedCharsRegex, "Owner's name can only contain letters, spaces, dots, and hyphens."),
   ownerContactNumber: z
     .string()
-    .min(10, "A valid owner contact number is required."),
-  ownerAddress: z.string().min(5, "A valid owner address is required."),
+    .min(10, "Owner contact number must be at least 10 characters.")
+    .max(15, "Owner contact number must not exceed 15 characters.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "Owner contact number can only contain numbers."
+    ),
+  ownerAddress: z
+    .string()
+    .min(5, "A valid owner address is required.")
+    .regex(addressAllowedCharsRegex, "Owner's address can only contain letters, numbers, spaces, dots, commas, and hyphens."),
   ownerEmailAddress: z.string().email("Invalid owner's email address."),
 
   // Certificates

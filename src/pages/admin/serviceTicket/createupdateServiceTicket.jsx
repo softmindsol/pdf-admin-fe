@@ -35,35 +35,43 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-const nameRegex = /^[a-zA-Z -]*$/;
+const nameRegex = /^[a-zA-Z\s\-]+$/;
+const generalTextRegex = /^[a-zA-Z0-9\s\.\,\-\_]+$/;
 
-const formSchema = z.object({
-  jobName: z.string()
+// For Phone Numbers: Allows ONLY digits (0-9). No spaces, no hyphens, no other characters.
+const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
+;
+
+
+ const formSchema = z.object({
+  jobName: z
+    .string()
     .min(2, "Job name is required.")
-    .refine((val) => nameRegex.test(val), {
-      message: "Job name should only contain letters, spaces and '-' .",
-    }),
+    .regex(nameRegex, "Job name can only contain letters, spaces, and hyphens."),
 
-  customerName: z.string()
+  customerName: z
+    .string()
     .min(2, "Customer name is required.")
-    .refine((val) => nameRegex.test(val), {
-      message: "Customer name should only contain letters, spaces and '-' .",
-    }),
+    .regex(nameRegex, "Customer name can only contain letters, spaces, and hyphens."),
 
   emailAddress: z.string().email("A valid email address is required."),
 
-  phoneNumber: z.string()
-    .min(1, { message: "A valid phone number is required." })
-    .transform(val => val.replace(/\D/g, ''))
-    .refine(val => val.length >= 10 && val.length <= 15, {
-      message: "Phone number must contain between 10 and 15 digits.",
-    }),
+  // CORRECTED: Strict phone number validation (digits only)
+  phoneNumber: z
+    .string()
+    .regex(phoneNumberAllowedCharsRegex, "Phone number must only contain digits.")
+    .min(10, "Phone number must be at least 10 digits.")
+    .max(15, "Phone number must not exceed 15 digits."),
     
-  jobLocation: z.string().min(5, "A valid job location is required."),
+  jobLocation: z
+    .string()
+    .min(5, "A valid job location is required.")
+    .regex(generalTextRegex, "Job location contains invalid characters."),
 
   workDescription: z
     .string()
-    .min(10, "A detailed work description is required."),
+    .min(10, "A detailed work description is required.")
+    .max(1000, "Work description must not exceed 1000 characters."),
 
   materials: z
     .array(
@@ -77,18 +85,17 @@ const formSchema = z.object({
     )
     .optional(),
 
-  technicianName: z.string()
+  technicianName: z
+    .string()
     .min(2, "Technician name is required.")
-    .refine((val) => nameRegex.test(val), {
-      message: "Technician name should only contain letters, spaces and '-' .",
-    }),
+    .regex(nameRegex, "Technician name can only contain letters, spaces, and hyphens."),
 
-  technicianContactNumber: z.string()
-    .min(1, { message: "A valid phone number is required." })
-    .transform(val => val.replace(/\D/g, ''))
-    .refine(val => val.length >= 10 && val.length <= 15, {
-      message: "Phone number must contain between 10 and 15 digits.",
-    }),
+  // CORRECTED: Strict phone number validation (digits only)
+  technicianContactNumber: z
+    .string()
+    .regex(phoneNumberAllowedCharsRegex, "Phone number must only contain digits.")
+    .min(10, "Phone number must be at least 10 digits.")
+    .max(15, "Phone number must not exceed 15 digits."),
     
   stHours: z.coerce.number().min(0).default(0),
   otHours: z.coerce.number().min(0).default(0),
@@ -96,9 +103,11 @@ const formSchema = z.object({
   applySalesTax: z.boolean().default(false),
   workOrderStatus: z.enum(["Not Complete", "System Out of Order", "Complete"]),
   
-  completionDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "A valid completion date is required.",
-  }),
+  completionDate: z.coerce.date({
+      required_error: "A valid completion date is required.",
+      invalid_type_error: "That's not a valid date!",
+    })
+    .max(new Date(), { message: "Completion date cannot be in the future." }),
 
   customerSignature: z.string().optional(),
 });
