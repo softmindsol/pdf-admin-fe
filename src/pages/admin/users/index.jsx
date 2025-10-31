@@ -199,25 +199,11 @@ const user=getUserData()
       </div>
 
       {/* --- Data Table --- */}
-      <div className="rounded-md border">
+      <div className="rounded-md border pl-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox
-                  checked={
-                    Object.keys(rowSelection).length === users.length &&
-                    users.length > 0
-                  }
-                  onCheckedChange={(checked) => {
-                    const newSelection = {};
-                    if (checked) {
-                      users.forEach((user) => (newSelection[user._id] = true));
-                    }
-                    setRowSelection(newSelection);
-                  }}
-                />
-              </TableHead>
+      
               <TableHead>Name</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Role</TableHead>
@@ -238,20 +224,7 @@ const user=getUserData()
             ) : users.length > 0 ? (
               users.map((user) => (
                 <TableRow key={user._id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={rowSelection[user._id] || false}
-                      onCheckedChange={(checked) => {
-                        const newSelection = { ...rowSelection };
-                        if (checked) {
-                          newSelection[user._ed] = true;
-                        } else {
-                          delete newSelection[user._id];
-                        }
-                        setRowSelection(newSelection);
-                      }}
-                    />
-                  </TableCell>
+                 
                   <TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.username}
