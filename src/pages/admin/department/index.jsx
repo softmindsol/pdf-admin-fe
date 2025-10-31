@@ -128,27 +128,11 @@ export default function DepartmentsManagement() {
       </div>
 
       {/* --- Data Table --- */}
-      <div className="rounded-md border">
+      <div className="rounded-md border pl-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox
-                  checked={
-                    Object.keys(rowSelection).length === departments.length &&
-                    departments.length > 0
-                  }
-                  onCheckedChange={(checked) => {
-                    const newSelection = {};
-                    if (checked) {
-                      departments.forEach(
-                        (dept) => (newSelection[dept._id] = true)
-                      );
-                    }
-                    setRowSelection(newSelection);
-                  }}
-                />
-              </TableHead>
+             
               <TableHead>Name</TableHead>
               <TableHead>Manager</TableHead>
               <TableHead>Status</TableHead>
@@ -167,20 +151,7 @@ export default function DepartmentsManagement() {
             ) : departments.length > 0 ? (
               departments.map((department) => (
                 <TableRow key={department._id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={rowSelection[department._id] || false}
-                      onCheckedChange={(checked) => {
-                        const newSelection = { ...rowSelection };
-                        if (checked) {
-                          newSelection[department._id] = true;
-                        } else {
-                          delete newSelection[department._id];
-                        }
-                        setRowSelection(newSelection);
-                      }}
-                    />
-                  </TableCell>
+                 
                   <TableCell className="font-medium">
                     {department.name}
                   </TableCell>

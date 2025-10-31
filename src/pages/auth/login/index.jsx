@@ -55,20 +55,32 @@ export default function LoginPage() {
       password: "",
     },
   });
+
+  // Keep track of whether the error toast has been shown for the current URL
+  const [hasErrorToastBeenShown, setHasErrorToastBeenShown] = useState(false);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const errorQuery = params.get("error");
 
-    if (errorQuery) {
+    // Only show toast if error exists and hasn't been shown for this URL yet
+    if (errorQuery && !hasErrorToastBeenShown) {
       const formattedMessage = errorQuery
         .replace(/-/g, " ")
         .replace(/^\w/, (c) => c.toUpperCase());
 
       toast.error(formattedMessage, { id: "url-error-toast" });
 
-      navigate(location.pathname, { replace: true });
+      // Mark that the toast has been shown to prevent re-showing on subsequent renders
+      setHasErrorToastBeenShown(true);
+
+      // IMPORTANT: Remove the navigate call
+      // navigate(location.pathname, { replace: true });
+    } else if (!errorQuery && hasErrorToastBeenShown) {
+      // Reset if the error parameter is no longer present in the URL
+      setHasErrorToastBeenShown(false);
     }
-  }, [location.search, location.pathname, navigate]);
+  }, [location.search, hasErrorToastBeenShown]); // Depend on location.search and hasErrorToastBeenShown
 
   const onSubmit = (values) => {
     login(values);

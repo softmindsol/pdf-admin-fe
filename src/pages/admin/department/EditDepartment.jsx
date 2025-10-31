@@ -35,6 +35,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2, "Department name must be at least 2 characters."),
@@ -111,6 +112,7 @@ export default function EditDepartment() {
   async function onSubmit(values) {
     try {
       await updateDepartment({ id, ...values }).unwrap();
+      toast.success("Department updated.")
       navigate(`/department/${id}`);
     } catch (err) {
       if (err.data?.errors?.[0]?.name) {
