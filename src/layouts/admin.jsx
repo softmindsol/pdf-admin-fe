@@ -72,8 +72,8 @@ export default function AdminLayout() {
             allowedModules={allowedModules}
           />
           <main
-            className={`overflow-y-auto p-4 transition-all duration-300  max-w-7xl mx-auto min-h-full
-              ${isVisuallyExpanded ? "ml-64 w-[70%]" : "ml-16 w-[90%]"}`}
+            className={`overflow-y-auto p-4 transition-all duration-300  lg:max-w-[1024px] xl:max-w-[1440px] mx-auto min-h-full
+              ${isVisuallyExpanded ? "ml-64 w-[70%] xl:w-[80%]" : "ml-16 w-[90%]"}`}
           >
             <Suspense fallback={<Loader />}>
               <Outlet />

@@ -3,10 +3,8 @@ import { Suspense, lazy } from "react";
 import Loader from "@/components/LoadingFalback";
 import AdminLayout from "./layouts/admin";
 import Dashboard from "./pages/admin/dashboard";
- import ProtectedRoute from "@/layouts/ProtectedRoute.jsx"
+import ProtectedRoute from "@/layouts/ProtectedRoute.jsx";
 
-
-// --- Import all your page components ---
 import UsersManagement from "./pages/admin/users";
 import ViewUser from "./pages/admin/users/view";
 import EditUser from "./pages/admin/users/EditUser";
@@ -26,7 +24,7 @@ import ViewAboveGroundTicket from "./pages/admin/AboveGround/view";
 import ServiceTicketManagement from "./pages/admin/serviceTicket";
 import ServiceTicketForm from "./pages/admin/serviceTicket/createupdateServiceTicket";
 import ViewServiceTicket from "./pages/admin/serviceTicket/viewServiceTicket";
-import UndergroundTestManagement from "./pages/admin/underGround"; // Renamed for consistency
+import UndergroundTestManagement from "./pages/admin/underGround";
 import ViewUndergroundTest from "./pages/admin/underGround/view";
 import UndergroundTestForm from "./pages/admin/underGround/createUpdateUnderground";
 import ChangePassword from "./pages/settings/Changepassword";
@@ -55,11 +53,9 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Dashboard />, // Dashboard is accessible to all logged-in users
+        element: <Dashboard />,
       },
 
-      // --- Protected "User" Routes ---
-      // NOTE: Assuming the module name in your token for this is "user"
       {
         path: "user",
         element: (
@@ -93,8 +89,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // --- Protected "Department" Routes ---
-      // NOTE: Assuming the module name in your token for this is "department"
       {
         path: "department",
         element: (
@@ -120,7 +114,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // --- Protected "Work Order" Routes ---
       {
         path: "work-order",
         element: (
@@ -154,8 +147,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // --- Protected "Customer" Routes ---
-      // NOTE: Assuming the module name is "customer"
       {
         path: "customer",
         element: (
@@ -189,7 +180,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // --- Protected "Above Ground" Routes ---
       {
         path: "above-ground",
         element: (
@@ -223,7 +213,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // --- Protected "Service Ticket" Routes ---
       {
         path: "service-ticket",
         element: (
@@ -257,7 +246,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // --- Protected "Under Ground" Routes ---
       {
         path: "under-ground",
         element: (
@@ -275,7 +263,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "under-ground/update/:id", // Corrected path from previous example
+        path: "under-ground/update/:id",
         element: (
           <ProtectedRoute moduleName="underGround">
             <UndergroundTestForm />
@@ -292,19 +280,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "change-password",
-        element: (
-          // <ProtectedRoute moduleName="underGround">
-            <ChangePassword />
-          // </ProtectedRoute>
-        ),
+        element: <ChangePassword />,
       },
-       {
+      {
         path: "change-username",
-        element: (
-          // <ProtectedRoute moduleName="underGround">
-            <ChangeUsername />
-          // </ProtectedRoute>
-        ),
+        element: <ChangeUsername />,
       },
     ],
   },

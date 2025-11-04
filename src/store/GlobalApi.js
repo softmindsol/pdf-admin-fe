@@ -53,14 +53,11 @@ const baseQueryWithAutoTokenSave = async (args, api, extraOptions) => {
   ) {
     console.error("Authorization error, logging out user.", result.error);
 
-    // 2. CLEAR ALL USER DATA FROM LOCAL STORAGE
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
     localStorage.removeItem("role");
 
-    // 3. REDIRECT TO THE LOGIN PAGE
-    // This is a robust way to force a redirect outside of the React component lifecycle.
-    const formattedErrorMessage = String(result?.error?.data?.message) // Ensure it's a string
+    const formattedErrorMessage = String(result?.error?.data?.message)
       .toLowerCase()
       .replace(/ /g, "-");
     window.location.href = `/auth/login?error=${formattedErrorMessage}`;
@@ -77,7 +74,7 @@ export const GlobalApi = createApi({
   reducerPath: "GlobalApi",
   baseQuery: baseQueryWithAutoTokenSave,
 
-  tagTypes: ["User", "Department", "WorkOrder", "Customer"], // Added "Customer" TagType
+  tagTypes: ["User", "Department", "WorkOrder", "Customer", "latestTickets"],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (body) => createPostRequest(`/auth/login`, body),
@@ -153,12 +150,10 @@ export const GlobalApi = createApi({
       invalidatesTags: [""],
     }),
 
-    // WorkOrder Endpoints
     createWorkOrder: builder.mutation({
       query: (body) => createPostRequest(`/admin/work-order`, body),
-      invalidatesTags: ["WorkOrder"],
+      invalidatesTags: ["WorkOrder", "latestTickets"],
     }),
-    // In your RTK Query slice file (e.g., workOrderApi.js)
 
     getWorkOrders: builder.query({
       query: ({
@@ -169,7 +164,7 @@ export const GlobalApi = createApi({
         jobNumber,
         technicianName,
         department,
-        // Add the new date parameters
+
         startDate,
         endDate,
       }) => {
@@ -181,7 +176,7 @@ export const GlobalApi = createApi({
           ...(jobNumber && { jobNumber }),
           ...(technicianName && { technicianName }),
           ...(department && { department }),
-          // Add the date filters with the correct backend keys
+
           ...(startDate && { "createdAt[gte]": startDate }),
           ...(endDate && { "createdAt[lte]": endDate }),
         });
@@ -203,21 +198,16 @@ export const GlobalApi = createApi({
       invalidatesTags: ["WorkOrder"],
     }),
 
-    // Customer Endpoints
     createCustomer: builder.mutation({
       query: (body) => createPostRequest(`/admin/customer-ticket`, body),
-      invalidatesTags: ["Customer"],
+      invalidatesTags: ["Customer",'latestTickets'],
     }),
-    // In your RTK Query slice file (e.g., GlobalApi.js)
 
     getCustomers: builder.query({
-      // Use a more robust function to build the query string from args
       query: (args) => {
-        // Build a clean parameters object, ignoring any falsy values
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            // Map frontend state keys to backend query keys
             if (key === "startDate") {
               queryParams["createdAt[gte]"] = value;
             } else if (key === "endDate") {
@@ -228,12 +218,11 @@ export const GlobalApi = createApi({
           }
         });
 
-        // Ensure default pagination if not provided
         if (!queryParams.page) queryParams.page = 1;
         if (!queryParams.limit) queryParams.limit = 10;
 
         const params = new URLSearchParams(queryParams);
-        // Ensure the endpoint matches your backend routes
+
         return createRequest(`/admin/customer-ticket?${params.toString()}`);
       },
       providesTags: ["Customer"],
@@ -251,21 +240,17 @@ export const GlobalApi = createApi({
       query: (id) => createDeleteRequest(`/admin/customer-ticket/${id}`),
       invalidatesTags: ["Customer"],
     }),
-    // Above Ground Test
+
     createAboveGroundTest: builder.mutation({
       query: (body) => createPostRequest(`/admin/above-ground`, body),
-      invalidatesTags: ["AboveGroundTest"],
+      invalidatesTags: ["AboveGroundTest", 'latestTickets'],
     }),
-    // In your RTK Query slice file (e.g., GlobalApi.js)
 
     getAboveGroundTests: builder.query({
-      // Use a more robust function to build the query string from args
       query: (args) => {
-        // Build a clean parameters object, ignoring any falsy values
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            // Map frontend state keys to backend query keys
             if (key === "startDate") {
               queryParams["propertyDetails.date[gte]"] = value;
             } else if (key === "endDate") {
@@ -276,7 +261,6 @@ export const GlobalApi = createApi({
           }
         });
 
-        // Ensure default pagination if not provided
         if (!queryParams.page) queryParams.page = 1;
         if (!queryParams.limit) queryParams.limit = 10;
 
@@ -300,18 +284,14 @@ export const GlobalApi = createApi({
     }),
     createServiceTicket: builder.mutation({
       query: (body) => createPostRequest(`/admin/service-ticket`, body),
-      invalidatesTags: ["ServiceTicket"],
+      invalidatesTags: ["ServiceTicket", 'latestTickets'],
     }),
-    // In your RTK Query slice file (e.g., GlobalApi.js)
 
     getServiceTickets: builder.query({
-      // Use a more robust function to build the query string from args
       query: (args) => {
-        // Build a clean parameters object, ignoring any falsy values
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            // Map frontend state keys to backend query keys
             if (key === "startDate") {
               queryParams["completionDate[gte]"] = value;
             } else if (key === "endDate") {
@@ -322,7 +302,6 @@ export const GlobalApi = createApi({
           }
         });
 
-        // Ensure default pagination if not provided
         if (!queryParams.page) queryParams.page = 1;
         if (!queryParams.limit) queryParams.limit = 10;
 
@@ -347,18 +326,14 @@ export const GlobalApi = createApi({
 
     createUndergroundTest: builder.mutation({
       query: (body) => createPostRequest(`/admin/under-ground`, body),
-      invalidatesTags: ["UndergroundTest"],
+      invalidatesTags: ["UndergroundTest", 'latestTickets'],
     }),
-    // In your RTK Query slice file (e.g., GlobalApi.js)
 
     getUndergroundTests: builder.query({
-      // Use a more robust function to build the query string from args
       query: (args) => {
-        // Build a clean parameters object, ignoring any falsy values
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            // Map frontend state keys to backend query keys
             if (key === "startDate") {
               queryParams["propertyDetails.date[gte]"] = value;
             } else if (key === "endDate") {
@@ -369,7 +344,6 @@ export const GlobalApi = createApi({
           }
         });
 
-        // Ensure default pagination if not provided
         if (!queryParams.page) queryParams.page = 1;
         if (!queryParams.limit) queryParams.limit = 10;
 
@@ -394,7 +368,7 @@ export const GlobalApi = createApi({
     getSignedUrl: builder.query({
       query: (key) => {
         const params = new URLSearchParams({ key });
-        // Assuming your controller is mounted at /api/s3
+
         return createRequest(`/file/pre-sign?${params.toString()}`);
       },
     }),
@@ -406,7 +380,9 @@ export const GlobalApi = createApi({
       query: (body) => createPostRequest(`/auth/change-username`, body),
     }),
     latestTickets: builder.query({
-      query: ({page=1, limit=10}) => createRequest(`/ticket/synced?page=${page}&limit=${limit}`),
+      query: ({ page = 1, limit = 10 }) =>
+        createRequest(`/ticket/synced?page=${page}&limit=${limit}`),
+      providesTags: ["latestTickets"],
     }),
   }),
 });
@@ -422,34 +398,31 @@ export const {
   useGetDepartmentByIdQuery,
   useUpdateDepartmentMutation,
   useFormsQuery,
-  // work order
+
   useCreateWorkOrderMutation,
   useGetWorkOrdersQuery,
   useGetWorkOrderByIdQuery,
   useUpdateWorkOrderMutation,
   useDeleteWorkOrderMutation,
-  // Export new customer hooks
+
   useCreateCustomerMutation,
   useGetCustomersQuery,
   useGetCustomerByIdQuery,
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
 
-  //  Above Ground Test,
   useCreateAboveGroundTestMutation,
   useGetAboveGroundTestsQuery,
   useGetAboveGroundTestByIdQuery,
   useUpdateAboveGroundTestMutation,
   useDeleteAboveGroundTestMutation,
 
-  // 3. Export Underground Test Hooks
   useCreateUndergroundTestMutation,
   useGetUndergroundTestsQuery,
   useGetUndergroundTestByIdQuery,
   useUpdateUndergroundTestMutation,
   useDeleteUndergroundTestMutation,
 
-  // 4.  Export Service Ticket Hooks
   useCreateServiceTicketMutation,
   useGetServiceTicketsQuery,
   useGetServiceTicketByIdQuery,
@@ -459,5 +432,5 @@ export const {
   useLazyGetSignedUrlQuery,
   useChangePasswordMutation,
   useChangeUsernameMutation,
-  useLatestTicketsQuery
+  useLatestTicketsQuery,
 } = GlobalApi;
