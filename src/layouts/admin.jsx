@@ -34,6 +34,7 @@ export default function AdminLayout() {
         "AboveGround",
         "underGround",
         "serviceTicket",
+        "alarm",
       ];
     } else {
  allowedModules = [...(userData?.allowedForms ?? []), "user"];

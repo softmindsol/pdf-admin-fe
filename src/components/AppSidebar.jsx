@@ -48,6 +48,7 @@ const sidebarNavItems = [
         icon: MdInventory,
         module: "department",
       },
+      
     ],
   },
   {
@@ -55,6 +56,12 @@ const sidebarNavItems = [
     to: "/docs",
     icon: FileBarChart,
     children: [
+      {
+        label: "Alarm",
+        to: "/alarm",
+        icon: MdInventory,
+        module: "alarm",
+      },
       {
         label: "Work Order",
         to: "/work-order",

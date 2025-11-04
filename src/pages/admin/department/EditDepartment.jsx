@@ -49,6 +49,7 @@ const formOptions = [
   { id: "underGround", label: "Under Ground" },
   { id: "workOrder", label: "Work Order" },
   { id: "customer", label: "Customer" },
+  { id: "alarm", label: "Alarm Monitor" },
 ];
 
 // Constant to control how many badges are visible before collapsing

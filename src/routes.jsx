@@ -29,6 +29,9 @@ import ViewUndergroundTest from "./pages/admin/underGround/view";
 import UndergroundTestForm from "./pages/admin/underGround/createUpdateUnderground";
 import ChangePassword from "./pages/settings/Changepassword";
 import ChangeUsername from "./pages/settings/ChangeUsername";
+import AlarmManagement from "./pages/admin/alarm";
+import AlarmForm from "./pages/admin/alarm/create";
+import ViewAlarm from "./pages/admin/alarm/view";
 
 const ErrorPage = lazy(() => import("./components/ErrorPage"));
 const AuthLayout = lazy(() => import("./layouts/auth"));
@@ -278,6 +281,42 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+ {
+        path: "alarm",
+        element: (
+          <ProtectedRoute moduleName="alarm">
+            <AlarmManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "alarm/new",
+        element: (
+          <ProtectedRoute moduleName="alarm">
+            <AlarmForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "alarm/update/:id",
+        element: (
+          <ProtectedRoute moduleName="alarm">
+            <AlarmForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "alarm/:id",
+        element: (
+          <ProtectedRoute moduleName="alarm">
+            <ViewAlarm />
+          </ProtectedRoute>
+        ),
+      },
+
+
+
       {
         path: "change-password",
         element: <ChangePassword />,

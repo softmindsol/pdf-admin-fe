@@ -74,7 +74,7 @@ export const GlobalApi = createApi({
   reducerPath: "GlobalApi",
   baseQuery: baseQueryWithAutoTokenSave,
 
-  tagTypes: ["User", "Department", "WorkOrder", "Customer", "latestTickets"],
+  tagTypes: ["User", "Department", "WorkOrder", "Customer", "latestTickets", "Alarm"],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (body) => createPostRequest(`/auth/login`, body),
@@ -384,6 +384,59 @@ export const GlobalApi = createApi({
         createRequest(`/ticket/synced?page=${page}&limit=${limit}`),
       providesTags: ["latestTickets"],
     }),
+
+// ... after deleteCustomer endpoint
+
+    createAlarm: builder.mutation({
+      query: (body) => createPostRequest(`/admin/alarm`, body),
+      invalidatesTags: ["Alarm", 'latestTickets'],
+    }),
+
+    getAlarms: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search,
+        department,
+        dealerCode,
+        accountNumber,
+        startDate,
+        endDate,
+      }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+          ...(department && { department }),
+          ...(dealerCode && { dealerCode }),
+          ...(accountNumber && { accountNumber }),
+          ...(startDate && { "createdAt[gte]": startDate }), // Filter by creation date range
+          ...(endDate && { "createdAt[lte]": endDate }),
+        });
+        return createRequest(`/admin/alarm?${params.toString()}`);
+      },
+      providesTags: ["Alarm"],
+    }),
+
+    getAlarmById: builder.query({
+      query: (id) => createRequest(`/admin/alarm/${id}`),
+      providesTags: (result, error, id) => [{ type: "Alarm", id }],
+    }),
+
+    updateAlarm: builder.mutation({
+      query: ({ id, ...body }) =>
+        createPatchRequest(`/admin/alarm/${id}`, body),
+      invalidatesTags: ["Alarm"],
+    }),
+
+    deleteAlarm: builder.mutation({
+      query: (id) => createDeleteRequest(`/admin/alarm/${id}`),
+      invalidatesTags: ["Alarm"],
+    }),
+
+    // ... other endpoints like createAboveGroundTest
+// ...
+
   }),
 });
 
@@ -433,4 +486,9 @@ export const {
   useChangePasswordMutation,
   useChangeUsernameMutation,
   useLatestTicketsQuery,
+   useCreateAlarmMutation,
+  useGetAlarmsQuery,
+  useGetAlarmByIdQuery,
+  useUpdateAlarmMutation,
+  useDeleteAlarmMutation,
 } = GlobalApi;
