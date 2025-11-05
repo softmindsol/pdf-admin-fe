@@ -105,7 +105,7 @@ const alarmDeviceSchema = z.object({
       sec: z.coerce
         .number()
         .min(0, { message: "Seconds must be at least 0" })
-        .max(59, "Seconds cannot exceed 59" )
+        .max(59, "Seconds cannot exceed 59")
         .optional()
         .nullable(),
     })
@@ -148,19 +148,23 @@ const dryPipeOperatingTestSchema = z.object({
   timeToTripWithoutQOD: z
     .object({
       min: z.coerce.number().optional().nullable(),
-      sec: z.coerce.number()
-       .min(0, { message: "Seconds must be at least 0" })
-        .max(59, "Seconds cannot exceed 59" )
-      .optional().nullable(),
+      sec: z.coerce
+        .number()
+        .min(0, { message: "Seconds must be at least 0" })
+        .max(59, "Seconds cannot exceed 59")
+        .optional()
+        .nullable(),
     })
     .optional(),
   timeToTripWithQOD: z
     .object({
       min: z.coerce.number().optional().nullable(),
-      sec: z.coerce.number()
-       .min(0, { message: "Seconds must be at least 0" })
-        .max(59, "Seconds cannot exceed 59" )
-      .optional().nullable(),
+      sec: z.coerce
+        .number()
+        .min(0, { message: "Seconds must be at least 0" })
+        .max(59, "Seconds cannot exceed 59")
+        .optional()
+        .nullable(),
     })
     .optional(),
   waterPressureWithoutQOD: z.coerce.number().optional().nullable(),
@@ -172,19 +176,23 @@ const dryPipeOperatingTestSchema = z.object({
   timeWaterReachedOutletWithoutQOD: z
     .object({
       min: z.coerce.number().optional().nullable(),
-      sec: z.coerce.number()
-       .min(0,  "Seconds must be at least 0" )
-        .max(59, "Seconds cannot exceed 59" )
-      .optional().nullable(),
+      sec: z.coerce
+        .number()
+        .min(0, "Seconds must be at least 0")
+        .max(59, "Seconds cannot exceed 59")
+        .optional()
+        .nullable(),
     })
     .optional(),
   timeWaterReachedOutletWithQOD: z
     .object({
       min: z.coerce.number().optional().nullable(),
-      sec: z.coerce.number()
-       .min(0, { message: "Seconds must be at least 0" })
-        .max(59, "Seconds cannot exceed 59" )
-      .optional().nullable(),
+      sec: z.coerce
+        .number()
+        .min(0, { message: "Seconds must be at least 0" })
+        .max(59, "Seconds cannot exceed 59")
+        .optional()
+        .nullable(),
     })
     .optional(),
   alarmOperatedProperlyWithoutQOD: z.boolean().optional().default(false),
@@ -221,10 +229,12 @@ const delugePreActionValveSchema = z.object({
   maxTimeToOperateRelease: z
     .object({
       min: z.coerce.number().optional().nullable(),
-      sec: z.coerce.number()
-       .min(0, { message: "Seconds must be at least 0" })
-        .max(59, "Seconds cannot exceed 59" )
-        .optional().nullable(),
+      sec: z.coerce
+        .number()
+        .min(0, { message: "Seconds must be at least 0" })
+        .max(59, "Seconds cannot exceed 59")
+        .optional()
+        .nullable(),
     })
     .optional(),
 });
@@ -521,24 +531,24 @@ export default function AboveGroundTestForm() {
 
           propertyDetails: {
             ...testData.propertyDetails,
-            date: formatDateForInput(testData.propertyDetails?.date),
+            date:testData.propertyDetails?.date ?  formatDateForInput(testData.propertyDetails?.date): null,
           },
           remarksAndSignatures: {
-            ...testData.remarksAndSignatures,
-            dateLeftInService: formatDateForInput(
+            ...testData?.remarksAndSignatures,
+            dateLeftInService: testData.remarksAndSignatures?.dateLeftInService ? formatDateForInput(
               testData.remarksAndSignatures?.dateLeftInService
-            ),
+            ):null,
             fireMarshalOrAHJ: {
               ...testData.remarksAndSignatures?.fireMarshalOrAHJ,
-              date: formatDateForInput(
+              date: testData.remarksAndSignatures?.fireMarshalOrAHJ?.date ? formatDateForInput(
                 testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
-              ),
+              ):null,
             },
             sprinklerContractor: {
               ...testData.remarksAndSignatures?.sprinklerContractor,
-              date: formatDateForInput(
-                testData.remarksAndSignatures?.sprinklerContractor?.date
-              ),
+              date: testData.remarksAndSignatures?.sprinklerContractor?.date ? formatDateForInput(
+                testData.remarksAndSignatures?.sprinklerContractor?.date 
+              ):null,
             },
           },
         };
@@ -548,7 +558,12 @@ export default function AboveGroundTestForm() {
       }
     }
   }, [existingData, isUpdateMode, reset]);
-
+  const onInvalid = (errors) => {
+    console.error("Zod Validation Errors:", errors);
+    toast.error("Validation failed.", {
+      description: "Please correct the highlighted fields before submitting.",
+    });
+  };
   async function onSubmit(values) {
     console.log("Form Values Submitted:", values);
     const promise = () =>
@@ -600,7 +615,10 @@ export default function AboveGroundTestForm() {
       </div>
 
       <Form {...form}>
-        <form id="above-ground-form" onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          id="above-ground-form"
+          onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        >
           <Accordion
             type="multiple"
             defaultValue={["item-1"]}
