@@ -77,6 +77,7 @@ export default function ViewUndergroundTest() {
   } = useGetUndergroundTestByIdQuery(id, { skip: !id });
 
   const testData = response?.data?.undergroundTest;
+  console.log("🚀 ~ ViewUndergroundTest ~ testData:", testData)
 
   // --- Loading State ---
   if (isLoading) {
@@ -130,7 +131,7 @@ export default function ViewUndergroundTest() {
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
-            onClick={() => navigate(`/under-ground/${id}/update`)}
+            onClick={() => navigate(`/under-ground/update/${id}`)}
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit
@@ -440,7 +441,7 @@ export default function ViewUndergroundTest() {
                   />
                   <DetailItem
                     label="Hydrant Make & Type"
-                    value={testData.hydrantsAndControlVales?.hydrantMakeAndType}
+                    value={testData.hydrantsAndControlValves?.hydrantMakeAndType}
                   />
                   <DetailItem
                     label="All Operate Satisfactorily?"
