@@ -389,7 +389,6 @@ export function AlarmsAndValvesSection({ control }) {
                                     onCheckedChange={field.onChange}
                                   />
                                 </FormControl>
-                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -505,7 +504,6 @@ export function AlarmsAndValvesSection({ control }) {
                                     onCheckedChange={field.onChange}
                                   />
                                 </FormControl>
-                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -668,7 +666,6 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -684,7 +681,6 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -700,7 +696,6 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -716,7 +711,6 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -734,7 +728,6 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -750,7 +743,6 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
