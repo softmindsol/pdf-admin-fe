@@ -2,11 +2,18 @@ import React, { useState, useEffect } from "react";
 import {
   useGetAlarmsQuery,
   useDeleteAlarmMutation,
-  useGetDepartmentsQuery, // <-- Import hook to fetch departments
+  useGetDepartmentsQuery,
+  useLazyGetSignedUrlQuery, // <-- 1. Import the correct hook for signing URLs
 } from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
+import {
+  MoreHorizontal,
+  PlusCircle,
+  Search,
+  Download, // <-- 2. Import the Download icon
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { toast } from "sonner"; // <-- 3. Import toast for notifications
 
 // --- Shadcn UI Imports ---
 import {
@@ -34,23 +41,27 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // <-- Import Select
+} from "@/components/ui/select";
 import { DataTablePagination } from "@/components/pagination";
 import { showDeleteConfirm } from "@/lib/swal";
-import { getUserData } from "@/lib/auth"; // <-- Import user utility
+import { getUserData } from "@/lib/auth";
 
 export default function AlarmManagement() {
   const navigate = useNavigate();
   const [deleteAlarm] = useDeleteAlarmMutation();
+  // --- 4. Instantiate the hook to get a signed URL ---
+  const [triggerGetSignedUrl, { isLoading: isDownloading }] =
+    useLazyGetSignedUrlQuery();
+
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState(""); // <-- State for department filter
+  const [departmentFilter, setDepartmentFilter] = useState("");
 
-  const user = getUserData(); // <-- Get current user info
+  const user = getUserData();
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -60,12 +71,10 @@ export default function AlarmManagement() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // --- Fetch departments for the filter dropdown ---
   const { data: departmentResponse, isLoading: areDepartmentsLoading } =
     useGetDepartmentsQuery({ page: 0 });
   const departments = departmentResponse?.data?.departments || [];
 
-  // --- Pass departmentFilter to the query ---
   const {
     data: response,
     isLoading,
@@ -86,6 +95,26 @@ export default function AlarmManagement() {
   const alarms = response?.data?.alarms || [];
   const pagination = response?.data?.pagination || {};
   const pageCount = pagination.totalPages || 0;
+
+  // --- 5. Create the handler function to open the signed PDF URL ---
+  const handleDownloadPdf = async (alarm) => {
+    if (!alarm.ticket) {
+      toast.error("No PDF found for this alarm record.");
+      return;
+    }
+    try {
+      // Trigger the backend to get a temporary, secure URL for the file
+      const apiResponse = await triggerGetSignedUrl(alarm.ticket).unwrap();
+      const signedUrl = apiResponse.data.url;
+
+      // Open the URL in a new browser tab
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+      toast.success("Opening PDF...");
+    } catch (error) {
+      console.error("Failed to download PDF:", error);
+      toast.error("Could not open the PDF. Please try again.");
+    }
+  };
 
   const renderSkeletons = () =>
     Array(limit)
@@ -109,8 +138,7 @@ export default function AlarmManagement() {
           </TableCell>
           <TableCell>
             <Skeleton className="h-4 w-24" />
-          </TableCell>{" "}
-          {/* Skeleton for new column */}
+          </TableCell>
           <TableCell className="text-right">
             <Skeleton className="h-8 w-8 ml-auto" />
           </TableCell>
@@ -119,6 +147,7 @@ export default function AlarmManagement() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
+      {/* Header and Filters are unchanged */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Alarms</h1>
         <p className="text-muted-foreground">
@@ -137,8 +166,6 @@ export default function AlarmManagement() {
               className="w-full pl-8"
             />
           </div>
-
-          {/* --- ADDED: Department Filter (for admins) --- */}
           {user?.role === "admin" && (
             <Select
               value={departmentFilter}
@@ -161,7 +188,6 @@ export default function AlarmManagement() {
               </SelectContent>
             </Select>
           )}
-
           <div className="flex items-center space-x-2">
             <label
               htmlFor="startDate"
@@ -214,8 +240,7 @@ export default function AlarmManagement() {
               <TableHead>Dealer Name</TableHead>
               <TableHead>City</TableHead>
               <TableHead>Start Date</TableHead>
-              <TableHead>Created By</TableHead>{" "}
-              {/* <-- ADDED: New Column Header */}
+              <TableHead>Created By</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -240,8 +265,7 @@ export default function AlarmManagement() {
                   <TableCell>
                     {format(new Date(alarm.startDate), "PPP")}
                   </TableCell>
-                  <TableCell>{alarm.createdBy?.username || "N/A"}</TableCell>{" "}
-                  {/* <-- ADDED: New Column Data */}
+                  <TableCell>{alarm.createdBy?.username || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -260,6 +284,14 @@ export default function AlarmManagement() {
                           onClick={() => navigate(`/alarm/update/${alarm._id}`)}
                         >
                           Edit
+                        </DropdownMenuItem>
+                        {/* --- 6. Add the Download PDF menu item --- */}
+                        <DropdownMenuItem
+                          disabled={!alarm.ticket || isDownloading}
+                          onClick={() => handleDownloadPdf(alarm)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          <span>Download PDF</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
