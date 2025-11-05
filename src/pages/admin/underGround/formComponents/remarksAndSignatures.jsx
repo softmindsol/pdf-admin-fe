@@ -66,11 +66,11 @@ export function RemarksAndSignatures({ control }) {
             {/* Property Owner Signature */}
             <div className="space-y-4">
               <h5 className="font-medium">Property Owner Representative</h5>
-              <FormField
+              <FormField 
                 control={control}
                 name="signatures.forPropertyOwner.signed"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className={'hidden'}>
                     <FormLabel>Signed By (Name)</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., John Doe" {...field} />
@@ -116,7 +116,7 @@ export function RemarksAndSignatures({ control }) {
                 control={control}
                 name="signatures.forInstallingContractor.signed"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className={'hidden'} >
                     <FormLabel>Signed By (Name)</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Jane Smith" {...field} />
