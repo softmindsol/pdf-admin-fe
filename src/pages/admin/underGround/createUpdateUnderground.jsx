@@ -68,8 +68,8 @@ const formSchema = z.object({
       .optional()
       .default([]),
     address: noSpecialChars.optional().default(""),
-    installationConformsToAcceptedPlans: z.boolean().optional().default(true),
-    equipmentUsedIsApproved: z.boolean().optional().default(true),
+    installationConformsToAcceptedPlans: z.boolean().optional().default(false),
+    equipmentUsedIsApproved: z.boolean().optional().default(false),
     deviationsExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
@@ -77,12 +77,12 @@ const formSchema = z.object({
   }),
 
   instructions: z.object({
-    personInChargeInstructed: z.boolean().optional().default(true),
+    personInChargeInstructed: z.boolean().optional().default(false),
     instructionExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
       .default(""),
-    instructionsAndCareChartsLeft: z.boolean().optional().default(true),
+    instructionsAndCareChartsLeft: z.boolean().optional().default(false),
     chartsExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
@@ -95,15 +95,15 @@ const formSchema = z.object({
     pipeTypesAndClass: noSpecialChars.optional().default(""),
     typeJoint: noSpecialChars.optional().default(""),
     pipeStandard: noSpecialChars.optional().default(""),
-    pipeStandardConform: z.boolean().optional().default(true),
+    pipeStandardConform: z.boolean().optional().default(false),
     fittingStandard: noSpecialChars.optional().default(""),
-    fittingStandardConform: z.boolean().optional().default(true),
+    fittingStandardConform: z.boolean().optional().default(false),
     fittingStandardExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
       .default(""),
     jointsStandard: noSpecialChars.optional().default(""),
-    jointsStandardConform: z.boolean().optional().default(true),
+    jointsStandardConform: z.boolean().optional().default(false),
     jointsStandardExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
@@ -112,7 +112,7 @@ const formSchema = z.object({
 
   flushingTests: z.object({
     undergroundPipingStandard: noSpecialChars.optional().default(""),
-    undergroundPipingStandardConform: z.boolean().optional().default(true),
+    undergroundPipingStandardConform: z.boolean().optional().default(false),
     undergroundPipingStandardExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
@@ -126,7 +126,7 @@ const formSchema = z.object({
 
   leadsflushingTests: z.object({
     undergroundPipingStandard: noSpecialChars.optional().default(""),
-    undergroundPipingStandardConform: z.boolean().optional().default(true),
+    undergroundPipingStandardConform: z.boolean().optional().default(false),
     undergroundPipingStandardExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
@@ -195,13 +195,13 @@ const formSchema = z.object({
     // SUGGESTION: .nonnegative() is consistent with other number fields
     numberOfHydrants: z.coerce.number().nonnegative().optional().nullable(),
     hydrantMakeAndType: noSpecialChars.optional().default(""),
-    allOperateSatisfactorily: z.boolean().optional().default(true),
-    waterControlValvesLeftWideOpen: z.boolean().optional().default(true),
+    allOperateSatisfactorily: z.boolean().optional().default(false),
+    waterControlValvesLeftWideOpen: z.boolean().optional().default(false),
     valvesNotOpenExplanation: noSpecialChars
       .max(1000, "Explanation is too long.")
       .optional()
       .default(""),
-    hoseThreadsInterchangeable: z.boolean().optional().default(true),
+    hoseThreadsInterchangeable: z.boolean().optional().default(false),
   }),
 
   remarks: z.object({

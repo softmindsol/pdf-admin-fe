@@ -91,8 +91,8 @@ const dryPipeOperatingTestSchema = z.object({
   tripPointAirPressureWithQOD: z.coerce.number().optional().nullable(),
   timeWaterReachedOutletWithoutQOD: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
   timeWaterReachedOutletWithQOD: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
-  alarmOperatedProperlyWithoutQOD: z.boolean().optional().default(true),
-  alarmOperatedProperlyWithQOD: z.boolean().optional().default(true),
+  alarmOperatedProperlyWithoutQOD: z.boolean().optional().default(false),
+  alarmOperatedProperlyWithQOD: z.boolean().optional().default(false),
   explain: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
 });
 
@@ -100,13 +100,13 @@ const delugePreActionValveSchema = z.object({
   operation: z.enum(["pneumatic", "electric", "hydraulic"]).nullable().optional(),
   isPipingSupervised: z.boolean().optional().default(false),
   isDetectingMediaSupervised: z.boolean().optional().default(false),
-  operatesFromManualOrRemote: z.boolean().optional().default(true),
-  isAccessibleForTesting: z.boolean().optional().default(true),
+  operatesFromManualOrRemote: z.boolean().optional().default(false),
+  isAccessibleForTesting: z.boolean().optional().default(false),
   explanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
   make: optionalWithRegex(modelSerialRegex, "Make contains invalid characters."),
   model: optionalWithRegex(modelSerialRegex, "Model contains invalid characters."),
-  doesSupervisionLossAlarmOperate: z.boolean().optional().default(true),
-  doesValveReleaseOperate: z.boolean().optional().default(true),
+  doesSupervisionLossAlarmOperate: z.boolean().optional().default(false),
+  doesValveReleaseOperate: z.boolean().optional().default(false),
   maxTimeToOperateRelease: z.object({ min: z.coerce.number().optional().nullable(), sec: z.coerce.number().optional().nullable() }).optional(),
 });
 
@@ -134,16 +134,16 @@ const pressureReducingValveTestSchema = z.object({
     plans: z.object({
       acceptedByAuthorities: z.array(z.string()).optional().default([]),
       address: optionalWithRegex(addressRegex, "Address contains invalid characters."),
-      conformsToAcceptedPlans: z.boolean().optional().default(true),
-      equipmentIsApproved: z.boolean().optional().default(true),
+      conformsToAcceptedPlans: z.boolean().optional().default(false),
+      equipmentIsApproved: z.boolean().optional().default(false),
       deviationsExplanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
     }).optional(),
     instructions: z.object({
-      isPersonInChargeInstructed: z.boolean().optional().default(true),
+      isPersonInChargeInstructed: z.boolean().optional().default(false),
       instructionExplanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
-      hasSystemComponentsInstructions: z.boolean().optional().default(true),
-      hasCareAndMaintenanceInstructions: z.boolean().optional().default(true),
-      hasNFPA25: z.boolean().optional().default(true),
+      hasSystemComponentsInstructions: z.boolean().optional().default(false),
+      hasCareAndMaintenanceInstructions: z.boolean().optional().default(false),
+      hasNFPA25: z.boolean().optional().default(false),
     }).optional(),
   }),
   systemComponents: z.object({
@@ -170,9 +170,9 @@ const pressureReducingValveTestSchema = z.object({
       durationHrs: z.coerce.number().optional().nullable(),
     }).optional(),
     isDryPipingPneumaticallyTested: z.boolean().optional().default(false),
-    doesEquipmentOperateProperly: z.boolean().optional().default(true),
+    doesEquipmentOperateProperly: z.boolean().optional().default(false),
     improperOperationReason: optionalWithRegex(generalTextRegex, "Reason contains invalid characters."),
-    noCorrosiveChemicalsCertification: z.boolean().optional().default(true),
+    noCorrosiveChemicalsCertification: z.boolean().optional().default(false),
     drainTest: z.object({
       gaugeReadingPsi: z.coerce.number().optional().nullable(),
       gaugeReadingBar: z.coerce.number().optional().nullable(),
@@ -180,12 +180,12 @@ const pressureReducingValveTestSchema = z.object({
       residualPressureBar: z.coerce.number().optional().nullable(),
     }).optional(),
     undergroundPiping: z.object({
-      isVerifiedByCertificate: z.boolean().optional().default(true),
-      wasFlushedByInstaller: z.boolean().optional().default(true),
+      isVerifiedByCertificate: z.boolean().optional().default(false),
+      wasFlushedByInstaller: z.boolean().optional().default(false),
       explanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
     }).optional(),
     powderDrivenFasteners: z.object({
-      isTestingSatisfactory: z.boolean().optional().default(true),
+      isTestingSatisfactory: z.boolean().optional().default(false),
       explanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
     }).optional(),
     blankTestingGaskets: z.object({
@@ -197,16 +197,16 @@ const pressureReducingValveTestSchema = z.object({
   weldingAndCutouts: z.object({
     isWeldingPiping: z.boolean().optional().default(false),
     certifications: z.object({
-      awsB21Compliant: z.boolean().optional().default(true),
-      weldersQualified: z.boolean().optional().default(true),
-      qualityControlProcedureCompliant: z.boolean().optional().default(true),
+      awsB21Compliant: z.boolean().optional().default(false),
+      weldersQualified: z.boolean().optional().default(false),
+      qualityControlProcedureCompliant: z.boolean().optional().default(false),
     }).optional(),
-    cutouts: z.object({ hasRetrievalControl: z.boolean().optional().default(true) }).optional(),
+    cutouts: z.object({ hasRetrievalControl: z.boolean().optional().default(false) }).optional(),
   }).optional(),
   finalChecks: z.object({
-    hasHydraulicDataNameplate: z.boolean().optional().default(true),
+    hasHydraulicDataNameplate: z.boolean().optional().default(false),
     nameplateExplanation: optionalWithRegex(generalTextRegex, "Explanation contains invalid characters."),
-    areCapsAndStrapsRemoved: z.boolean().optional().default(true),
+    areCapsAndStrapsRemoved: z.boolean().optional().default(false),
   }),
   remarksAndSignatures: z.object({
     remarks: optionalWithRegex(generalTextRegex, "Remarks contains invalid characters."),

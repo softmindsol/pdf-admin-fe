@@ -58,7 +58,7 @@ const formatDate = (dateString) => {
 
 const formatBoolean = (value) => {
   if (value === null || typeof value === "undefined") {
-    return "--"; // <-- Added check for null/undefined
+    return "No"; // <-- Added check for null/undefined
   }
   return value ? "Yes" : "No";
 };
