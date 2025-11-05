@@ -207,11 +207,7 @@ export default function ViewWorkOrder() {
                   {workOrder.paymentMethod.replace("_", " ")}
                 </span>
               </DetailItem>
-              <DetailItem
-                label="Customer Signature"
-                value={workOrder.customerSignature}
-                className="sm:col-span-2 md:col-span-1"
-              />
+            
             </CardContent>
             <CardFooter className="flex-col items-start text-xs text-gray-500 space-y-1">
               <p>Created On: {formatDate(workOrder.createdAt)}</p>

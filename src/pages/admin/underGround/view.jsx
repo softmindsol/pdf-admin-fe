@@ -494,10 +494,7 @@ export default function ViewUndergroundTest() {
                       <h4 className="font-semibold text-md mb-2">
                         Property Owner Representative
                       </h4>
-                      <DetailItem
-                        label="Signed"
-                        value={testData.signatures?.forPropertyOwner?.signed}
-                      />
+                      
                       <DetailItem
                         label="Title"
                         value={testData.signatures?.forPropertyOwner?.title}
@@ -513,12 +510,7 @@ export default function ViewUndergroundTest() {
                       <h4 className="font-semibold text-md mb-2">
                         Installing Contractor Representative
                       </h4>
-                      <DetailItem
-                        label="Signed"
-                        value={
-                          testData.signatures?.forInstallingContractor?.signed
-                        }
-                      />
+                      
                       <DetailItem
                         label="Title"
                         value={
