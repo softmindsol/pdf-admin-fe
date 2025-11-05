@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import { showDeleteConfirm } from "@/lib/swal";
 
 // --- Helper Components & Functions ---
@@ -77,12 +76,24 @@ export default function ViewWorkOrder() {
 
   const workOrder = response?.data?.workOrder;
 
-  // Calculate grand total for materials
-  const grandTotal =
+  // --- Financial Calculations ---
+
+  // Calculate Subtotal (sum of base costs before tax)
+  const subtotal =
     workOrder?.materialList?.reduce(
       (acc, item) => acc + (item.totalCost || 0),
       0
     ) || 0;
+
+  // Calculate Total Tax amount
+  const totalTax =
+    workOrder?.materialList?.reduce((acc, item) => {
+      const taxAmount = (item.totalCost || 0) * ((item.taxRate || 0) / 100);
+      return acc + taxAmount;
+    }, 0) || 0;
+
+  // Calculate Grand Total (Subtotal + Total Tax)
+  const grandTotal = subtotal + totalTax;
 
   // --- Loading State ---
   if (isLoading) {
@@ -161,7 +172,7 @@ export default function ViewWorkOrder() {
             onClick={() => {
               showDeleteConfirm(async () => {
                 await deleteWorkOrder(id);
-                navigate('/work-order')
+                navigate("/work-order");
               });
             }}
           >
@@ -207,7 +218,6 @@ export default function ViewWorkOrder() {
                   {workOrder.paymentMethod.replace("_", " ")}
                 </span>
               </DetailItem>
-            
             </CardContent>
             <CardFooter className="flex-col items-start text-xs text-gray-500 space-y-1">
               <p>Created On: {formatDate(workOrder.createdAt)}</p>
@@ -229,6 +239,7 @@ export default function ViewWorkOrder() {
                     <TableHead>Description</TableHead>
                     <TableHead className="text-right">Unit Cost</TableHead>
                     <TableHead className="text-right">Total Cost</TableHead>
+                    <TableHead className="text-right">Tax Rate (%)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -245,11 +256,14 @@ export default function ViewWorkOrder() {
                         <TableCell className="text-right">
                           {formatCurrency(item.totalCost)}
                         </TableCell>
+                        <TableCell className="text-right">
+                          {item.taxRate || 0}%
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                         No materials were recorded for this work order.
                       </TableCell>
                     </TableRow>
@@ -259,7 +273,29 @@ export default function ViewWorkOrder() {
                   <ShadcnTableFooter>
                     <TableRow>
                       <TableCell
-                        colSpan={3}
+                        colSpan={4}
+                        className="text-right font-semibold"
+                      >
+                        Subtotal
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {formatCurrency(subtotal)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
+                        className="text-right font-semibold"
+                      >
+                        Total Tax
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {formatCurrency(totalTax)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
                         className="text-right font-bold text-lg"
                       >
                         Grand Total
