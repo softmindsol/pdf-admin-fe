@@ -219,6 +219,13 @@ export default function ViewAboveGroundTicket() {
                             ?.deviationsExplanation
                         }
                       />
+                      <DetailItem
+                        label="Location"
+                        value={
+                          ticket.plansAndInstructions?.plans
+                            ?.address
+                        }
+                      />
                     </div>
                   </div>
                   <div>
