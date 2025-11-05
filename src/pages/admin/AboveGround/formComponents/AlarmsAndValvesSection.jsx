@@ -5,6 +5,7 @@ import {
   FormControl,
   FormLabel,
   FormItem,
+  FormMessage,
 } from "@/components/ui/form";
 import {
   AccordionItem,
@@ -87,6 +88,7 @@ export function AlarmsAndValvesSection({ control }) {
                           <FormControl>
                             <Input placeholder="Waterflow Switch" {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -99,6 +101,7 @@ export function AlarmsAndValvesSection({ control }) {
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -111,6 +114,7 @@ export function AlarmsAndValvesSection({ control }) {
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -123,6 +127,7 @@ export function AlarmsAndValvesSection({ control }) {
                           <FormControl>
                             <Input type="number" {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -135,6 +140,7 @@ export function AlarmsAndValvesSection({ control }) {
                           <FormControl>
                             <Input type="number" {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -192,6 +198,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -204,6 +211,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -216,6 +224,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -228,6 +237,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -240,6 +250,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -252,6 +263,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -279,6 +291,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -291,6 +304,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -303,6 +317,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -315,6 +330,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -327,6 +343,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -339,6 +356,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -351,6 +369,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -370,6 +389,7 @@ export function AlarmsAndValvesSection({ control }) {
                                     onCheckedChange={field.onChange}
                                   />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -387,6 +407,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -399,6 +420,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -411,6 +433,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -423,6 +446,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -435,6 +459,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -447,6 +472,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -459,6 +485,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -478,24 +505,26 @@ export function AlarmsAndValvesSection({ control }) {
                                     onCheckedChange={field.onChange}
                                   />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
                         </div>
                       </TabsContent>
                     </Tabs>
-                      <FormField
+                    <FormField
                       control={control}
                       name={`alarmsAndValves.dryPipeOperatingTests.${index}.explain`}
                       render={({ field }) => (
                         <FormItem className="mt-4">
                           <FormLabel>If no, explain</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="Explain if alarm did not operate properly..." 
-                              {...field} 
+                            <Textarea
+                              placeholder="Explain if alarm did not operate properly..."
+                              {...field}
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -546,6 +575,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -558,6 +588,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -576,6 +607,8 @@ export function AlarmsAndValvesSection({ control }) {
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                               </FormControl>
+                              <FormMessage />
+
                               <SelectContent>
                                 <SelectItem value="pneumatic">
                                   Pneumatic
@@ -603,6 +636,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input type="number" {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -615,6 +649,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input type="number" {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -633,6 +668,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -648,6 +684,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -663,6 +700,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -678,6 +716,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -695,6 +734,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -710,6 +750,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -724,6 +765,7 @@ export function AlarmsAndValvesSection({ control }) {
                           <FormControl>
                             <Textarea {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -775,6 +817,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -787,6 +830,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -799,6 +843,7 @@ export function AlarmsAndValvesSection({ control }) {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -818,6 +863,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -830,6 +876,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -849,6 +896,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -861,6 +909,7 @@ export function AlarmsAndValvesSection({ control }) {
                                 <FormControl>
                                   <Input type="number" {...field} />
                                 </FormControl>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -876,6 +925,7 @@ export function AlarmsAndValvesSection({ control }) {
                           <FormControl>
                             <Input type="number" {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
