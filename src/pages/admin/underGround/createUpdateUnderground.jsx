@@ -46,7 +46,7 @@ const nonFutureDate = z.coerce // coerce will attempt to convert the string from
 
 const signatureSchema = z.object({
   // Applied validation to signature fields
-  signed: noSpecialChars.optional().default(""),
+  signed: z.string().optional().default(""),
   title: noSpecialChars.optional().default(""),
   // Using the improved date schema here as well
   date: nonFutureDate.optional().nullable(),
@@ -286,26 +286,29 @@ export default function UndergroundTestForm() {
           ...testData,
           propertyDetails: {
             ...testData.propertyDetails,
-            date: formatDateForInput(testData.propertyDetails?.date),
+            date: testData.propertyDetails?.date? formatDateForInput(testData.propertyDetails?.date):null,
           },
           remarks: {
             ...testData.remarks,
-            dateLeftInService: formatDateForInput(
+            dateLeftInService: testData.remarks?.dateLeftInService? formatDateForInput(
               testData.remarks?.dateLeftInService
-            ),
+            ):null ,
           },
           signatures: {
             forPropertyOwner: {
               ...testData.signatures?.forPropertyOwner,
-              date: formatDateForInput(
+              signed: testData.signatures?.forPropertyOwner?.signed|| '' ,
+              date: testData.signatures?.forPropertyOwner?.date ? formatDateForInput(
                 testData.signatures?.forPropertyOwner?.date
-              ),
+              ):null,
+              
             },
             forInstallingContractor: {
               ...testData.signatures?.forInstallingContractor,
-              date: formatDateForInput(
+              signed: testData.signatures?.forInstallingContractor?.signed||'',
+              date:testData.signatures?.forInstallingContractor?.date?  formatDateForInput(
                 testData.signatures?.forInstallingContractor?.date
-              ),
+              ):null,
             },
           },
         };
@@ -313,7 +316,13 @@ export default function UndergroundTestForm() {
       }
     }
   }, [existingData, isUpdateMode, reset]);
-
+  
+  const onInvalid = (errors) => {
+    console.error("Zod Validation Errors:", errors);
+    toast.error("Validation failed.", {
+      description: "Please correct the highlighted fields before submitting.",
+    });
+  };
   async function onSubmit(values) {
     console.log("Form Values Submitted:", values);
     const promise = () =>
@@ -367,7 +376,10 @@ export default function UndergroundTestForm() {
       </div>
 
       <Form {...form}>
-        <form id="under-ground-form" onSubmit={form.handleSubmit(onSubmit)}>
+        <form id="under-ground-form" 
+                  onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+
+        >
           <Accordion
             type="multiple"
             defaultValue={["item-1"]}
