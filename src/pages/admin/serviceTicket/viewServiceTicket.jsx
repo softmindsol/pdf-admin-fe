@@ -253,6 +253,10 @@ export default function ViewServiceTicket() {
                   label="Sales Tax Applied"
                   value={ticket.applySalesTax ? "Yes" : "No"}
                 />
+                <DetailItem
+                  label="Print Name"
+                  value={ticket?.printName }
+                />
               </div>
             </div>
           </CardContent>

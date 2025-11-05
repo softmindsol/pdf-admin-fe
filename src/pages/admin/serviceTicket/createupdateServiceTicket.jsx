@@ -39,30 +39,37 @@ const nameRegex = /^[a-zA-Z\s\-]+$/;
 const generalTextRegex = /^[a-zA-Z0-9\s\.\,\-\_]+$/;
 
 // For Phone Numbers: Allows ONLY digits (0-9). No spaces, no hyphens, no other characters.
-const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
-;
+const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/;
 
-
- const formSchema = z.object({
+const formSchema = z.object({
   jobName: z
     .string()
     .min(2, "Job name is required.")
-    .regex(nameRegex, "Job name can only contain letters, spaces, and hyphens."),
+    .regex(
+      nameRegex,
+      "Job name can only contain letters, spaces, and hyphens."
+    ),
 
   customerName: z
     .string()
     .min(2, "Customer name is required.")
-    .regex(nameRegex, "Customer name can only contain letters, spaces, and hyphens."),
+    .regex(
+      nameRegex,
+      "Customer name can only contain letters, spaces, and hyphens."
+    ),
 
   emailAddress: z.string().email("A valid email address is required."),
 
   // CORRECTED: Strict phone number validation (digits only)
   phoneNumber: z
     .string()
-    .regex(phoneNumberAllowedCharsRegex, "Phone number must only contain digits.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "Phone number must only contain digits."
+    )
     .min(10, "Phone number must be at least 10 digits.")
     .max(15, "Phone number must not exceed 15 digits."),
-    
+
   jobLocation: z
     .string()
     .min(5, "A valid job location is required.")
@@ -88,28 +95,41 @@ const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
   technicianName: z
     .string()
     .min(2, "Technician name is required.")
-    .regex(nameRegex, "Technician name can only contain letters, spaces, and hyphens."),
+    .regex(
+      nameRegex,
+      "Technician name can only contain letters, spaces, and hyphens."
+    ),
 
   // CORRECTED: Strict phone number validation (digits only)
   technicianContactNumber: z
     .string()
-    .regex(phoneNumberAllowedCharsRegex, "Phone number must only contain digits.")
+    .regex(
+      phoneNumberAllowedCharsRegex,
+      "Phone number must only contain digits."
+    )
     .min(10, "Phone number must be at least 10 digits.")
     .max(15, "Phone number must not exceed 15 digits."),
-    
+
   stHours: z.coerce.number().min(0).default(0),
   otHours: z.coerce.number().min(0).default(0),
 
   applySalesTax: z.boolean().default(false),
   workOrderStatus: z.enum(["Not Complete", "System Out of Order", "Complete"]),
-  
-  completionDate: z.coerce.date({
+
+  completionDate: z.coerce
+    .date({
       required_error: "A valid completion date is required.",
       invalid_type_error: "That's not a valid date!",
     })
     .max(new Date(), { message: "Completion date cannot be in the future." }),
 
   customerSignature: z.string().optional(),
+
+  // Added printName field
+  printName: z
+    .string()
+    .min(2, "Printed name is required for acknowledgement.")
+    .regex(nameRegex, "Name can only contain letters, spaces, and hyphens."),
 });
 
 export default function ServiceTicketForm() {
@@ -157,6 +177,7 @@ export default function ServiceTicketForm() {
       workOrderStatus: "Not Complete",
       completionDate: format(new Date(), "yyyy-MM-dd"),
       customerSignature: "",
+      printName: "", // Added default value for printName
     },
   });
 
@@ -178,6 +199,7 @@ export default function ServiceTicketForm() {
       }
     }
   }, [existingData, isUpdateMode, form]);
+
   async function onSubmit(values) {
     try {
       if (isUpdateMode) {
@@ -246,7 +268,7 @@ export default function ServiceTicketForm() {
       </div>
 
       <Card>
-        <CardContent className="">
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               {/* --- Job & Customer Information Section --- */}
@@ -260,15 +282,14 @@ export default function ServiceTicketForm() {
                     name="jobName"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Job Name</FormLabel>{" "}
+                        <FormLabel>Job Name</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Quarterly HVAC Maintenance"
                             {...field}
                           />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -277,12 +298,11 @@ export default function ServiceTicketForm() {
                     name="customerName"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Customer Name</FormLabel>{" "}
+                        <FormLabel>Customer Name</FormLabel>
                         <FormControl>
                           <Input placeholder="Acme Corporation" {...field} />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -291,12 +311,11 @@ export default function ServiceTicketForm() {
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Phone Number</FormLabel>{" "}
+                        <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="(555) 111-2222" {...field} />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                          <Input placeholder="5551112222" {...field} />
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -305,16 +324,15 @@ export default function ServiceTicketForm() {
                     name="emailAddress"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Email Address</FormLabel>{" "}
+                        <FormLabel>Email Address</FormLabel>
                         <FormControl>
                           <Input
                             type="email"
                             placeholder="contact@acme.com"
                             {...field}
                           />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -323,15 +341,14 @@ export default function ServiceTicketForm() {
                     name="jobLocation"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        {" "}
-                        <FormLabel>Job Location / Address</FormLabel>{" "}
+                        <FormLabel>Job Location / Address</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="123 Industrial Way, Anytown, USA"
                             {...field}
                           />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -349,18 +366,15 @@ export default function ServiceTicketForm() {
                     name="workDescription"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>
-                          Description of Work Performed
-                        </FormLabel>{" "}
+                        <FormLabel>Description of Work Performed</FormLabel>
                         <FormControl>
                           <Textarea
                             rows={5}
                             placeholder="Describe the tasks completed, issues found, and resolutions..."
                             {...field}
                           />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -448,12 +462,11 @@ export default function ServiceTicketForm() {
                     name="technicianName"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Technician Name</FormLabel>{" "}
+                        <FormLabel>Technician Name</FormLabel>
                         <FormControl>
                           <Input placeholder="John Smith" {...field} />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -462,12 +475,11 @@ export default function ServiceTicketForm() {
                     name="technicianContactNumber"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Technician Contact</FormLabel>{" "}
+                        <FormLabel>Technician Contact</FormLabel>
                         <FormControl>
-                          <Input placeholder="(555) 999-8888" {...field} />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                          <Input placeholder="5559998888" {...field} />
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -476,8 +488,7 @@ export default function ServiceTicketForm() {
                     name="stHours"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Straight Time (Hours)</FormLabel>{" "}
+                        <FormLabel>Straight Time (Hours)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -485,8 +496,8 @@ export default function ServiceTicketForm() {
                             placeholder="e.g., 8.5"
                             {...field}
                           />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -495,8 +506,7 @@ export default function ServiceTicketForm() {
                     name="otHours"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Overtime (Hours)</FormLabel>{" "}
+                        <FormLabel>Overtime (Hours)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -504,8 +514,8 @@ export default function ServiceTicketForm() {
                             placeholder="e.g., 2.0"
                             {...field}
                           />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -525,30 +535,27 @@ export default function ServiceTicketForm() {
                     name="workOrderStatus"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Work Order Status</FormLabel>{" "}
+                        <FormLabel>Work Order Status</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
-                          {" "}
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a status" />
                             </SelectTrigger>
-                          </FormControl>{" "}
+                          </FormControl>
                           <SelectContent>
-                            {" "}
                             <SelectItem value="Not Complete">
                               Not Complete
-                            </SelectItem>{" "}
+                            </SelectItem>
                             <SelectItem value="System Out of Order">
                               System Out of Order
-                            </SelectItem>{" "}
-                            <SelectItem value="Complete">Complete</SelectItem>{" "}
-                          </SelectContent>{" "}
-                        </Select>{" "}
-                        <FormMessage />{" "}
+                            </SelectItem>
+                            <SelectItem value="Complete">Complete</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -557,12 +564,11 @@ export default function ServiceTicketForm() {
                     name="completionDate"
                     render={({ field }) => (
                       <FormItem>
-                        {" "}
-                        <FormLabel>Completion Date</FormLabel>{" "}
+                        <FormLabel>Completion Date</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
-                        </FormControl>{" "}
-                        <FormMessage />{" "}
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -591,7 +597,36 @@ export default function ServiceTicketForm() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <Separator />
+
+              {/* --- Acknowledgement Section --- */}
+              <div>
+                <CardTitle className="text-lg mb-4">Acknowledgement</CardTitle>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="printName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Print Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Type customer's full name"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Customer acknowledges that the work has been completed
+                          satisfactorily.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
                 <Button type="submit" disabled={isLoading}>
                   {isLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
