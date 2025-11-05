@@ -252,9 +252,9 @@ export const GlobalApi = createApi({
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
             if (key === "startDate") {
-              queryParams["propertyDetails.date[gte]"] = value;
+              queryParams["createdAt[gte]"] = value;
             } else if (key === "endDate") {
-              queryParams["propertyDetails.date[lte]"] = value;
+              queryParams["createdAt[lte]"] = value;
             } else {
               queryParams[key] = value;
             }
@@ -293,9 +293,9 @@ export const GlobalApi = createApi({
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
             if (key === "startDate") {
-              queryParams["completionDate[gte]"] = value;
+              queryParams["createdAt[gte]"] = value;
             } else if (key === "endDate") {
-              queryParams["completionDate[lte]"] = value;
+              queryParams["createdAt[lte]"] = value;
             } else {
               queryParams[key] = value;
             }
@@ -335,9 +335,9 @@ export const GlobalApi = createApi({
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
             if (key === "startDate") {
-              queryParams["propertyDetails.date[gte]"] = value;
+              queryParams["createdAt[gte]"] = value;
             } else if (key === "endDate") {
-              queryParams["propertyDetails.date[lte]"] = value;
+              queryParams["createdAt[lte]"] = value;
             } else {
               queryParams[key] = value;
             }
