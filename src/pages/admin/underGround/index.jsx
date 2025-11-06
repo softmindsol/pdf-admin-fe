@@ -222,11 +222,11 @@ export default function UndergroundTestManagement() {
             ) : undergroundTests.length > 0 ? (
               undergroundTests.map((test) => (
                 <TableRow key={test._id}>
-                  <TableCell className="font-medium">{test.propertyDetails.propertyName}</TableCell>
-                  <TableCell>{test.propertyDetails.propertyAddress}</TableCell>
-                  <TableCell className="text-muted-foreground">{test.remarks.nameOfInstallingContractor || "N/A"}</TableCell>
+                  <TableCell className="font-medium">{test.propertyDetails?.propertyName}</TableCell>
+                  <TableCell>{test.propertyDetails?.propertyAddress}</TableCell>
+                  <TableCell className="text-muted-foreground">{test?.remarks?.nameOfInstallingContractor || "N/A"}</TableCell>
                   <TableCell>{test.createdBy?.username || "N/A"}</TableCell>
-                  <TableCell>{format(new Date(test.createdAt), "PP")}</TableCell>
+                  <TableCell>{format(new Date(test?.createdAt), "PP")}</TableCell>
                   <TableCell className="text-right">
                      <DropdownMenu>
                       <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>

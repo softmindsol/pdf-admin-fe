@@ -39,6 +39,7 @@ const instructionValues = ["VN", "NA", "NC", "ND", "NG"];
 
 const formSchema = z.object({
   accountNumber: z.string().min(3, "Account number is required."),
+  communicatorFormat: z.string().min(1, "Communicator format is required."),
   dealerName: z
     .string()
     .min(2, "Dealer name is required.")
@@ -66,7 +67,7 @@ const formSchema = z.object({
   zip: z.string().regex(zipCodeRegex, "A valid 5-digit ZIP code is required."),
   monitor: z.string().min(2, "Monitor information is required."),
   dealer: z.string().optional(),
-  communicatorFormat: z
+  areas: z
     .array(
       z.object({
         areaNumber: z.coerce
@@ -79,6 +80,8 @@ const formSchema = z.object({
           .positive("Must be a positive number."),
         zoneDescription: z.string().optional(),
         partitionAreaDescription: z.string().optional(),
+        // Added 'codeDescription' to the Zod schema
+        codeDescription: z.string().optional(),
         instruction1: z.enum(instructionValues),
         instruction2: z.enum(instructionValues),
         instruction3: z.enum(instructionValues),
@@ -104,6 +107,7 @@ export default function AlarmForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       accountNumber: "",
+      communicatorFormat: "",
       dealerName: "",
       dealerCode: "",
       startDate: format(new Date(), "yyyy-MM-dd"),
@@ -114,13 +118,13 @@ export default function AlarmForm() {
       zip: "",
       monitor: "",
       dealer: "",
-      communicatorFormat: [],
+      areas: [],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "communicatorFormat",
+    name: "areas",
   });
 
   React.useEffect(() => {
@@ -172,6 +176,7 @@ export default function AlarmForm() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
+      {/* Header is unchanged */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
@@ -191,6 +196,7 @@ export default function AlarmForm() {
         <CardContent className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Account, Dealer, Subscriber, and Location sections are unchanged */}
               <div>
                 <CardTitle className="text-lg mb-4">
                   Account & Dealer Information
@@ -204,6 +210,22 @@ export default function AlarmForm() {
                         <FormLabel>Account Number</FormLabel>
                         <FormControl>
                           <Input placeholder="e.g., 12345-ABC" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="communicatorFormat"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Communicator Format</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., SIA, Contact ID"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -370,6 +392,10 @@ export default function AlarmForm() {
                       append({
                         areaNumber: 1,
                         zoneNumber: 1,
+                        zoneDescription: "",
+                        partitionAreaDescription: "",
+                        // Added default value for codeDescription
+                        codeDescription: "",
                         instruction1: "VN",
                         instruction2: "VN",
                         instruction3: "VN",
@@ -400,7 +426,7 @@ export default function AlarmForm() {
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         <FormField
                           control={form.control}
-                          name={`communicatorFormat.${index}.areaNumber`}
+                          name={`areas.${index}.areaNumber`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Area #</FormLabel>
@@ -413,7 +439,7 @@ export default function AlarmForm() {
                         />
                         <FormField
                           control={form.control}
-                          name={`communicatorFormat.${index}.zoneNumber`}
+                          name={`areas.${index}.zoneNumber`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Zone #</FormLabel>
@@ -426,7 +452,7 @@ export default function AlarmForm() {
                         />
                         <FormField
                           control={form.control}
-                          name={`communicatorFormat.${index}.zoneDescription`}
+                          name={`areas.${index}.zoneDescription`}
                           render={({ field }) => (
                             <FormItem className="col-span-2">
                               <FormLabel>Zone Desc.</FormLabel>
@@ -442,7 +468,7 @@ export default function AlarmForm() {
                         />
                         <FormField
                           control={form.control}
-                          name={`communicatorFormat.${index}.partitionAreaDescription`}
+                          name={`areas.${index}.partitionAreaDescription`}
                           render={({ field }) => (
                             <FormItem className="col-span-2">
                               <FormLabel>Partition Desc.</FormLabel>
@@ -456,16 +482,35 @@ export default function AlarmForm() {
                             </FormItem>
                           )}
                         />
+                        {/* --- NEW FIELD ADDED HERE --- */}
+                        <FormField
+                          control={form.control}
+                          name={`areas.${index}.codeDescription`}
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>Code Desc.</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g., Fire Alarm"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {/* The rest of the grid is adjusted, and this will flow correctly */}
                         {[1, 2, 3, 4].map((i) => (
                           <FormField
                             key={i}
                             control={form.control}
-                            name={`communicatorFormat.${index}.instruction${i}`}
+                            name={`areas.${index}.instruction${i}`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Instr. {i}</FormLabel>
                                 <Select
-                                  onValueChange={field.onChange}
+                                  onValuecha
+                                  nge={field.onChange}
                                   defaultValue={field.value}
                                 >
                                   <FormControl>
