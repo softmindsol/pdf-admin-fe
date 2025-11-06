@@ -65,7 +65,6 @@ const formSchema = z.object({
     .min(2, "State is required.")
     .regex(nameRegex, "Invalid characters."),
   zip: z.string().regex(zipCodeRegex, "A valid 5-digit ZIP code is required."),
-  monitor: z.string().min(2, "Monitor information is required."),
   areas: z
     .array(
       z.object({
@@ -114,7 +113,6 @@ export default function AlarmForm() {
       city: "",
       state: "",
       zip: "",
-      monitor: "",
       areas: [],
     },
   });
@@ -255,22 +253,7 @@ export default function AlarmForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="monitor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Monitor</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Central Station XYZ"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                 
                   <FormField
                     control={form.control}
                     name="startDate"
