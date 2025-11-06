@@ -66,7 +66,6 @@ const formSchema = z.object({
     .regex(nameRegex, "Invalid characters."),
   zip: z.string().regex(zipCodeRegex, "A valid 5-digit ZIP code is required."),
   monitor: z.string().min(2, "Monitor information is required."),
-  dealer: z.string().optional(),
   areas: z
     .array(
       z.object({
@@ -80,7 +79,6 @@ const formSchema = z.object({
           .positive("Must be a positive number."),
         zoneDescription: z.string().optional(),
         partitionAreaDescription: z.string().optional(),
-        // Added 'codeDescription' to the Zod schema
         codeDescription: z.string().optional(),
         instruction1: z.enum(instructionValues),
         instruction2: z.enum(instructionValues),
@@ -117,7 +115,6 @@ export default function AlarmForm() {
       state: "",
       zip: "",
       monitor: "",
-      dealer: "",
       areas: [],
     },
   });
@@ -176,7 +173,6 @@ export default function AlarmForm() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
-      {/* Header is unchanged */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
@@ -196,7 +192,6 @@ export default function AlarmForm() {
         <CardContent className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Account, Dealer, Subscriber, and Location sections are unchanged */}
               <div>
                 <CardTitle className="text-lg mb-4">
                   Account & Dealer Information
@@ -269,22 +264,6 @@ export default function AlarmForm() {
                         <FormControl>
                           <Input
                             placeholder="e.g., Central Station XYZ"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="dealer"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dealer (Optional)</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Dealer Contact Name"
                             {...field}
                           />
                         </FormControl>
@@ -394,7 +373,6 @@ export default function AlarmForm() {
                         zoneNumber: 1,
                         zoneDescription: "",
                         partitionAreaDescription: "",
-                        // Added default value for codeDescription
                         codeDescription: "",
                         instruction1: "VN",
                         instruction2: "VN",
@@ -482,7 +460,6 @@ export default function AlarmForm() {
                             </FormItem>
                           )}
                         />
-                        {/* --- NEW FIELD ADDED HERE --- */}
                         <FormField
                           control={form.control}
                           name={`areas.${index}.codeDescription`}
@@ -499,7 +476,6 @@ export default function AlarmForm() {
                             </FormItem>
                           )}
                         />
-                        {/* The rest of the grid is adjusted, and this will flow correctly */}
                         {[1, 2, 3, 4].map((i) => (
                           <FormField
                             key={i}
@@ -509,8 +485,7 @@ export default function AlarmForm() {
                               <FormItem>
                                 <FormLabel>Instr. {i}</FormLabel>
                                 <Select
-                                  onValuecha
-                                  nge={field.onChange}
+                                  onValueChange={field.onChange}
                                   defaultValue={field.value}
                                 >
                                   <FormControl>
