@@ -173,6 +173,7 @@ export default function ViewAlarm() {
                   label="Start Date"
                   value={formatDate(alarm.startDate)}
                 />
+                <DetailItem label="Communicator Format" value={alarm.communicatorFormat} />
               </div>
             </div>
 
@@ -207,8 +208,8 @@ export default function ViewAlarm() {
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Communicator Zones
               </h3>
-              {alarm.communicatorFormat &&
-              alarm.communicatorFormat.length > 0 ? (
+              {alarm.areas &&
+              alarm.areas.length > 0 ? (
                 <div className="border rounded-md">
                   <Table>
                     <TableHeader>
@@ -224,7 +225,7 @@ export default function ViewAlarm() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {alarm.communicatorFormat.map((zone, index) => (
+                      {alarm.areas.map((zone, index) => (
                         <TableRow key={zone._id || index}>
                           <TableCell>{zone.areaNumber}</TableCell>
                           <TableCell>{zone.zoneNumber}</TableCell>
