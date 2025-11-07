@@ -48,7 +48,7 @@ const DetailItem = ({ label, value, children, className = "" }) => {
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return "--"; // <-- Changed
+  if (!dateString) return "--";
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -58,7 +58,7 @@ const formatDate = (dateString) => {
 
 const formatBoolean = (value) => {
   if (value === null || typeof value === "undefined") {
-    return "No"; // <-- Added check for null/undefined
+    return "No";
   }
   return value ? "Yes" : "No";
 };
@@ -77,7 +77,6 @@ export default function ViewUndergroundTest() {
   } = useGetUndergroundTestByIdQuery(id, { skip: !id });
 
   const testData = response?.data?.undergroundTest;
-  console.log("🚀 ~ ViewUndergroundTest ~ testData:", testData)
 
   // --- Loading State ---
   if (isLoading) {
@@ -338,7 +337,7 @@ export default function ViewUndergroundTest() {
                   <Separator />
                   <div>
                     <h4 className="font-semibold text-md mb-2">
-                      Flushing Tests
+                      Main Piping Flushing Test
                     </h4>
                     <div className="grid gap-6 sm:grid-cols-2">
                       <DetailItem
@@ -372,6 +371,47 @@ export default function ViewUndergroundTest() {
                       />
                     </div>
                   </div>
+                  {/* --- NEWLY ADDED SECTION --- */}
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-md mb-2">
+                      Lead-in Connection Flushing Tests
+                    </h4>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <DetailItem
+                        label="Piping Standard"
+                        value={
+                          testData.leadsflushingTests?.undergroundPipingStandard
+                        }
+                      />
+                      <DetailItem
+                        label="Conforms to Piping Standard?"
+                        value={formatBoolean(
+                          testData.leadsflushingTests
+                            ?.undergroundPipingStandardConform
+                        )}
+                      />
+                      <DetailItem
+                        label="Piping Explanation"
+                        value={
+                          testData.leadsflushingTests
+                            ?.undergroundPipingStandardExplanation
+                        }
+                        className="col-span-full"
+                      />
+                      <DetailItem
+                        label="Flow Obtained From"
+                        value={
+                          testData.leadsflushingTests?.flushingFlowObtained
+                        }
+                      />
+                      <DetailItem
+                        label="Opening Type"
+                        value={testData.leadsflushingTests?.openingType}
+                      />
+                    </div>
+                  </div>
+                  {/* --- END OF NEWLY ADDED SECTION --- */}
                 </AccordionContent>
               </AccordionItem>
 
@@ -441,7 +481,9 @@ export default function ViewUndergroundTest() {
                   />
                   <DetailItem
                     label="Hydrant Make & Type"
-                    value={testData.hydrantsAndControlValves?.hydrantMakeAndType}
+                    value={
+                      testData.hydrantsAndControlValves?.hydrantMakeAndType
+                    }
                   />
                   <DetailItem
                     label="All Operate Satisfactorily?"
@@ -477,55 +519,16 @@ export default function ViewUndergroundTest() {
 
               {/* Remarks & Signatures */}
               <AccordionItem value="item-6">
-                <AccordionTrigger>Remarks & Signatures</AccordionTrigger>
-                <AccordionContent className="space-y-4 p-2">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <DetailItem
-                      label="Date Left in Service"
-                      value={formatDate(testData.remarks?.dateLeftInService)}
-                    />
-                    <DetailItem
-                      label="Name of Installing Contractor"
-                      value={testData.remarks?.nameOfInstallingContractor}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div>
-                      <h4 className="font-semibold text-md mb-2">
-                        Property Owner Representative
-                      </h4>
-                      
-                      <DetailItem
-                        label="Title"
-                        value={testData.signatures?.forPropertyOwner?.title}
-                      />
-                      <DetailItem
-                        label="Date Signed"
-                        value={formatDate(
-                          testData.signatures?.forPropertyOwner?.date
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-md mb-2">
-                        Installing Contractor Representative
-                      </h4>
-                      
-                      <DetailItem
-                        label="Title"
-                        value={
-                          testData.signatures?.forInstallingContractor?.title
-                        }
-                      />
-                      <DetailItem
-                        label="Date Signed"
-                        value={formatDate(
-                          testData.signatures?.forInstallingContractor?.date
-                        )}
-                      />
-                    </div>
-                  </div>
+                <AccordionTrigger>Remarks</AccordionTrigger>
+                <AccordionContent className="p-2 grid sm:grid-cols-2 gap-6">
+                  <DetailItem
+                    label="Date Left in Service"
+                    value={formatDate(testData.remarks?.dateLeftInService)}
+                  />
+                  <DetailItem
+                    label="Name of Installing Contractor"
+                    value={testData.remarks?.nameOfInstallingContractor}
+                  />
                 </AccordionContent>
               </AccordionItem>
 
