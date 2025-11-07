@@ -531,7 +531,51 @@ export default function ViewUndergroundTest() {
                   />
                 </AccordionContent>
               </AccordionItem>
+              {/* Signatures */}
+              <AccordionItem value="item-8">
+                <AccordionTrigger>Signatures</AccordionTrigger>
+                <AccordionContent className="p-2 grid sm:grid-cols-2 gap-x-6 gap-y-8">
+                  {/* Property Owner Signature Details */}
+                  <div>
+                    <h4 className="font-semibold text-md mb-2">
+                      For Property Owner
+                    </h4>
+                    <div className="space-y-4">
+                      <DetailItem
+                        label="Title"
+                        value={testData.signatures?.forPropertyOwner?.title}
+                      />
+                      <DetailItem
+                        label="Date Signed"
+                        value={formatDate(
+                          testData.signatures?.forPropertyOwner?.date
+                        )}
+                      />
+                    </div>
+                  </div>
 
+                  {/* Installing Contractor Signature Details */}
+                  <div>
+                    <h4 className="font-semibold text-md mb-2">
+                      For Installing Contractor
+                    </h4>
+                    <div className="space-y-4">
+                      <DetailItem
+                        label="Title"
+                        value={
+                          testData.signatures?.forInstallingContractor?.title
+                        }
+                      />
+                      <DetailItem
+                        label="Date Signed"
+                        value={formatDate(
+                          testData.signatures?.forInstallingContractor?.date
+                        )}
+                      />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
               {/* Additional Notes */}
               <AccordionItem value="item-7">
                 <AccordionTrigger>Additional Notes</AccordionTrigger>
