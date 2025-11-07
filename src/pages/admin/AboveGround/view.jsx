@@ -373,7 +373,6 @@ export default function ViewAboveGroundTicket() {
                     )}
                   </div>
 
-                  {/* --- NEWLY ADDED: Dry Pipe Operating Tests --- */}
                   <Separator />
                   <div>
                     <h4 className="font-semibold text-md">
@@ -389,6 +388,7 @@ export default function ViewAboveGroundTicket() {
                           >
                             <p className="font-medium">Test {i + 1}</p>
                             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                              {/* --- Existing Fields --- */}
                               <DetailItem
                                 label="Dry Valve Make/Model"
                                 value={`${test.dryValve?.make || "N/A"} / ${
@@ -401,6 +401,40 @@ export default function ViewAboveGroundTicket() {
                                   test.qodValve?.model || "N/A"
                                 }`}
                               />
+                              {/* --- NEWLY ADDED FIELDS --- */}
+                              <DetailItem
+                                label="Dry Valve Serial #"
+                                value={test.dryValve?.serialNumber}
+                              />
+                              <DetailItem
+                                label="QOD Valve Serial #"
+                                value={test.qodValve?.serialNumber}
+                              />
+                              <DetailItem
+                                label="Water Pressure (w/o | w/ QOD)"
+                                value={`${
+                                  test.waterPressureWithoutQOD ?? "N/A"
+                                } psi | ${
+                                  test.waterPressureWithQOD ?? "N/A"
+                                } psi`}
+                              />
+                              <DetailItem
+                                label="Air Pressure (w/o | w/ QOD)"
+                                value={`${
+                                  test.airPressureWithoutQOD ?? "N/A"
+                                } psi | ${
+                                  test.airPressureWithQOD ?? "N/A"
+                                } psi`}
+                              />
+                              <DetailItem
+                                label="Trip Point Air (w/o | w/ QOD)"
+                                value={`${
+                                  test.tripPointAirPressureWithoutQOD ?? "N/A"
+                                } psi | ${
+                                  test.tripPointAirPressureWithQOD ?? "N/A"
+                                } psi`}
+                              />
+                              {/* --- End of Newly Added Fields --- */}
                               <DetailItem
                                 label="Time to Trip (without QOD)"
                                 value={formatTime(test.timeToTripWithoutQOD)}
@@ -433,6 +467,12 @@ export default function ViewAboveGroundTicket() {
                                   test.alarmOperatedProperlyWithQOD
                                 )}
                               />
+                              {/* --- NEWLY ADDED FIELD --- */}
+                              <DetailItem
+                                label="Alarm Operation Explanation"
+                                value={test.explain}
+                                className="col-span-full"
+                              />
                             </div>
                           </div>
                         )
@@ -444,7 +484,6 @@ export default function ViewAboveGroundTicket() {
                     )}
                   </div>
 
-                  {/* --- NEWLY ADDED: Deluge & Pre-Action Valves --- */}
                   <Separator />
                   <div>
                     <h4 className="font-semibold text-md">
@@ -460,6 +499,7 @@ export default function ViewAboveGroundTicket() {
                           >
                             <p className="font-medium">Valve {i + 1}</p>
                             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                              {/* --- Existing Fields --- */}
                               <DetailItem
                                 label="Make/Model"
                                 value={`${valve.make || "N/A"} / ${
@@ -480,6 +520,20 @@ export default function ViewAboveGroundTicket() {
                                   valve.isDetectingMediaSupervised
                                 )}
                               />
+                              {/* --- NEWLY ADDED FIELDS --- */}
+                              <DetailItem
+                                label="Operates from Manual/Remote?"
+                                value={formatBoolean(
+                                  valve.operatesFromManualOrRemote
+                                )}
+                              />
+                              <DetailItem
+                                label="Accessible for Testing?"
+                                value={formatBoolean(
+                                  valve.isAccessibleForTesting
+                                )}
+                              />
+                              {/* --- End of Newly Added Fields --- */}
                               <DetailItem
                                 label="Supervision Loss Alarm OK?"
                                 value={formatBoolean(
@@ -498,6 +552,12 @@ export default function ViewAboveGroundTicket() {
                                   valve.maxTimeToOperateRelease
                                 )}
                               />
+                              {/* --- NEWLY ADDED FIELD --- */}
+                              <DetailItem
+                                label="Explanation"
+                                value={valve.explanation}
+                                className="col-span-full"
+                              />
                             </div>
                           </div>
                         )
@@ -509,7 +569,6 @@ export default function ViewAboveGroundTicket() {
                     )}
                   </div>
 
-                  {/* --- NEWLY ADDED: Pressure Reducing Valve Tests --- */}
                   <Separator />
                   <div>
                     <h4 className="font-semibold text-md">
@@ -541,17 +600,23 @@ export default function ViewAboveGroundTicket() {
                                 label="Static Pressure (In/Out)"
                                 value={`${
                                   test.staticPressure?.inlet || "N/A"
-                                } / ${test.staticPressure?.outlet || "N/A"}`}
+                                } psi / ${
+                                  test.staticPressure?.outlet || "N/A"
+                                } psi`}
                               />
                               <DetailItem
                                 label="Residual Pressure (In/Out)"
                                 value={`${
                                   test.residualPressure?.inlet || "N/A"
-                                } / ${test.residualPressure?.outlet || "N/A"}`}
+                                } psi / ${
+                                  test.residualPressure?.outlet || "N/A"
+                                } psi`}
                               />
                               <DetailItem
                                 label="Flow Rate"
-                                value={test.flowRate}
+                                value={
+                                  test.flowRate ? `${test.flowRate} GPM` : "N/A"
+                                }
                               />
                             </div>
                           </div>
@@ -570,7 +635,6 @@ export default function ViewAboveGroundTicket() {
               <AccordionItem value="item-5">
                 <AccordionTrigger>Testing</AccordionTrigger>
                 <AccordionContent className="p-2 space-y-6">
-                  {/* --- NEWLY ADDED: Backflow Test --- */}
                   <div>
                     <h4 className="font-semibold text-md">Backflow Test</h4>
                     <div className="grid gap-6 sm:grid-cols-2">
@@ -627,7 +691,6 @@ export default function ViewAboveGroundTicket() {
                     </div>
                   </div>
                   <Separator />
-                  {/* --- NEWLY ADDED: Blank Gaskets --- */}
                   <div>
                     <h4 className="font-semibold text-md">
                       Blank Testing Gaskets
@@ -646,6 +709,7 @@ export default function ViewAboveGroundTicket() {
                       <DetailItem
                         label="Locations"
                         value={ticket.testing?.blankTestingGaskets?.locations}
+                        className="col-span-full sm:col-span-1"
                       />
                     </div>
                   </div>
@@ -697,12 +761,24 @@ export default function ViewAboveGroundTicket() {
                         value={ticket.testing?.improperOperationReason}
                         className="col-span-full"
                       />
+                      {/* --- NEWLY ADDED FIELDS --- */}
+                      <DetailItem
+                        label="Underground Piping Explanation"
+                        value={ticket.testing?.undergroundPiping?.explanation}
+                        className="col-span-full"
+                      />
+                      <DetailItem
+                        label="Powder-Driven Fasteners Explanation"
+                        value={
+                          ticket.testing?.powderDrivenFasteners?.explanation
+                        }
+                        className="col-span-full"
+                      />
                     </div>
                   </div>
                 </AccordionContent>
               </AccordionItem>
 
-              {/* --- NEWLY ADDED: Welding & Cutouts --- */}
               <AccordionItem value="item-6">
                 <AccordionTrigger>Welding & Cutouts</AccordionTrigger>
                 <AccordionContent className="p-2 space-y-6">
@@ -751,7 +827,6 @@ export default function ViewAboveGroundTicket() {
                 </AccordionContent>
               </AccordionItem>
 
-              {/* --- NEWLY ADDED: Final Checks --- */}
               <AccordionItem value="item-7">
                 <AccordionTrigger>Final Checks</AccordionTrigger>
                 <AccordionContent className="p-2 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
@@ -775,12 +850,10 @@ export default function ViewAboveGroundTicket() {
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Remarks & Signatures */}
               <AccordionItem value="item-8">
                 <AccordionTrigger>Remarks</AccordionTrigger>
                 <AccordionContent className="p-2 space-y-4">
                   <div className="grid gap-6 sm:grid-cols-2">
-                    {/* --- NEWLY ADDED Fields --- */}
                     <DetailItem
                       label="Sprinkler Contractor Name"
                       value={
@@ -794,6 +867,27 @@ export default function ViewAboveGroundTicket() {
                       )}
                     />
                   </div>
+                   <Separator />
+
+  <div className="space-y-4">
+    <div>
+        <h4 className="font-semibold text-md mb-2">Fire Marshal / AHJ</h4>
+        <div className="grid gap-4 sm:grid-cols-3 p-3 border rounded-md">
+            <DetailItem label="Name" value={ticket.remarksAndSignatures?.fireMarshalOrAHJ?.name} />
+            <DetailItem label="Title" value={ticket.remarksAndSignatures?.fireMarshalOrAHJ?.title} />
+            <DetailItem label="Date Signed" value={formatDate(ticket.remarksAndSignatures?.fireMarshalOrAHJ?.date)} />
+        </div>
+    </div>
+    <div>
+        <h4 className="font-semibold text-md mb-2">Sprinkler Contractor</h4>
+         <div className="grid gap-4 sm:grid-cols-3 p-3 border rounded-md">
+            <DetailItem label="Name" value={ticket.remarksAndSignatures?.sprinklerContractor?.name} />
+            <DetailItem label="Title" value={ticket.remarksAndSignatures?.sprinklerContractor?.title} />
+            <DetailItem label="Date Signed" value={formatDate(ticket.remarksAndSignatures?.sprinklerContractor?.date)} />
+        </div>
+    </div>
+  </div>
+
                   <DetailItem
                     label="Remarks"
                     value={ticket.remarksAndSignatures?.remarks}
@@ -802,7 +896,6 @@ export default function ViewAboveGroundTicket() {
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Notes */}
               <AccordionItem value="item-9">
                 <AccordionTrigger>Notes</AccordionTrigger>
                 <AccordionContent className="p-2">
