@@ -67,7 +67,6 @@ export default function ViewAboveGroundTicket() {
     isError,
   } = useGetAboveGroundTestByIdQuery(id, { skip: !id });
 
-  // Note: The API response key might be `aboveGroundTest` or `ticket`. Adjust if needed.
   const ticket = response?.data?.ticket || response?.data?.aboveGroundTest;
 
   // --- Loading State ---
@@ -199,6 +198,16 @@ export default function ViewAboveGroundTicket() {
                     <h4 className="font-semibold text-md mb-2">Plans</h4>
                     <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
                       <DetailItem
+                        label="Authorities Accepting Plans"
+                        value={ticket.plansAndInstructions?.plans?.acceptedByAuthorities?.join(
+                          ", "
+                        )}
+                      />
+                      <DetailItem
+                        label="Location of Plans"
+                        value={ticket.plansAndInstructions?.plans?.address}
+                      />
+                      <DetailItem
                         label="Conforms to Accepted Plans?"
                         value={formatBoolean(
                           ticket.plansAndInstructions?.plans
@@ -218,16 +227,11 @@ export default function ViewAboveGroundTicket() {
                           ticket.plansAndInstructions?.plans
                             ?.deviationsExplanation
                         }
-                      />
-                      <DetailItem
-                        label="Location"
-                        value={
-                          ticket.plansAndInstructions?.plans
-                            ?.address
-                        }
+                        className="col-span-full"
                       />
                     </div>
                   </div>
+                  <Separator />
                   <div>
                     <h4 className="font-semibold text-md mb-2">Instructions</h4>
                     <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
@@ -258,6 +262,14 @@ export default function ViewAboveGroundTicket() {
                           ticket.plansAndInstructions?.instructions?.hasNFPA25
                         )}
                       />
+                      <DetailItem
+                        label="Instruction Explanation"
+                        value={
+                          ticket.plansAndInstructions?.instructions
+                            ?.instructionExplanation
+                        }
+                        className="col-span-full"
+                      />
                     </div>
                   </div>
                 </AccordionContent>
@@ -286,19 +298,20 @@ export default function ViewAboveGroundTicket() {
                       />
                     </div>
                   </div>
+                  <Separator />
                   <div>
                     <h4 className="font-semibold text-md mb-2">Sprinklers</h4>
                     {ticket.systemComponents?.sprinklers?.length > 0 ? (
                       ticket.systemComponents.sprinklers.map((s, i) => (
                         <div
                           key={i}
-                          className="p-2 border rounded-md mt-2 space-y-2"
+                          className="p-3 border rounded-md mt-2 space-y-2"
                         >
                           <p className="font-medium">Sprinkler {i + 1}</p>
                           <div className="grid gap-4 sm:grid-cols-3">
                             <DetailItem
                               label="Make/Model"
-                              value={`${s.make} / ${s.model}`}
+                              value={`${s.make || "N/A"} / ${s.model || "N/A"}`}
                             />
                             <DetailItem label="Year" value={s.yearOfMfg} />
                             <DetailItem label="Quantity" value={s.quantity} />
@@ -325,168 +338,467 @@ export default function ViewAboveGroundTicket() {
               {/* Alarms & Valves */}
               <AccordionItem value="item-4">
                 <AccordionTrigger>Alarms & Valves</AccordionTrigger>
-                <AccordionContent className="p-2 space-y-4">
-                  {/* You can create more sub-accordions here if needed for clarity */}
-                  <h4 className="font-semibold text-md">
-                    Alarm Valves / Flow Indicators
-                  </h4>
-                  {ticket.alarmsAndValves?.alarmValvesOrFlowIndicators?.length >
-                  0 ? (
-                    ticket.alarmsAndValves.alarmValvesOrFlowIndicators.map(
-                      (d, i) => (
-                        <div
-                          key={i}
-                          className="p-2 border rounded-md grid gap-4 sm:grid-cols-3"
-                        >
-                          <DetailItem
-                            label={`Device ${i + 1} Type`}
-                            value={d.type}
-                          />
-                          <DetailItem
-                            label="Make/Model"
-                            value={`${d.make} / ${d.model}`}
-                          />
-                          <DetailItem
-                            label="Max Operation Time"
-                            value={formatTime(d.maxOperationTime)}
-                          />
-                        </div>
+                <AccordionContent className="p-2 space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-md">
+                      Alarm Valves / Flow Indicators
+                    </h4>
+                    {ticket.alarmsAndValves?.alarmValvesOrFlowIndicators
+                      ?.length > 0 ? (
+                      ticket.alarmsAndValves.alarmValvesOrFlowIndicators.map(
+                        (d, i) => (
+                          <div
+                            key={i}
+                            className="p-3 border rounded-md mt-2 grid gap-4 sm:grid-cols-3"
+                          >
+                            <DetailItem
+                              label={`Device ${i + 1} Type`}
+                              value={d.type}
+                            />
+                            <DetailItem
+                              label="Make/Model"
+                              value={`${d.make || "N/A"} / ${d.model || "N/A"}`}
+                            />
+                            <DetailItem
+                              label="Max Operation Time"
+                              value={formatTime(d.maxOperationTime)}
+                            />
+                          </div>
+                        )
                       )
-                    )
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No alarm devices listed.
-                    </p>
-                  )}
-                  {/* Add similar mapping for dryPipeOperatingTests, delugeAndPreActionValves etc. */}
+                    ) : (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        No alarm devices listed.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* --- NEWLY ADDED: Dry Pipe Operating Tests --- */}
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-md">
+                      Dry Pipe Operating Tests
+                    </h4>
+                    {ticket.alarmsAndValves?.dryPipeOperatingTests?.length >
+                    0 ? (
+                      ticket.alarmsAndValves.dryPipeOperatingTests.map(
+                        (test, i) => (
+                          <div
+                            key={i}
+                            className="p-3 border rounded-md mt-2 space-y-4"
+                          >
+                            <p className="font-medium">Test {i + 1}</p>
+                            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                              <DetailItem
+                                label="Dry Valve Make/Model"
+                                value={`${test.dryValve?.make || "N/A"} / ${
+                                  test.dryValve?.model || "N/A"
+                                }`}
+                              />
+                              <DetailItem
+                                label="QOD Valve Make/Model"
+                                value={`${test.qodValve?.make || "N/A"} / ${
+                                  test.qodValve?.model || "N/A"
+                                }`}
+                              />
+                              <DetailItem
+                                label="Time to Trip (without QOD)"
+                                value={formatTime(test.timeToTripWithoutQOD)}
+                              />
+                              <DetailItem
+                                label="Time to Trip (with QOD)"
+                                value={formatTime(test.timeToTripWithQOD)}
+                              />
+                              <DetailItem
+                                label="Water Reached Outlet (without QOD)"
+                                value={formatTime(
+                                  test.timeWaterReachedOutletWithoutQOD
+                                )}
+                              />
+                              <DetailItem
+                                label="Water Reached Outlet (with QOD)"
+                                value={formatTime(
+                                  test.timeWaterReachedOutletWithQOD
+                                )}
+                              />
+                              <DetailItem
+                                label="Alarm OK (without QOD)"
+                                value={formatBoolean(
+                                  test.alarmOperatedProperlyWithoutQOD
+                                )}
+                              />
+                              <DetailItem
+                                label="Alarm OK (with QOD)"
+                                value={formatBoolean(
+                                  test.alarmOperatedProperlyWithQOD
+                                )}
+                              />
+                            </div>
+                          </div>
+                        )
+                      )
+                    ) : (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        No dry pipe operating tests listed.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* --- NEWLY ADDED: Deluge & Pre-Action Valves --- */}
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-md">
+                      Deluge & Pre-Action Valves
+                    </h4>
+                    {ticket.alarmsAndValves?.delugeAndPreActionValves?.length >
+                    0 ? (
+                      ticket.alarmsAndValves.delugeAndPreActionValves.map(
+                        (valve, i) => (
+                          <div
+                            key={i}
+                            className="p-3 border rounded-md mt-2 space-y-4"
+                          >
+                            <p className="font-medium">Valve {i + 1}</p>
+                            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                              <DetailItem
+                                label="Make/Model"
+                                value={`${valve.make || "N/A"} / ${
+                                  valve.model || "N/A"
+                                }`}
+                              />
+                              <DetailItem
+                                label="Operation Type"
+                                value={valve.operation}
+                              />
+                              <DetailItem
+                                label="Piping Supervised?"
+                                value={formatBoolean(valve.isPipingSupervised)}
+                              />
+                              <DetailItem
+                                label="Detecting Media Supervised?"
+                                value={formatBoolean(
+                                  valve.isDetectingMediaSupervised
+                                )}
+                              />
+                              <DetailItem
+                                label="Supervision Loss Alarm OK?"
+                                value={formatBoolean(
+                                  valve.doesSupervisionLossAlarmOperate
+                                )}
+                              />
+                              <DetailItem
+                                label="Valve Release OK?"
+                                value={formatBoolean(
+                                  valve.doesValveReleaseOperate
+                                )}
+                              />
+                              <DetailItem
+                                label="Max Time to Operate"
+                                value={formatTime(
+                                  valve.maxTimeToOperateRelease
+                                )}
+                              />
+                            </div>
+                          </div>
+                        )
+                      )
+                    ) : (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        No deluge or pre-action valves listed.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* --- NEWLY ADDED: Pressure Reducing Valve Tests --- */}
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-md">
+                      Pressure Reducing Valve Tests
+                    </h4>
+                    {ticket.alarmsAndValves?.pressureReducingValveTests
+                      ?.length > 0 ? (
+                      ticket.alarmsAndValves.pressureReducingValveTests.map(
+                        (test, i) => (
+                          <div
+                            key={i}
+                            className="p-3 border rounded-md mt-2 space-y-4"
+                          >
+                            <p className="font-medium">Test {i + 1}</p>
+                            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                              <DetailItem
+                                label="Location & Floor"
+                                value={test.locationAndFloor}
+                              />
+                              <DetailItem
+                                label="Make & Model"
+                                value={test.makeAndModel}
+                              />
+                              <DetailItem
+                                label="Setting"
+                                value={test.setting}
+                              />
+                              <DetailItem
+                                label="Static Pressure (In/Out)"
+                                value={`${
+                                  test.staticPressure?.inlet || "N/A"
+                                } / ${test.staticPressure?.outlet || "N/A"}`}
+                              />
+                              <DetailItem
+                                label="Residual Pressure (In/Out)"
+                                value={`${
+                                  test.residualPressure?.inlet || "N/A"
+                                } / ${test.residualPressure?.outlet || "N/A"}`}
+                              />
+                              <DetailItem
+                                label="Flow Rate"
+                                value={test.flowRate}
+                              />
+                            </div>
+                          </div>
+                        )
+                      )
+                    ) : (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        No pressure reducing valve tests listed.
+                      </p>
+                    )}
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
               {/* Testing */}
               <AccordionItem value="item-5">
                 <AccordionTrigger>Testing</AccordionTrigger>
-                <AccordionContent className="p-2 space-y-4">
-                  <h4 className="font-semibold text-md">Hydrostatic Test</h4>
-                  <div className="grid gap-6 sm:grid-cols-3">
-                    <DetailItem
-                      label="Pressure (PSI)"
-                      value={ticket.testing?.hydrostaticTest?.pressurePsi}
-                    />
-                    <DetailItem
-                      label="Pressure (Bar)"
-                      value={ticket.testing?.hydrostaticTest?.pressureBar}
-                    />
-                    <DetailItem
-                      label="Duration (Hours)"
-                      value={ticket.testing?.hydrostaticTest?.durationHrs}
-                    />
+                <AccordionContent className="p-2 space-y-6">
+                  {/* --- NEWLY ADDED: Backflow Test --- */}
+                  <div>
+                    <h4 className="font-semibold text-md">Backflow Test</h4>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <DetailItem
+                        label="Means Used"
+                        value={ticket.testing?.backflowTest?.meansUsed}
+                      />
+                      <DetailItem
+                        label="Flow Demand Created?"
+                        value={
+                          ticket.testing?.backflowTest?.wasFlowDemandCreated
+                        }
+                      />
+                    </div>
                   </div>
                   <Separator />
-                  <h4 className="font-semibold text-md">Drain Test</h4>
-                  <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
-                    <DetailItem
-                      label="Gauge Reading (PSI)"
-                      value={ticket.testing?.drainTest?.gaugeReadingPsi}
-                    />
-                    <DetailItem
-                      label="Gauge Reading (Bar)"
-                      value={ticket.testing?.drainTest?.gaugeReadingBar}
-                    />
-                    <DetailItem
-                      label="Residual Pressure (PSI)"
-                      value={ticket.testing?.drainTest?.residualPressurePsi}
-                    />
-                    <DetailItem
-                      label="Residual Pressure (Bar)"
-                      value={ticket.testing?.drainTest?.residualPressureBar}
-                    />
+                  <div>
+                    <h4 className="font-semibold text-md">Hydrostatic Test</h4>
+                    <div className="grid gap-6 sm:grid-cols-3">
+                      <DetailItem
+                        label="Pressure (PSI)"
+                        value={ticket.testing?.hydrostaticTest?.pressurePsi}
+                      />
+                      <DetailItem
+                        label="Pressure (Bar)"
+                        value={ticket.testing?.hydrostaticTest?.pressureBar}
+                      />
+                      <DetailItem
+                        label="Duration (Hours)"
+                        value={ticket.testing?.hydrostaticTest?.durationHrs}
+                      />
+                    </div>
                   </div>
                   <Separator />
-                  <h4 className="font-semibold text-md">General Tests</h4>
-                  <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+                  <div>
+                    <h4 className="font-semibold text-md">Drain Test</h4>
+                    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+                      <DetailItem
+                        label="Gauge Reading (PSI)"
+                        value={ticket.testing?.drainTest?.gaugeReadingPsi}
+                      />
+                      <DetailItem
+                        label="Gauge Reading (Bar)"
+                        value={ticket.testing?.drainTest?.gaugeReadingBar}
+                      />
+                      <DetailItem
+                        label="Residual Pressure (PSI)"
+                        value={ticket.testing?.drainTest?.residualPressurePsi}
+                      />
+                      <DetailItem
+                        label="Residual Pressure (Bar)"
+                        value={ticket.testing?.drainTest?.residualPressureBar}
+                      />
+                    </div>
+                  </div>
+                  <Separator />
+                  {/* --- NEWLY ADDED: Blank Gaskets --- */}
+                  <div>
+                    <h4 className="font-semibold text-md">
+                      Blank Testing Gaskets
+                    </h4>
+                    <div className="grid gap-6 sm:grid-cols-3">
+                      <DetailItem
+                        label="Number Used"
+                        value={ticket.testing?.blankTestingGaskets?.numberUsed}
+                      />
+                      <DetailItem
+                        label="Number Removed"
+                        value={
+                          ticket.testing?.blankTestingGaskets?.numberRemoved
+                        }
+                      />
+                      <DetailItem
+                        label="Locations"
+                        value={ticket.testing?.blankTestingGaskets?.locations}
+                      />
+                    </div>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-md">General Tests</h4>
+                    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+                      <DetailItem
+                        label="Dry Piping Pneumatically Tested?"
+                        value={formatBoolean(
+                          ticket.testing?.isDryPipingPneumaticallyTested
+                        )}
+                      />
+                      <DetailItem
+                        label="Equipment Operates Properly?"
+                        value={formatBoolean(
+                          ticket.testing?.doesEquipmentOperateProperly
+                        )}
+                      />
+                      <DetailItem
+                        label="No Corrosive Chemicals Used?"
+                        value={formatBoolean(
+                          ticket.testing?.noCorrosiveChemicalsCertification
+                        )}
+                      />
+                      <DetailItem
+                        label="Underground Piping Flushed?"
+                        value={formatBoolean(
+                          ticket.testing?.undergroundPiping
+                            ?.wasFlushedByInstaller
+                        )}
+                      />
+                      <DetailItem
+                        label="Underground Piping Verified?"
+                        value={formatBoolean(
+                          ticket.testing?.undergroundPiping
+                            ?.isVerifiedByCertificate
+                        )}
+                      />
+                      <DetailItem
+                        label="Powder-Driven Fasteners Test OK?"
+                        value={formatBoolean(
+                          ticket.testing?.powderDrivenFasteners
+                            ?.isTestingSatisfactory
+                        )}
+                      />
+                      <DetailItem
+                        label="Improper Operation Reason"
+                        value={ticket.testing?.improperOperationReason}
+                        className="col-span-full"
+                      />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* --- NEWLY ADDED: Welding & Cutouts --- */}
+              <AccordionItem value="item-6">
+                <AccordionTrigger>Welding & Cutouts</AccordionTrigger>
+                <AccordionContent className="p-2 space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-md mb-2">Welding</h4>
+                    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+                      <DetailItem
+                        label="Welding Piping?"
+                        value={formatBoolean(
+                          ticket.weldingAndCutouts?.isWeldingPiping
+                        )}
+                      />
+                      <DetailItem
+                        label="AWS B2.1 Compliant?"
+                        value={formatBoolean(
+                          ticket.weldingAndCutouts?.certifications
+                            ?.awsB21Compliant
+                        )}
+                      />
+                      <DetailItem
+                        label="Welders Qualified?"
+                        value={formatBoolean(
+                          ticket.weldingAndCutouts?.certifications
+                            ?.weldersQualified
+                        )}
+                      />
+                      <DetailItem
+                        label="QC Procedure Compliant?"
+                        value={formatBoolean(
+                          ticket.weldingAndCutouts?.certifications
+                            ?.qualityControlProcedureCompliant
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-md mb-2">Cutouts</h4>
                     <DetailItem
-                      label="Dry Piping Pneumatically Tested?"
+                      label="Retrieval Control for Cutouts?"
                       value={formatBoolean(
-                        ticket.testing?.isDryPipingPneumaticallyTested
-                      )}
-                    />
-                    <DetailItem
-                      label="Equipment Operates Properly?"
-                      value={formatBoolean(
-                        ticket.testing?.doesEquipmentOperateProperly
-                      )}
-                    />
-                    <DetailItem
-                      label="Underground Piping Flushed?"
-                      value={formatBoolean(
-                        ticket.testing?.undergroundPiping?.wasFlushedByInstaller
+                        ticket.weldingAndCutouts?.cutouts?.hasRetrievalControl
                       )}
                     />
                   </div>
                 </AccordionContent>
               </AccordionItem>
 
-              {/* ... Add other sections like Welding, Final Checks similarly ... */}
+              {/* --- NEWLY ADDED: Final Checks --- */}
+              <AccordionItem value="item-7">
+                <AccordionTrigger>Final Checks</AccordionTrigger>
+                <AccordionContent className="p-2 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+                  <DetailItem
+                    label="Hydraulic Data Nameplate?"
+                    value={formatBoolean(
+                      ticket.finalChecks?.hasHydraulicDataNameplate
+                    )}
+                  />
+                  <DetailItem
+                    label="Caps & Straps Removed?"
+                    value={formatBoolean(
+                      ticket.finalChecks?.areCapsAndStrapsRemoved
+                    )}
+                  />
+                  <DetailItem
+                    label="Nameplate Explanation"
+                    value={ticket.finalChecks?.nameplateExplanation}
+                    className="col-span-full"
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
               {/* Remarks & Signatures */}
               <AccordionItem value="item-8">
-                <AccordionTrigger>Remarks & Signatures</AccordionTrigger>
+                <AccordionTrigger>Remarks</AccordionTrigger>
                 <AccordionContent className="p-2 space-y-4">
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    {/* --- NEWLY ADDED Fields --- */}
+                    <DetailItem
+                      label="Sprinkler Contractor Name"
+                      value={
+                        ticket.remarksAndSignatures?.sprinklerContractorName
+                      }
+                    />
+                    <DetailItem
+                      label="Date System Left in Service"
+                      value={formatDate(
+                        ticket.remarksAndSignatures?.dateLeftInService
+                      )}
+                    />
+                  </div>
                   <DetailItem
                     label="Remarks"
                     value={ticket.remarksAndSignatures?.remarks}
                     className="col-span-full"
                   />
-                  <Separator />
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div>
-                      <h4 className="font-semibold text-md mb-2">
-                        Sprinkler Contractor
-                      </h4>
-                      <DetailItem
-                        label="Name"
-                        value={
-                          ticket.remarksAndSignatures?.sprinklerContractor?.name
-                        }
-                      />
-                      <DetailItem
-                        label="Title"
-                        value={
-                          ticket.remarksAndSignatures?.sprinklerContractor
-                            ?.title
-                        }
-                      />
-                      <DetailItem
-                        label="Date Signed"
-                        value={formatDate(
-                          ticket.remarksAndSignatures?.sprinklerContractor?.date
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-md mb-2">
-                        Fire Marshal / AHJ
-                      </h4>
-                      <DetailItem
-                        label="Name"
-                        value={
-                          ticket.remarksAndSignatures?.fireMarshalOrAHJ?.name
-                        }
-                      />
-                      <DetailItem
-                        label="Title"
-                        value={
-                          ticket.remarksAndSignatures?.fireMarshalOrAHJ?.title
-                        }
-                      />
-                      <DetailItem
-                        label="Date Signed"
-                        value={formatDate(
-                          ticket.remarksAndSignatures?.fireMarshalOrAHJ?.date
-                        )}
-                      />
-                    </div>
-                  </div>
                 </AccordionContent>
               </AccordionItem>
 
