@@ -203,10 +203,11 @@ export default function ViewWorkOrder() {
                 label="Email Address"
                 value={workOrder.emailAddress}
               />
-              <DetailItem label="Phone Number" value={workOrder.phoneNumber} />
+              {/* <DetailItem label="Phone Number" value={workOrder.phoneNumber} /> */}
               <DetailItem label="Technician" value={workOrder.technicianName} />
+              <DetailItem label="Contact Name" value={workOrder.contactName} />
               <DetailItem
-                label="Technician Contact"
+                label=" Contact Number"
                 value={workOrder.contactNumber}
               />
               <DetailItem

@@ -129,6 +129,13 @@ const formSchema = z.object({
       nameAllowedCharsRegex,
       "Technician name can only contain letters, spaces, dots, and hyphens."
     ),
+    contactName: z
+    .string()
+    .min(2, "Contact name is required.")
+    .regex(
+      nameAllowedCharsRegex,
+      "Technician name can only contain letters, spaces, dots, and hyphens."
+    ),
   contactNumber: z
     .string()
     .min(10, "Contact number must be at least 10 characters.")
@@ -171,9 +178,10 @@ export default function WorkOrderForm() {
     defaultValues: {
       customerName: "",
       emailAddress: "",
-      phoneNumber: "",
+      phoneNumber: "123112312312",
       jobNumber: "",
       technicianName: "",
+      contactName: "",
       contactNumber: "",
       paymentMethod: "",
       date: new Date(),
@@ -365,7 +373,7 @@ export default function WorkOrderForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={control}
                   name="phoneNumber"
                   render={({ field }) => (
@@ -377,7 +385,7 @@ export default function WorkOrderForm() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
                 <FormField
                   control={control}
                   name="jobNumber"
@@ -404,6 +412,19 @@ export default function WorkOrderForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Technician Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Mike Rowe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={control}
+                  name="contactName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Name</FormLabel>
                       <FormControl>
                         <Input placeholder="Mike Rowe" {...field} />
                       </FormControl>

@@ -26,6 +26,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // --- Zod Schema for Customer Form Validation ---
 const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
@@ -34,15 +41,16 @@ const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
 const addressAllowedCharsRegex = /^[a-zA-Z0-9\s\.\,\-]+$/;
 
 // For Phone Numbers: Allows digits, spaces, hyphens, and underscores.
-const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
-;
-
- const formSchema = z.object({
+const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/;
+const formSchema = z.object({
   // Customer Information
   customerName: z
     .string()
     .min(2, "Customer name is required.")
-    .regex(nameAllowedCharsRegex, "Customer name can only contain letters, spaces, dots, and hyphens."),
+    .regex(
+      nameAllowedCharsRegex,
+      "Customer name can only contain letters, spaces, dots, and hyphens."
+    ),
   phoneNumber: z
     .string()
     .min(10, "Phone number must be at least 10 characters.")
@@ -57,7 +65,10 @@ const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
   onSiteContactName: z
     .string()
     .min(2, "On-site contact name is required.")
-    .regex(nameAllowedCharsRegex, "On-site contact name can only contain letters, spaces, dots, and hyphens."),
+    .regex(
+      nameAllowedCharsRegex,
+      "On-site contact name can only contain letters, spaces, dots, and hyphens."
+    ),
   onSitePhoneNumber: z
     .string()
     .min(10, "On-site phone number must be at least 10 characters.")
@@ -72,21 +83,33 @@ const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
   buildingName: z
     .string()
     .min(2, "Building name is required.")
-    .regex(nameAllowedCharsRegex, "Building name can only contain letters, spaces, dots, and hyphens."),
+    .regex(
+      nameAllowedCharsRegex,
+      "Building name can only contain letters, spaces, dots, and hyphens."
+    ),
   typeOfSite: z
     .string()
     .min(2, "Type of site is required.")
-    .regex(nameAllowedCharsRegex, "Type of site can only contain letters, spaces, dots, and hyphens."),
+    .regex(
+      nameAllowedCharsRegex,
+      "Type of site can only contain letters, spaces, dots, and hyphens."
+    ),
   siteAddress: z
     .string()
     .min(5, "A valid site address is required.")
-    .regex(addressAllowedCharsRegex, "Site address can only contain letters, numbers, spaces, dots, commas, and hyphens."),
+    .regex(
+      addressAllowedCharsRegex,
+      "Site address can only contain letters, numbers, spaces, dots, commas, and hyphens."
+    ),
 
   // Billing Information
   billingName: z
     .string()
     .min(2, "Billing name is required.")
-    .regex(nameAllowedCharsRegex, "Billing name can only contain letters, spaces, dots, and hyphens."),
+    .regex(
+      nameAllowedCharsRegex,
+      "Billing name can only contain letters, spaces, dots, and hyphens."
+    ),
   billingContactNumber: z
     .string()
     .min(10, "Billing contact number must be at least 10 characters.")
@@ -101,7 +124,10 @@ const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
   ownerName: z
     .string()
     .min(2, "Owner's name is required.")
-    .regex(nameAllowedCharsRegex, "Owner's name can only contain letters, spaces, dots, and hyphens."),
+    .regex(
+      nameAllowedCharsRegex,
+      "Owner's name can only contain letters, spaces, dots, and hyphens."
+    ),
   ownerContactNumber: z
     .string()
     .min(10, "Owner contact number must be at least 10 characters.")
@@ -113,12 +139,24 @@ const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/
   ownerAddress: z
     .string()
     .min(5, "A valid owner address is required.")
-    .regex(addressAllowedCharsRegex, "Owner's address can only contain letters, numbers, spaces, dots, commas, and hyphens."),
+    .regex(
+      addressAllowedCharsRegex,
+      "Owner's address can only contain letters, numbers, spaces, dots, commas, and hyphens."
+    ),
   ownerEmailAddress: z.string().email("Invalid owner's email address."),
 
   // Certificates
-  taxExemptCertificate: z.boolean().default(false),
-  directPayCertificate: z.boolean().default(false),
+  taxExemptCertificate: z
+    .enum(["Yes", "No", "N/A"], {
+      required_error: "Please select an option for the Tax Exempt Certificate.",
+    })
+    .default("na"),
+
+  directPayCertificate: z
+    .enum(["Yes", "No", "N/A"], {
+      required_error: "Please select an option for the Direct Pay Certificate.",
+    })
+    .default("na"),
 });
 
 export default function CustomerForm() {
@@ -159,8 +197,8 @@ export default function CustomerForm() {
       ownerContactNumber: "",
       ownerAddress: "",
       ownerEmailAddress: "",
-      taxExemptCertificate: false,
-      directPayCertificate: false,
+      taxExemptCertificate: "N/A",
+      directPayCertificate: "N/A",
     },
   });
 
@@ -524,21 +562,28 @@ export default function CustomerForm() {
                     control={form.control}
                     name="taxExemptCertificate"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            Tax Exempt
-                          </FormLabel>
-                          <FormDescription>
-                            This customer has a tax-exempt certificate on file.
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                      <FormItem>
+                        <FormLabel>Tax Exempt Certificate</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select an option" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="N/A">N/A</SelectItem>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Select the status of the customer's tax-exempt
+                          certificate.
+                        </FormDescription>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -546,21 +591,28 @@ export default function CustomerForm() {
                     control={form.control}
                     name="directPayCertificate"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            Direct Pay
-                          </FormLabel>
-                          <FormDescription>
-                            This customer has a direct pay certificate on file.
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                      <FormItem>
+                        <FormLabel>Direct Pay Certificate</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select an option" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="N/A">N/A</SelectItem>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Select the status of the customer's Direct Pay
+                          Certificate.
+                        </FormDescription>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
