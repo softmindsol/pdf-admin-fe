@@ -42,6 +42,7 @@ import { DataTablePagination } from "@/components/pagination";
 import { Badge } from "@/components/ui/badge";
 import { showDeleteConfirm } from "@/lib/swal";
 import { getUserData } from "@/lib/auth";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function ServiceTicketManagement() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ export default function ServiceTicketManagement() {
   // 1. ADDED: State for date filters
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  
+
   const user = getUserData();
 
   // Debounce search term
@@ -86,9 +87,12 @@ export default function ServiceTicketManagement() {
     page,
     limit,
     search: debouncedSearch,
-    department: departmentFilter && departmentFilter !== "all" ? departmentFilter : undefined,
+    department:
+      departmentFilter && departmentFilter !== "all"
+        ? departmentFilter
+        : undefined,
     startDate, // Pass startDate state
-    endDate,   // Pass endDate state
+    endDate, // Pass endDate state
   });
 
   const serviceTickets = response?.data?.serviceTickets || [];
@@ -116,14 +120,30 @@ export default function ServiceTicketManagement() {
       .fill(0)
       .map((_, index) => (
         <TableRow key={index}>
-          <TableCell className="w-[40px]"><Skeleton className="h-4 w-4" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-          <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+          <TableCell className="w-[40px]">
+            <Skeleton className="h-4 w-4" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-40" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-28" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell className="text-right">
+            <Skeleton className="h-8 w-8 ml-auto" />
+          </TableCell>
         </TableRow>
       ));
   };
@@ -133,7 +153,9 @@ export default function ServiceTicketManagement() {
       {/* --- Header --- */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Service Tickets</h1>
-        <p className="text-muted-foreground">Manage all service tickets in the system.</p>
+        <p className="text-muted-foreground">
+          Manage all service tickets in the system.
+        </p>
       </div>
 
       {/* 3. UPDATED: Responsive Toolbar */}
@@ -156,35 +178,60 @@ export default function ServiceTicketManagement() {
           {user?.role === "admin" && (
             <Select
               value={departmentFilter}
-              onValueChange={(value) => { setDepartmentFilter(value); setPage(1); }}
+              onValueChange={(value) => {
+                setDepartmentFilter(value);
+                setPage(1);
+              }}
               disabled={areDepartmentsLoading}
             >
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select a department" /></SelectTrigger>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a department" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (<SelectItem key={dept._id} value={dept._id}>{dept.name}</SelectItem>))}
+                {departments.map((dept) => (
+                  <SelectItem key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           )}
 
           {/* Date filter inputs */}
           <div className="flex items-center space-x-2">
-            <label htmlFor="startDate" className="text-sm font-medium text-muted-foreground whitespace-nowrap">From</label>
+            <label
+              htmlFor="startDate"
+              className="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >
+              From
+            </label>
             <Input
               id="startDate"
               type="date"
               value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPage(1);
+              }}
               className="w-[150px]"
             />
           </div>
           <div className="flex items-center space-x-2">
-            <label htmlFor="endDate" className="text-sm font-medium text-muted-foreground whitespace-nowrap">To</label>
+            <label
+              htmlFor="endDate"
+              className="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >
+              To
+            </label>
             <Input
               id="endDate"
               type="date"
               value={endDate}
-              onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setPage(1);
+              }}
               className="w-[150px]"
             />
           </div>
@@ -218,34 +265,113 @@ export default function ServiceTicketManagement() {
             {isLoading || isFetching ? (
               renderSkeletons()
             ) : isError ? (
-              <TableRow><TableCell colSpan={8} className="h-24 text-center">Failed to load data.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  Failed to load data.
+                </TableCell>
+              </TableRow>
             ) : serviceTickets.length > 0 ? (
               serviceTickets.map((ticket) => (
                 <TableRow key={ticket._id}>
-                  <TableCell className="font-medium">{ticket.jobName}</TableCell>
+                  <TableCell className="font-medium">
+                    {ticket.jobName}
+                  </TableCell>
                   <TableCell>{ticket.customerName}</TableCell>
-                  <TableCell>{ticket.technicianName}</TableCell>
                   <TableCell>
-                    <Badge variant={ticket.workOrderStatus === "Complete" ? "default" : "secondary"}>
+                    {ticket.staff && ticket.staff.length > 0 ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <div className="flex items-center gap-2">
+                              {/* Show the first technician's name */}
+                              <span className="font-medium">
+                                {ticket.staff[0].technicianName}
+                              </span>
+
+                              {/* If there's more than one, show a badge with the remaining count */}
+                              {ticket.staff.length > 1 && (
+                                <Badge variant="secondary">
+                                  +{ticket.staff.length - 1}
+                                </Badge>
+                              )}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {/* The tooltip shows all technician names in a clean list */}
+                            <div className="flex flex-col gap-1 text-left">
+                              <p className="font-bold border-b pb-1 mb-1">
+                                All Technicians:
+                              </p>
+                              {ticket.staff.map((s) => (
+                                <span key={s.technicianName}>
+                                  {s.technicianName}
+                                </span>
+                              ))}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      "N/A"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        ticket.workOrderStatus === "Complete"
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
                       {ticket.workOrderStatus}
                     </Badge>
                   </TableCell>
-                  <TableCell>{format(new Date(ticket.completionDate), "PPP")}</TableCell>
+                  <TableCell>
+                    {format(new Date(ticket.completionDate), "PPP")}
+                  </TableCell>
                   <TableCell>{ticket.createdBy?.username || "N/A"}</TableCell>
-                  <TableCell>{format(new Date(ticket.createdAt), "PPP") || "N/A"}</TableCell>
+                  <TableCell>
+                    {format(new Date(ticket.createdAt), "PPP") || "N/A"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigate(`/service-ticket/${ticket._id}`)}>View</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(`/service-ticket/update/${ticket._id}`)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem disabled={!ticket.ticket || isDownloading} onClick={() => handleDownloadPdf(ticket)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/service-ticket/${ticket._id}`)
+                          }
+                        >
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/service-ticket/update/${ticket._id}`)
+                          }
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={!ticket.ticket || isDownloading}
+                          onClick={() => handleDownloadPdf(ticket)}
+                        >
                           <Download className="mr-1 h-4 w-4" />
                           <span>Download PDF</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => showDeleteConfirm(() => deleteServiceTicket(ticket._id).unwrap())} className="text-red-600">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            showDeleteConfirm(() =>
+                              deleteServiceTicket(ticket._id).unwrap()
+                            )
+                          }
+                          className="text-red-600"
+                        >
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -254,7 +380,11 @@ export default function ServiceTicketManagement() {
                 </TableRow>
               ))
             ) : (
-              <TableRow><TableCell colSpan={8} className="h-24 text-center">No results found.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  No results found.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

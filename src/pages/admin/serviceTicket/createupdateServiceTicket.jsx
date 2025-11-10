@@ -49,6 +49,8 @@ const formSchema = z.object({
       nameRegex,
       "Job name can only contain letters, spaces, and hyphens."
     ),
+       jobNumber: z.string().min(1, "Job number is required."),
+  workorderNumber: z.string().min(1, "Work Order Number is required."),
 
   customerName: z
     .string()
@@ -92,26 +94,30 @@ const formSchema = z.object({
     )
     .optional(),
 
-  technicianName: z
-    .string()
-    .min(2, "Technician name is required.")
-    .regex(
-      nameRegex,
-      "Technician name can only contain letters, spaces, and hyphens."
-    ),
-
-  // CORRECTED: Strict phone number validation (digits only)
-  technicianContactNumber: z
-    .string()
-    .regex(
-      phoneNumberAllowedCharsRegex,
-      "Phone number must only contain digits."
+  // ADD this new 'staff' array schema
+  staff: z
+    .array(
+      z.object({
+        technicianName: z
+          .string()
+          .min(2, "Technician name is required.")
+          .regex(
+            nameRegex,
+            "Technician name can only contain letters, spaces, and hyphens."
+          ),
+        technicianContactNumber: z
+          .string()
+          .regex(
+            phoneNumberAllowedCharsRegex,
+            "Phone number must only contain digits."
+          )
+          .min(10, "Phone number must be at least 10 digits.")
+          .max(15, "Phone number must not exceed 15 digits."),
+        stHours: z.coerce.number().min(0).default(0),
+        otHours: z.coerce.number().min(0).default(0),
+      })
     )
-    .min(10, "Phone number must be at least 10 digits.")
-    .max(15, "Phone number must not exceed 15 digits."),
-
-  stHours: z.coerce.number().min(0).default(0),
-  otHours: z.coerce.number().min(0).default(0),
+    .min(1, "At least one staff member is required."), // This ensures the array is not empty
 
   applySalesTax: z.boolean().default(false),
   workOrderStatus: z.enum(["Not Complete", "System Out of Order", "Complete"]),
@@ -163,16 +169,15 @@ export default function ServiceTicketForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       jobName: "",
+       jobNumber: "",
+      workorderNumber: "",
       customerName: "",
       emailAddress: "",
       phoneNumber: "",
       jobLocation: "",
       workDescription: "",
       materials: [],
-      technicianName: "",
-      technicianContactNumber: "",
-      stHours: 0,
-      otHours: 0,
+      staff: [],
       applySalesTax: false,
       workOrderStatus: "Not Complete",
       completionDate: format(new Date(), "yyyy-MM-dd"),
@@ -184,6 +189,14 @@ export default function ServiceTicketForm() {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "materials",
+  });
+  const {
+    fields: staffFields,
+    append: appendStaff,
+    remove: removeStaff,
+  } = useFieldArray({
+    control: form.control,
+    name: "staff",
   });
 
   useEffect(() => {
@@ -277,6 +290,38 @@ export default function ServiceTicketForm() {
                   Job & Customer Information
                 </CardTitle>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="jobNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Job Number</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Quarterly HVAC Maintenance"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  /> <FormField
+                    control={form.control}
+                    name="workorderNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Work Order Number</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Quarterly HVAC Maintenance"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                 
                   <FormField
                     control={form.control}
                     name="jobName"
@@ -452,73 +497,124 @@ export default function ServiceTicketForm() {
               <Separator />
 
               {/* --- Labor Information Section --- */}
+              {/* --- UPDATED Labor Information Section --- */}
               <div>
-                <CardTitle className="text-lg mb-4">
-                  Labor Information
-                </CardTitle>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="technicianName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Technician Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Smith" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="technicianContactNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Technician Contact</FormLabel>
-                        <FormControl>
-                          <Input placeholder="5559998888" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="stHours"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Straight Time (Hours)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.25"
-                            placeholder="e.g., 8.5"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="otHours"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Overtime (Hours)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.25"
-                            placeholder="e.g., 2.0"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="flex items-center justify-between mb-4">
+                  <CardTitle className="text-lg">Labor Information</CardTitle>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      appendStaff({
+                        technicianName: "",
+                        technicianContactNumber: "123221321321",
+                        stHours: 0,
+                        otHours: 0,
+                      })
+                    }
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add Staff
+                  </Button>
+                </div>
+                <div className="space-y-6">
+                  {staffFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="p-4 border rounded-lg space-y-4 relative"
+                    >
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => removeStaff(index)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* --- Technician Name Field --- */}
+                       
+                        <FormField
+                          control={form.control}
+                          name={`staff.${index}.technicianName`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Technician Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="John Smith" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* --- Technician Contact Number Field --- */}
+                        {/* <FormField
+                          control={form.control}
+                          name={`staff.${index}.technicianContactNumber`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Technician Contact</FormLabel>
+                              <FormControl>
+                                <Input placeholder="5559998888" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        /> */}
+
+                        {/* --- Straight Time (ST) Hours Field --- */}
+                        <FormField
+                          control={form.control}
+                          name={`staff.${index}.stHours`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Straight Time (Hours)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.25"
+                                  placeholder="e.g., 8.5"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* --- Overtime (OT) Hours Field --- */}
+                        <FormField
+                          control={form.control}
+                          name={`staff.${index}.otHours`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Overtime (Hours)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.25"
+                                  placeholder="e.g., 2.0"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  {staffFields.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No staff members added. Click "Add Staff" to begin.
+                    </p>
+                  )}
+                  {/* This specifically shows the array-level error message, like "At least one staff member is required" */}
+                  <FormMessage>
+                    {form.formState.errors.staff?.message}
+                  </FormMessage>
                 </div>
               </div>
 
@@ -572,28 +668,7 @@ export default function ServiceTicketForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="applySalesTax"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 h-full">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            Apply Sales Tax
-                          </FormLabel>
-                          <FormDescription>
-                            Enable if sales tax is applicable for this ticket.
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                 
                 </div>
               </div>
 

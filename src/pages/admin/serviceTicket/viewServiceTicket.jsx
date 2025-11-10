@@ -151,6 +151,8 @@ export default function ViewServiceTicket() {
                 Job & Customer Information
               </h3>
               <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+                <DetailItem label="Job Number" value={ticket.jobNumber} />
+                <DetailItem label="Work Order Number" value={ticket.workorderNumber} />
                 <DetailItem label="Job Name" value={ticket.jobName} />
                 <DetailItem label="Customer Name" value={ticket.customerName} />
                 <DetailItem label="Phone Number" value={ticket.phoneNumber} />
@@ -203,27 +205,43 @@ export default function ViewServiceTicket() {
 
             <Separator />
 
+            {/* --- UPDATED Labor Information Section --- */}
             <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Labor Information
               </h3>
-              <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
-                <DetailItem
-                  label="Technician Name"
-                  value={ticket.technicianName}
-                />
-                <DetailItem
-                  label="Technician Contact"
-                  value={ticket.technicianContactNumber}
-                />
-                <DetailItem
-                  label="Straight Time Hours"
-                  value={`${ticket.stHours} hrs`}
-                />
-                <DetailItem
-                  label="Overtime Hours"
-                  value={`${ticket.otHours} hrs`}
-                />
+              <div className="space-y-4">
+                {ticket.staff && ticket.staff.length > 0 ? (
+                  ticket.staff.map((staffMember, index) => (
+                    <div
+                      key={staffMember._id || index}
+                      className="p-4 border rounded-lg"
+                    >
+                      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+                        <DetailItem
+                          label="Technician Name"
+                          value={staffMember.technicianName}
+                        />
+                        {/* <DetailItem
+                          label="Technician Contact"
+                          value={staffMember.technicianContactNumber}
+                        /> */}
+                        <DetailItem
+                          label="Straight Time Hours"
+                          value={`${staffMember.stHours || 0} hrs`}
+                        />
+                        <DetailItem
+                          label="Overtime Hours"
+                          value={`${staffMember.otHours || 0} hrs`}
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">
+                    No labor information was provided for this job.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -253,10 +271,7 @@ export default function ViewServiceTicket() {
                   label="Sales Tax Applied"
                   value={ticket.applySalesTax ? "Yes" : "No"}
                 />
-                <DetailItem
-                  label="Print Name"
-                  value={ticket?.printName }
-                />
+                <DetailItem label="Print Name" value={ticket?.printName} />
               </div>
             </div>
           </CardContent>

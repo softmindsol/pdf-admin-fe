@@ -867,26 +867,63 @@ export default function ViewAboveGroundTicket() {
                       )}
                     />
                   </div>
-                   <Separator />
+                  <Separator />
 
-  <div className="space-y-4">
-    <div>
-        <h4 className="font-semibold text-md mb-2">Fire Marshal / AHJ</h4>
-        <div className="grid gap-4 sm:grid-cols-3 p-3 border rounded-md">
-            <DetailItem label="Name" value={ticket.remarksAndSignatures?.fireMarshalOrAHJ?.name} />
-            <DetailItem label="Title" value={ticket.remarksAndSignatures?.fireMarshalOrAHJ?.title} />
-            <DetailItem label="Date Signed" value={formatDate(ticket.remarksAndSignatures?.fireMarshalOrAHJ?.date)} />
-        </div>
-    </div>
-    <div>
-        <h4 className="font-semibold text-md mb-2">Sprinkler Contractor</h4>
-         <div className="grid gap-4 sm:grid-cols-3 p-3 border rounded-md">
-            <DetailItem label="Name" value={ticket.remarksAndSignatures?.sprinklerContractor?.name} />
-            <DetailItem label="Title" value={ticket.remarksAndSignatures?.sprinklerContractor?.title} />
-            <DetailItem label="Date Signed" value={formatDate(ticket.remarksAndSignatures?.sprinklerContractor?.date)} />
-        </div>
-    </div>
-  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-md mb-2">
+                        Fire Marshal / AHJ
+                      </h4>
+                      <div className="grid gap-4 sm:grid-cols-3 p-3 border rounded-md">
+                        <DetailItem
+                          label="Name"
+                          value={
+                            ticket.remarksAndSignatures?.fireMarshalOrAHJ?.name
+                          }
+                        />
+                        <DetailItem
+                          label="Title"
+                          value={
+                            ticket.remarksAndSignatures?.fireMarshalOrAHJ?.title
+                          }
+                        />
+                        <DetailItem
+                          label="Date Signed"
+                          value={formatDate(
+                            ticket.remarksAndSignatures?.fireMarshalOrAHJ?.date
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-md mb-2">
+                        Sprinkler Contractor
+                      </h4>
+                      <div className="grid gap-4 sm:grid-cols-3 p-3 border rounded-md">
+                        <DetailItem
+                          label="Name"
+                          value={
+                            ticket.remarksAndSignatures?.sprinklerContractor
+                              ?.name
+                          }
+                        />
+                        <DetailItem
+                          label="Title"
+                          value={
+                            ticket.remarksAndSignatures?.sprinklerContractor
+                              ?.title
+                          }
+                        />
+                        <DetailItem
+                          label="Date Signed"
+                          value={formatDate(
+                            ticket.remarksAndSignatures?.sprinklerContractor
+                              ?.date
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
                   <DetailItem
                     label="Remarks"
