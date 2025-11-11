@@ -658,10 +658,10 @@ export default function ViewAboveGroundTicket() {
                         label="Pressure (PSI)"
                         value={ticket.testing?.hydrostaticTest?.pressurePsi}
                       />
-                      <DetailItem
+                      {/* <DetailItem
                         label="Pressure (Bar)"
                         value={ticket.testing?.hydrostaticTest?.pressureBar}
-                      />
+                      /> */}
                       <DetailItem
                         label="Duration (Hours)"
                         value={ticket.testing?.hydrostaticTest?.durationHrs}
@@ -676,18 +676,18 @@ export default function ViewAboveGroundTicket() {
                         label="Gauge Reading (PSI)"
                         value={ticket.testing?.drainTest?.gaugeReadingPsi}
                       />
-                      <DetailItem
+                      {/* <DetailItem
                         label="Gauge Reading (Bar)"
                         value={ticket.testing?.drainTest?.gaugeReadingBar}
-                      />
+                      /> */}
                       <DetailItem
                         label="Residual Pressure (PSI)"
                         value={ticket.testing?.drainTest?.residualPressurePsi}
                       />
-                      <DetailItem
+                      {/* <DetailItem
                         label="Residual Pressure (Bar)"
                         value={ticket.testing?.drainTest?.residualPressureBar}
-                      />
+                      /> */}
                     </div>
                   </div>
                   <Separator />

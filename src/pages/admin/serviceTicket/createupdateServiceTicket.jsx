@@ -50,7 +50,7 @@ const formSchema = z.object({
       "Job name can only contain letters, spaces, and hyphens."
     ),
        jobNumber: z.string().min(1, "Job number is required."),
-  workorderNumber: z.string().min(1, "Work Order Number is required."),
+  workorderNumber: z.string().min(1, "Work Order P/O is required."),
 
   customerName: z
     .string()
@@ -310,7 +310,7 @@ export default function ServiceTicketForm() {
                     name="workorderNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Work Order Number</FormLabel>
+                        <FormLabel>Work Order P/O</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Quarterly HVAC Maintenance"

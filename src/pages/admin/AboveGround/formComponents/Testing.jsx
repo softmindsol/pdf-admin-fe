@@ -41,7 +41,7 @@ export function TestingSection({ control }) {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={control}
                   name="testing.hydrostaticTest.pressureBar"
                   render={({ field }) => (
@@ -52,7 +52,7 @@ export function TestingSection({ control }) {
                       </FormControl>
                     </FormItem>
                   )}
-                />
+                /> */}
                 <FormField
                   control={control}
                   name="testing.hydrostaticTest.durationHrs"
@@ -153,7 +153,7 @@ export function TestingSection({ control }) {
                                 </FormItem>
                               )}
                             />
-                            <FormField
+                            {/* <FormField
                               control={control}
                               name="testing.drainTest.gaugeReadingBar"
                               render={({ field }) => (
@@ -164,7 +164,7 @@ export function TestingSection({ control }) {
                                   </FormControl>
                                 </FormItem>
                               )}
-                            />
+                            /> */}
                         </div>
                     </div>
                      <div className="space-y-2 p-2 border rounded-md">
@@ -182,7 +182,7 @@ export function TestingSection({ control }) {
                                 </FormItem>
                               )}
                             />
-                            <FormField
+                            {/* <FormField
                               control={control}
                               name="testing.drainTest.residualPressureBar"
                               render={({ field }) => (
@@ -193,7 +193,7 @@ export function TestingSection({ control }) {
                                   </FormControl>
                                 </FormItem>
                               )}
-                            />
+                            /> */}
                         </div>
                     </div>
                  </div>

@@ -152,7 +152,7 @@ export default function ViewServiceTicket() {
               </h3>
               <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
                 <DetailItem label="Job Number" value={ticket.jobNumber} />
-                <DetailItem label="Work Order Number" value={ticket.workorderNumber} />
+                <DetailItem label="Work Order P/O" value={ticket.workorderNumber} />
                 <DetailItem label="Job Name" value={ticket.jobName} />
                 <DetailItem label="Customer Name" value={ticket.customerName} />
                 <DetailItem label="Phone Number" value={ticket.phoneNumber} />

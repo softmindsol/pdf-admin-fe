@@ -27,7 +27,7 @@ import { FinalChecksSection } from "./formComponents/FinalChecksSection";
 import { RemarksAndSignaturesSection } from "./formComponents/Remarks";
 import { NotesSection } from "./formComponents/Notes";
 
-const nameRegex = /^[a-zA-Z\s\.\-]+$/;
+const nameRegex = /^[a-zA-Z\s\.\-/,]+$/;
 
 // For Addresses: Allows letters, numbers, spaces, dots, commas, and hyphens.
 const addressRegex = /^[a-zA-Z0-9\s\.\,\-]+$/;
@@ -513,7 +513,10 @@ export default function AboveGroundTestForm() {
       remarksAndSignatures: {
         dateLeftInService: formatDateForInput(new Date().toISOString()),
         fireMarshalOrAHJ: {},
-        sprinklerContractor: {},
+        sprinklerContractor: {
+          title: "Southern Fire Sprinkler, Inc",
+          name: "Southern Fire Sprinkler, Inc",
+        },
       },
       notes: "",
     },
@@ -531,24 +534,32 @@ export default function AboveGroundTestForm() {
 
           propertyDetails: {
             ...testData.propertyDetails,
-            date:testData.propertyDetails?.date ?  formatDateForInput(testData.propertyDetails?.date): null,
+            date: testData.propertyDetails?.date
+              ? formatDateForInput(testData.propertyDetails?.date)
+              : null,
           },
           remarksAndSignatures: {
             ...testData?.remarksAndSignatures,
-            dateLeftInService: testData.remarksAndSignatures?.dateLeftInService ? formatDateForInput(
-              testData.remarksAndSignatures?.dateLeftInService
-            ):null,
+            dateLeftInService: testData.remarksAndSignatures?.dateLeftInService
+              ? formatDateForInput(
+                  testData.remarksAndSignatures?.dateLeftInService
+                )
+              : null,
             fireMarshalOrAHJ: {
               ...testData.remarksAndSignatures?.fireMarshalOrAHJ,
-              date: testData.remarksAndSignatures?.fireMarshalOrAHJ?.date ? formatDateForInput(
-                testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
-              ):null,
+              date: testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
+                ? formatDateForInput(
+                    testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
+                  )
+                : null,
             },
             sprinklerContractor: {
               ...testData.remarksAndSignatures?.sprinklerContractor,
-              date: testData.remarksAndSignatures?.sprinklerContractor?.date ? formatDateForInput(
-                testData.remarksAndSignatures?.sprinklerContractor?.date 
-              ):null,
+              date: testData.remarksAndSignatures?.sprinklerContractor?.date
+                ? formatDateForInput(
+                    testData.remarksAndSignatures?.sprinklerContractor?.date
+                  )
+                : null,
             },
           },
         };

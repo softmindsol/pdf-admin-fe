@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { format, parseISO } from "date-fns";
 
 // A reusable component for the signature block to keep the code DRY
-const SignatureBlock = ({ control, name, title }) => {
+const SignatureBlock = ({ control, name, title, disabled }) => {
   const formatDateForInput = (dateString) => {
   if (!dateString) return "";
   try {
@@ -48,7 +48,7 @@ const todayFormatted = formatDateForInput(new Date().toISOString());
           <FormItem>
             <FormLabel>Printed Name</FormLabel>
             <FormControl>
-              <Input placeholder="Printed full name" {...field} />
+              <Input placeholder="Printed full name" disabled={disabled} {...field} />
             </FormControl>
           </FormItem>
         )}
@@ -60,7 +60,7 @@ const todayFormatted = formatDateForInput(new Date().toISOString());
           <FormItem>
             <FormLabel>Title</FormLabel>
             <FormControl>
-              <Input placeholder="Official title" {...field} />
+              <Input placeholder="Official title" disabled={disabled} {...field} />
             </FormControl>
           </FormItem>
         )}
@@ -149,7 +149,7 @@ export function RemarksAndSignaturesSection({ control }) {
                 name="remarksAndSignatures.fireMarshalOrAHJ"
                 title="Fire Marshal or Authority Having Jurisdiction (AHJ)"
               />
-              <SignatureBlock
+              <SignatureBlock 
                 control={control}
                 name="remarksAndSignatures.sprinklerContractor"
                 title="Sprinkler Contractor Representative"
