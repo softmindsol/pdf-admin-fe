@@ -268,7 +268,9 @@ const pressureReducingValveTestSchema = z.object({
 });
 
 // --- Main Form Schema ---
-
+const noSpecialChars = z.string().regex(/^[a-zA-Z0-9\s.,'&#-()/]*$/, {
+  message: "Field contains invalid characters.",
+});
 const formSchema = z.object({
   propertyDetails: z.object({
     propertyName: z
@@ -288,6 +290,8 @@ const formSchema = z.object({
     isNewInstallation: z.boolean().default(false),
     isModification: z.boolean().default(false),
   }),
+    suppliesBuildingsNames: z.array(noSpecialChars).optional().default([]),
+  
   plansAndInstructions: z.object({
     plans: z
       .object({
@@ -493,6 +497,8 @@ export default function AboveGroundTestForm() {
         isNewInstallation: false,
         isModification: false,
       },
+      suppliesBuildingsNames: [],
+
       plansAndInstructions: { plans: {}, instructions: {} },
       systemComponents: { sprinklers: [], pipeAndFittings: {} },
       alarmsAndValves: {

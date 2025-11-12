@@ -7,6 +7,7 @@ import {
   FormLabel,
   FormItem,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   AccordionItem,
@@ -18,6 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { useFieldArray } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, Trash2 } from "lucide-react";
 
 // --- DEDICATED COMPONENT FOR THE CREATABLE INPUT ---
 
@@ -39,6 +43,7 @@ const AuthorityCreatableInput = ({ field }) => {
       : [];
     field.onChange(authoritiesArray);
   };
+  
 
   return (
     <CreatableSelect
@@ -59,7 +64,14 @@ const AuthorityCreatableInput = ({ field }) => {
 
 // --- MAIN COMPONENT ---
 export function PlansAndInstructionsSection({ control, watch }) {
-
+const {
+    fields: buildingFields,
+    append: appendBuilding,
+    remove: removeBuilding,
+  } = useFieldArray({
+    control,
+    name: "suppliesBuildingsNames",
+  });
 
   return (
     <AccordionItem value="plans-and-instructions">
@@ -238,6 +250,42 @@ export function PlansAndInstructionsSection({ control, watch }) {
                   </FormItem>
                 )}
               />
+              <div>
+                        <h4 className="text-lg font-semibold mb-4">Buildings Supplied</h4>
+                        <div className="space-y-3 md:w-1/2">
+                          <FormDescription>
+                            List the names of all buildings supplied by this system.
+                          </FormDescription>
+                          {buildingFields.map((item, index) => (
+                            <div key={item.id} className="flex items-center gap-2">
+                              <FormField
+                                control={control}
+                                name={`suppliesBuildingsNames.${index}`}
+                                render={({ field }) => (
+                                  <Input placeholder={`Building Name ${index + 1}`} {...field} />
+                                )}
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => removeBuilding(index)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => appendBuilding("")}
+                          >
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Building
+                          </Button>
+                        </div>
+                      </div>
           </CardContent>
         </Card>
       </AccordionContent>
