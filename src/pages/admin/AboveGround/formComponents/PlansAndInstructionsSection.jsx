@@ -251,7 +251,7 @@ const {
                 )}
               />
               <div>
-                        <h4 className="text-lg font-semibold mb-4">Buildings Supplied</h4>
+                        <h4 className="text-lg font-semibold mb-4">Locations of System</h4>
                         <div className="space-y-3 md:w-1/2">
                           <FormDescription>
                             List the names of all buildings supplied by this system.

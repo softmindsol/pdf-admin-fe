@@ -259,7 +259,7 @@ export default function ViewUndergroundTest() {
                   <div>
                     <h4 className="font-semibold text-md mb-2">Supplies</h4>
                     <DetailItem
-                      label="Buildings Supplied"
+                      label="Location of Systems"
                       value={testData.suppliesBuildingsNames?.join(", ")}
                     />
                   </div>
