@@ -57,7 +57,7 @@ export function PlansAndInstructionsSection({ control }) {
                 name="plans.address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address on Plans</FormLabel>
+                    <FormLabel>Authority having jurisdiction address</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., 456 Oak Avenue, Anytown" {...field} />
                     </FormControl>

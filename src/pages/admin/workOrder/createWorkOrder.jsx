@@ -49,7 +49,7 @@ import { cn } from "@/lib/utils";
 const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
 
 // For Phone Numbers: Allows digits, spaces, hyphens, and underscores
-const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/;
+const phoneNumberAllowedCharsRegex = /^\+?[0-9 \-]+$/;
 
 // For Positive Numeric Decimals (and integers)
 // Allows 0 and positive numbers with optional decimals.
@@ -67,13 +67,7 @@ const materialSchema = z.object({
   description: z
     .string()
     .min(3, "Description is required.")
-    .max(500, "Description must not exceed 500 characters.") // Max length 500 characters
-    // Applying "no special characters" (using nameAllowedCharsRegex for simplicity)
-    // IMPORTANT: If description needs full flexibility for special chars like !,@,#, etc., remove this line.
-    .regex(
-      nameAllowedCharsRegex,
-      "Description can only contain letters, numbers, spaces, dots, and hyphens."
-    ),
+    .max(500, "Description must not exceed 500 characters."),
   // If you prefer to allow numbers in description: /^[a-zA-Z0-9\s\.\-]+$/
   unitCost: z.coerce
     .number()
