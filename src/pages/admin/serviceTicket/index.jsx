@@ -167,7 +167,7 @@ export default function ServiceTicketManagement() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search by job, customer..."
+              placeholder="Search by job, name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8"
@@ -251,8 +251,9 @@ export default function ServiceTicketManagement() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Job Number</TableHead>
               <TableHead>Job Name</TableHead>
-              <TableHead>Customer</TableHead>
+              <TableHead>Contact Name</TableHead>
               <TableHead>Technician</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Completion Date</TableHead>
@@ -274,8 +275,9 @@ export default function ServiceTicketManagement() {
               serviceTickets.map((ticket) => (
                 <TableRow key={ticket._id}>
                   <TableCell className="font-medium">
-                    {ticket.jobName}
+                    {ticket.jobNumber}
                   </TableCell>
+                  <TableCell>{ticket.jobName}</TableCell>
                   <TableCell>{ticket.customerName}</TableCell>
                   <TableCell>
                     {ticket.staff && ticket.staff.length > 0 ? (

@@ -140,11 +140,7 @@ const formSchema = z.object({
     ),
   paymentMethod: z
     .string()
-    .min(1, "Payment method is required.")
-    .regex(
-      nameAllowedCharsRegex,
-      "Payment method can only contain letters, spaces, dots, and hyphens."
-    ),
+    .min(1, "Payment method is required."),
   date: z.date({ required_error: "A date is required." }),
   materialList: z.array(materialSchema).optional(),
 });
@@ -495,6 +491,7 @@ export default function WorkOrderForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="n/a">Not Applicable</SelectItem>
                           <SelectItem value="credit">Credit Card</SelectItem>
                           <SelectItem value="cash">Cash</SelectItem>
                           <SelectItem value="check">Check</SelectItem>

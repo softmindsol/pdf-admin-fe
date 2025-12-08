@@ -49,15 +49,18 @@ const formSchema = z.object({
       nameRegex,
       "Job name can only contain letters, spaces, and hyphens."
     ),
-       jobNumber: z.string().min(1, "Job number is required."),
+  jobNumber: z.string().min(1, "Job number is required."),
   workorderNumber: z.string().min(1, "Work Order P/O is required."),
+  laborCost: z.string().min(1, "Labor cost is required."),
+  materialCost: z.string().min(1, "Material cost is required."),
+  totalCost: z.string().min(1, "Total cost is required."),
 
   customerName: z
     .string()
-    .min(2, "Customer name is required.")
+    .min(2, "Contact name is required.")
     .regex(
       nameRegex,
-      "Customer name can only contain letters, spaces, and hyphens."
+      "Contact name can only contain letters, spaces, and hyphens."
     ),
 
   emailAddress: z.string().email("A valid email address is required."),
@@ -169,7 +172,11 @@ export default function ServiceTicketForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       jobName: "",
-       jobNumber: "",
+      laborCost: "",
+      materialCost: "",
+      totalCost: "",
+
+      jobNumber: "",
       workorderNumber: "",
       customerName: "",
       emailAddress: "",
@@ -321,7 +328,7 @@ export default function ServiceTicketForm() {
                       </FormItem>
                     )}
                   />
-                 
+
                   <FormField
                     control={form.control}
                     name="jobName"
@@ -343,7 +350,7 @@ export default function ServiceTicketForm() {
                     name="customerName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Customer Name</FormLabel>
+                        <FormLabel>Contact Name</FormLabel>
                         <FormControl>
                           <Input placeholder="Acme Corporation" {...field} />
                         </FormControl>
@@ -534,7 +541,7 @@ export default function ServiceTicketForm() {
                       </Button>
                       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {/* --- Technician Name Field --- */}
-                       
+
                         <FormField
                           control={form.control}
                           name={`staff.${index}.technicianName`}
@@ -628,6 +635,63 @@ export default function ServiceTicketForm() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
                   <FormField
                     control={form.control}
+                    name="laborCost"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Labor Cost ($)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="materialCost"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Material Cost ($)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="totalCost"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Total Cost ($)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="workOrderStatus"
                     render={({ field }) => (
                       <FormItem>
@@ -668,7 +732,6 @@ export default function ServiceTicketForm() {
                       </FormItem>
                     )}
                   />
-                 
                 </div>
               </div>
 

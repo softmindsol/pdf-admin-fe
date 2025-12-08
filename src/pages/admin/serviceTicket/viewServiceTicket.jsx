@@ -154,7 +154,7 @@ export default function ViewServiceTicket() {
                 <DetailItem label="Job Number" value={ticket.jobNumber} />
                 <DetailItem label="Work Order P/O" value={ticket.workorderNumber} />
                 <DetailItem label="Job Name" value={ticket.jobName} />
-                <DetailItem label="Customer Name" value={ticket.customerName} />
+                <DetailItem label="Contact Name" value={ticket.customerName} />
                 <DetailItem label="Phone Number" value={ticket.phoneNumber} />
                 <DetailItem label="Email Address" value={ticket.emailAddress} />
                 <DetailItem
@@ -252,6 +252,18 @@ export default function ViewServiceTicket() {
                 Status & Financials
               </h3>
               <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+                <DetailItem
+                  label="Labor Cost"
+                  value={`$${ticket.laborCost || "0.00"}`}
+                />
+                <DetailItem
+                  label="Material Cost"
+                  value={`$${ticket.materialCost || "0.00"}`}
+                />
+                <DetailItem
+                  label="Total Cost"
+                  value={`$${ticket.totalCost || "0.00"}`}
+                />
                 <DetailItem label="Work Status">
                   <Badge
                     variant={
