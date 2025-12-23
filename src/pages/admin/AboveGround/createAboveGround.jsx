@@ -33,7 +33,7 @@ const nameRegex = /^[a-zA-Z\s\.\-/,]+$/;
 const addressRegex = /^[a-zA-Z0-9\s\.\,\-]+$/;
 
 // For Models/Makes/Types/Serials: Allows letters, numbers, hyphens, and underscores.
-const modelSerialRegex = /^[a-zA-Z0-9 \-\_]+$/;
+const modelSerialRegex = /^[a-zA-Z0-9 \-\_\/\.]+$/;
 
 // For General Text/Explanations: Allows more punctuation but prevents most other special characters.
 const generalTextRegex = /^[a-zA-Z0-9\s\.\,\-\_()]+$/;
@@ -195,8 +195,8 @@ const dryPipeOperatingTestSchema = z.object({
         .nullable(),
     })
     .optional(),
-  alarmOperatedProperlyWithoutQOD: z.boolean().optional().default(false),
-  alarmOperatedProperlyWithQOD: z.boolean().optional().default(false),
+  alarmOperatedProperlyWithoutQOD: z.boolean().nullable().optional().default(null),
+  alarmOperatedProperlyWithQOD: z.boolean().nullable().optional().default(null),
   explain: optionalWithRegex(
     generalTextRegex,
     "Explanation contains invalid characters."
@@ -208,10 +208,10 @@ const delugePreActionValveSchema = z.object({
     .enum(["pneumatic", "electric", "hydraulic"])
     .nullable()
     .optional(),
-  isPipingSupervised: z.boolean().optional().default(false),
-  isDetectingMediaSupervised: z.boolean().optional().default(false),
-  operatesFromManualOrRemote: z.boolean().optional().default(false),
-  isAccessibleForTesting: z.boolean().optional().default(false),
+  isPipingSupervised: z.boolean().nullable().optional().default(null),
+  isDetectingMediaSupervised: z.boolean().nullable().optional().default(null),
+  operatesFromManualOrRemote: z.boolean().nullable().optional().default(null),
+  isAccessibleForTesting: z.boolean().nullable().optional().default(null),
   explanation: optionalWithRegex(
     generalTextRegex,
     "Explanation contains invalid characters."
@@ -224,8 +224,8 @@ const delugePreActionValveSchema = z.object({
     modelSerialRegex,
     "Model contains invalid characters."
   ),
-  doesSupervisionLossAlarmOperate: z.boolean().optional().default(false),
-  doesValveReleaseOperate: z.boolean().optional().default(false),
+  doesSupervisionLossAlarmOperate: z.boolean().nullable().optional().default(null),
+  doesValveReleaseOperate: z.boolean().nullable().optional().default(null),
   maxTimeToOperateRelease: z
     .object({
       min: z.coerce.number().optional().nullable(),
@@ -287,11 +287,11 @@ const formSchema = z.object({
       addressRegex,
       "Property Address contains invalid characters."
     ),
-    isNewInstallation: z.boolean().default(false),
-    isModification: z.boolean().default(false),
+    isNewInstallation: z.boolean().nullable().optional().default(null),
+    isModification: z.boolean().nullable().optional().default(null),
   }),
-    suppliesBuildingsNames: z.array(noSpecialChars).optional().default([]),
-  
+  suppliesBuildingsNames: z.array(noSpecialChars).optional().default([]),
+
   plansAndInstructions: z.object({
     plans: z
       .object({
@@ -300,8 +300,8 @@ const formSchema = z.object({
           addressRegex,
           "Address contains invalid characters."
         ),
-        conformsToAcceptedPlans: z.boolean().optional().default(false),
-        equipmentIsApproved: z.boolean().optional().default(false),
+        conformsToAcceptedPlans: z.boolean().nullable().optional().default(null),
+        equipmentIsApproved: z.boolean().nullable().optional().default(null),
         deviationsExplanation: optionalWithRegex(
           generalTextRegex,
           "Explanation contains invalid characters."
@@ -310,17 +310,14 @@ const formSchema = z.object({
       .optional(),
     instructions: z
       .object({
-        isPersonInChargeInstructed: z.boolean().optional().default(false),
+        isPersonInChargeInstructed: z.boolean().nullable().optional().default(null),
         instructionExplanation: optionalWithRegex(
           generalTextRegex,
           "Explanation contains invalid characters."
         ),
-        hasSystemComponentsInstructions: z.boolean().optional().default(false),
-        hasCareAndMaintenanceInstructions: z
-          .boolean()
-          .optional()
-          .default(false),
-        hasNFPA25: z.boolean().optional().default(false),
+        hasSystemComponentsInstructions: z.boolean().nullable().optional().default(null),
+        hasCareAndMaintenanceInstructions: z.boolean().nullable().optional().default(null),
+        hasNFPA25: z.boolean().nullable().optional().default(null),
       })
       .optional(),
   }),
@@ -367,13 +364,13 @@ const formSchema = z.object({
         durationHrs: z.coerce.number().optional().nullable(),
       })
       .optional(),
-    isDryPipingPneumaticallyTested: z.boolean().optional().default(false),
-    doesEquipmentOperateProperly: z.boolean().optional().default(false),
+    isDryPipingPneumaticallyTested: z.boolean().nullable().optional().default(null),
+    doesEquipmentOperateProperly: z.boolean().nullable().optional().default(null),
     improperOperationReason: optionalWithRegex(
       generalTextRegex,
       "Reason contains invalid characters."
     ),
-    noCorrosiveChemicalsCertification: z.boolean().optional().default(false),
+    noCorrosiveChemicalsCertification: z.boolean().nullable().optional().default(null),
     drainTest: z
       .object({
         gaugeReadingPsi: z.coerce.number().optional().nullable(),
@@ -384,8 +381,8 @@ const formSchema = z.object({
       .optional(),
     undergroundPiping: z
       .object({
-        isVerifiedByCertificate: z.boolean().optional().default(false),
-        wasFlushedByInstaller: z.boolean().optional().default(false),
+        isVerifiedByCertificate: z.boolean().nullable().optional().default(null),
+        wasFlushedByInstaller: z.boolean().nullable().optional().default(null),
         explanation: optionalWithRegex(
           generalTextRegex,
           "Explanation contains invalid characters."
@@ -394,7 +391,7 @@ const formSchema = z.object({
       .optional(),
     powderDrivenFasteners: z
       .object({
-        isTestingSatisfactory: z.boolean().optional().default(false),
+        isTestingSatisfactory: z.boolean().nullable().optional().default(null),
         explanation: optionalWithRegex(
           generalTextRegex,
           "Explanation contains invalid characters."
@@ -414,29 +411,26 @@ const formSchema = z.object({
   }),
   weldingAndCutouts: z
     .object({
-      isWeldingPiping: z.boolean().optional().default(false),
+      isWeldingPiping: z.boolean().nullable().optional().default(null),
       certifications: z
         .object({
-          awsB21Compliant: z.boolean().optional().default(false),
-          weldersQualified: z.boolean().optional().default(false),
-          qualityControlProcedureCompliant: z
-            .boolean()
-            .optional()
-            .default(false),
+          awsB21Compliant: z.boolean().nullable().optional().default(null),
+          weldersQualified: z.boolean().nullable().optional().default(null),
+          qualityControlProcedureCompliant: z.boolean().nullable().optional().default(null),
         })
         .optional(),
       cutouts: z
-        .object({ hasRetrievalControl: z.boolean().optional().default(false) })
+        .object({ hasRetrievalControl: z.boolean().nullable().optional().default(null) })
         .optional(),
     })
     .optional(),
   finalChecks: z.object({
-    hasHydraulicDataNameplate: z.boolean().optional().default(false),
+    hasHydraulicDataNameplate: z.boolean().nullable().optional().default(null),
     nameplateExplanation: optionalWithRegex(
       generalTextRegex,
       "Explanation contains invalid characters."
     ),
-    areCapsAndStrapsRemoved: z.boolean().optional().default(false),
+    areCapsAndStrapsRemoved: z.boolean().nullable().optional().default(null),
   }),
   remarksAndSignatures: z
     .object({
@@ -494,8 +488,8 @@ export default function AboveGroundTestForm() {
         propertyName: "",
         date: formatDateForInput(new Date().toISOString()),
         propertyAddress: "",
-        isNewInstallation: false,
-        isModification: false,
+        isNewInstallation: null,
+        isModification: null,
       },
       suppliesBuildingsNames: [],
 
@@ -548,23 +542,23 @@ export default function AboveGroundTestForm() {
             ...testData?.remarksAndSignatures,
             dateLeftInService: testData.remarksAndSignatures?.dateLeftInService
               ? formatDateForInput(
-                  testData.remarksAndSignatures?.dateLeftInService
-                )
+                testData.remarksAndSignatures?.dateLeftInService
+              )
               : null,
             fireMarshalOrAHJ: {
               ...testData.remarksAndSignatures?.fireMarshalOrAHJ,
               date: testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
                 ? formatDateForInput(
-                    testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
-                  )
+                  testData.remarksAndSignatures?.fireMarshalOrAHJ?.date
+                )
                 : null,
             },
             sprinklerContractor: {
               ...testData.remarksAndSignatures?.sprinklerContractor,
               date: testData.remarksAndSignatures?.sprinklerContractor?.date
                 ? formatDateForInput(
-                    testData.remarksAndSignatures?.sprinklerContractor?.date
-                  )
+                  testData.remarksAndSignatures?.sprinklerContractor?.date
+                )
                 : null,
             },
           },

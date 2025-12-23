@@ -204,7 +204,7 @@ export default function ViewAboveGroundTicket() {
                         )}
                       />
                       <DetailItem
-                        label="Location of Plans"
+                        label="Authorities having jurisdiction address"
                         value={ticket.plansAndInstructions?.plans?.address}
                       />
                       <DetailItem

@@ -89,7 +89,7 @@ const {
                   name="plansAndInstructions.plans.address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location of Plans</FormLabel>
+                      <FormLabel>Authorities having jurisdiction address</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., On-site office" {...field} />
                       </FormControl>

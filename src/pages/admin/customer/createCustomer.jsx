@@ -41,7 +41,7 @@ const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
 const addressAllowedCharsRegex = /^[a-zA-Z0-9\s\.\,\-]+$/;
 
 // For Phone Numbers: Allows digits, spaces, hyphens, and underscores.
-const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/;
+const phoneNumberAllowedCharsRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
 const formSchema = z.object({
   // Customer Information
   customerName: z
@@ -138,11 +138,11 @@ const formSchema = z.object({
     ),
   ownerAddress: z
     .string()
-    .min(5, "A valid owner address is required.")
-    .regex(
-      addressAllowedCharsRegex,
-      "Owner's address can only contain letters, numbers, spaces, dots, commas, and hyphens."
-    ),
+    .optional()
+    .refine((val) => !val || addressAllowedCharsRegex.test(val), {
+      message:
+        "Owner's address can only contain letters, numbers, spaces, dots, commas, and hyphens.",
+    }),
   ownerEmailAddress: z.string().email("Invalid owner's email address."),
 
   // Certificates

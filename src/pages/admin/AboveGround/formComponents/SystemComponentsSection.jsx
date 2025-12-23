@@ -92,7 +92,7 @@ export function SystemComponentsSection({ control }) {
                                         control={control}
                                         name={`systemComponents.sprinklers.${index}.orificeSize`}
                                         render={({ field }) => (
-                                            <FormItem><FormLabel>Orifice Size</FormLabel><FormControl><Input placeholder="1/2 in" {...field} /></FormControl></FormItem>
+                                            <FormItem><FormLabel>Orifice Size</FormLabel><FormControl><Input placeholder="1.5 in" {...field} /></FormControl></FormItem>
                                         )}
                                     />
                                     <FormField
