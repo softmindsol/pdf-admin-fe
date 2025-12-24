@@ -139,9 +139,19 @@ export const GlobalApi = createApi({
       providesTags: (result, error, id) => [{ type: "Department", id }],
     }),
 
+    createDepartment: builder.mutation({
+      query: (body) => createPostRequest(`/admin/department`, body),
+      invalidatesTags: ["Department"],
+    }),
+
     updateDepartment: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/department/${id}`, body),
+      invalidatesTags: ["Department"],
+    }),
+
+    deleteDepartment: builder.mutation({
+      query: (id) => createDeleteRequest(`/admin/department/${id}`),
       invalidatesTags: ["Department"],
     }),
 
@@ -200,7 +210,7 @@ export const GlobalApi = createApi({
 
     createCustomer: builder.mutation({
       query: (body) => createPostRequest(`/admin/customer-ticket`, body),
-      invalidatesTags: ["Customer",'latestTickets'],
+      invalidatesTags: ["Customer", 'latestTickets'],
     }),
 
     getCustomers: builder.query({
@@ -385,7 +395,7 @@ export const GlobalApi = createApi({
       providesTags: ["latestTickets"],
     }),
 
-// ... after deleteCustomer endpoint
+    // ... after deleteCustomer endpoint
 
     createAlarm: builder.mutation({
       query: (body) => createPostRequest(`/admin/alarm`, body),
@@ -435,7 +445,7 @@ export const GlobalApi = createApi({
     }),
 
     // ... other endpoints like createAboveGroundTest
-// ...
+    // ...
 
   }),
 });
@@ -449,7 +459,9 @@ export const {
   useDeleteUserMutation,
   useGetDepartmentsQuery,
   useGetDepartmentByIdQuery,
+  useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
+  useDeleteDepartmentMutation,
   useFormsQuery,
 
   useCreateWorkOrderMutation,
@@ -486,7 +498,7 @@ export const {
   useChangePasswordMutation,
   useChangeUsernameMutation,
   useLatestTicketsQuery,
-   useCreateAlarmMutation,
+  useCreateAlarmMutation,
   useGetAlarmsQuery,
   useGetAlarmByIdQuery,
   useUpdateAlarmMutation,

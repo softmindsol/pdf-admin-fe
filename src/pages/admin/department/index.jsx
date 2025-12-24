@@ -3,9 +3,21 @@ import {
   useFormsQuery,
   useGetDepartmentsQuery,
   useUpdateDepartmentMutation,
+  useDeleteDepartmentMutation,
 } from "@/store/GlobalApi";
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   Table,
@@ -38,6 +50,23 @@ export default function DepartmentsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rowSelection, setRowSelection] = useState({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [departmentToDelete, setDepartmentToDelete] = useState(null);
+
+  const [deleteDepartment, { isLoading: isDeleting }] = useDeleteDepartmentMutation();
+
+  const handleConfirmDelete = async () => {
+    if (!departmentToDelete) return;
+    try {
+      await deleteDepartment(departmentToDelete._id).unwrap();
+      toast.success("Department deleted successfully");
+      setDeleteDialogOpen(false);
+      setDepartmentToDelete(null);
+    } catch (error) {
+      toast.error(error.data?.message || "Failed to delete department");
+      console.error("Failed to delete department:", error);
+    }
+  };
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -125,6 +154,10 @@ export default function DepartmentsManagement() {
             />
           </div>
         </div>
+        <Button onClick={() => navigate("/department/new")}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Create Department
+        </Button>
       </div>
 
       {/* --- Data Table --- */}
@@ -132,7 +165,7 @@ export default function DepartmentsManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-             
+
               <TableHead>Name</TableHead>
               <TableHead>Manager</TableHead>
               <TableHead>Status</TableHead>
@@ -151,7 +184,7 @@ export default function DepartmentsManagement() {
             ) : departments.length > 0 ? (
               departments.map((department) => (
                 <TableRow key={department._id}>
-                 
+
                   <TableCell className="font-medium">
                     {department.name}
                   </TableCell>
@@ -160,7 +193,7 @@ export default function DepartmentsManagement() {
                       <div className="flex flex-wrap gap-1">
                         {department.manager.map((m) => (
                           <Badge
-                          
+
                             key={m._id}
                             variant="secondary"
                             className="cursor-pointer select-none"
@@ -202,18 +235,17 @@ export default function DepartmentsManagement() {
                         >
                           Edit
                         </DropdownMenuItem>
-                        {/* <DropdownMenuSeparator />
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() =>
-                            updateDepartment({
-                              id: department._id,
-                              isDeleted: true,
-                            })
-                          }
-                          className="text-red-600"
+                          onClick={() => {
+                            setDepartmentToDelete(department);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="text-red-600 focus:text-red-600 cursor-pointer"
                         >
+                          <Trash2 className="mr-2 h-4 w-4" />
                           Delete
-                        </DropdownMenuItem> */}
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -240,6 +272,28 @@ export default function DepartmentsManagement() {
         totalItems={pagination.totalDepartments || 0}
         currentPage={pagination.currentPage || 0}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              <strong> {departmentToDelete?.name} </strong> department and remove its data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

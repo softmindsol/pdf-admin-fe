@@ -35,7 +35,7 @@ export function ManagerSelectionDialog({
       page: 0,
       department: id,
     },
-    { skip: !id }
+    { skip: false }
   );
   const users = usersResponse?.data?.users || [];
   console.log("🚀 ~ ManagerSelectionDialog ~ users:", users);

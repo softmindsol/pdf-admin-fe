@@ -11,6 +11,7 @@ import EditUser from "./pages/admin/users/EditUser";
 import CreateUser from "./pages/admin/users/CreateUser";
 import DepartmentsManagement from "./pages/admin/department";
 import EditDepartment from "./pages/admin/department/EditDepartment";
+import CreateDepartment from "./pages/admin/department/createDepartment";
 import ViewDepartment from "./pages/admin/department/viewDepartment";
 import WorkOrderManagement from "./pages/admin/workOrder";
 import CreateWorkOrder from "./pages/admin/workOrder/createWorkOrder";
@@ -97,6 +98,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute moduleName="department">
             <DepartmentsManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "department/new",
+        element: (
+          <ProtectedRoute moduleName="department">
+            <CreateDepartment />
           </ProtectedRoute>
         ),
       },
@@ -282,7 +291,7 @@ export const router = createBrowserRouter([
         ),
       },
 
- {
+      {
         path: "alarm",
         element: (
           <ProtectedRoute moduleName="alarm">
