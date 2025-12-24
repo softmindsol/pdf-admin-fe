@@ -41,7 +41,7 @@ const nameAllowedCharsRegex = /^[a-zA-Z\s\.\-]+$/;
 const addressAllowedCharsRegex = /^[a-zA-Z0-9\s\.\,\-]+$/;
 
 // For Phone Numbers: Allows digits, spaces, hyphens, and underscores.
-const phoneNumberAllowedCharsRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
+const phoneNumberAllowedCharsRegex = /^(?:\+((?:9[679]|8[035789]|6[789]|5[90]|42|3[578]|2[1-689])|9[0-58]|8[1246]|6[0-6]|5[1-8]|4[013-9]|3[0-469]|2[70]|7|1)(?:\W*\d){0,13}\d|\d{8,15})$/;
 const formSchema = z.object({
   // Customer Information
   customerName: z
@@ -57,7 +57,7 @@ const formSchema = z.object({
     .max(15, "Phone number must not exceed 15 characters.")
     .regex(
       phoneNumberAllowedCharsRegex,
-      "Phone number can only contain numbers."
+      "Phone number can contain numbers, spaces, parentheses, and dashes."
     ),
   emailForInspectionReports: z.string().email("Invalid email address."),
 
@@ -75,7 +75,7 @@ const formSchema = z.object({
     .max(15, "On-site phone number must not exceed 15 characters.")
     .regex(
       phoneNumberAllowedCharsRegex,
-      "On-site phone number can only contain numbers."
+      "On-site phone number can contain numbers, spaces, parentheses, and dashes."
     ),
   onSiteEmailAddress: z.string().email("Invalid on-site email address."),
 
@@ -116,7 +116,7 @@ const formSchema = z.object({
     .max(15, "Billing contact number must not exceed 15 characters.")
     .regex(
       phoneNumberAllowedCharsRegex,
-      "Billing contact number can only contain numbers."
+      "Billing contact number can contain numbers, spaces, parentheses, and dashes."
     ),
   billingEmailAddress: z.string().email("Invalid billing email address."),
 
@@ -134,7 +134,7 @@ const formSchema = z.object({
     .max(15, "Owner contact number must not exceed 15 characters.")
     .regex(
       phoneNumberAllowedCharsRegex,
-      "Owner contact number can only contain numbers."
+      "Owner contact number can contain numbers, spaces, parentheses, and dashes."
     ),
   ownerAddress: z
     .string()

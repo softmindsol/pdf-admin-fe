@@ -201,7 +201,7 @@ export function AppSidebar({
               className="flex items-center space-x-2 cursor-pointer"
             >
               <img
-                src="/logofull.svg"
+                src="/metallogo.png"
                 alt="Admin Panel"
                 className="h-8 w-auto"
               />

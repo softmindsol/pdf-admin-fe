@@ -108,13 +108,13 @@ export default function LoginPage() {
   }, [reset]);
 
   return (
-    <section className="bg-gradient-to-r from-[#BE0200] to-[#FB7F09]">
+    <section className="bg-gradient-to-r from-[#BE0200] to-[#FB7F09] ">
       <div className="container  mx-auto min-h-screen flex items-center justify-center p-4">
         {" "}
         <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
           <div className="hidden lg:flex justify-center">
             <img
-              src={LoginImage}
+              src="/Picture2.png"
               alt="Login illustration"
               className="max-w-full h-auto rounded-lg"
             />
