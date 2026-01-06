@@ -108,6 +108,8 @@ export default function CreateUser() {
       toast.success("User created.")
       navigate("/user");
     } catch (err) {
+      console.log(err)
+      toast.error(err?.data?.message)
       if (err.data?.errors?.[0]?.username) {
         form.setError("username", {
           type: "manual",
