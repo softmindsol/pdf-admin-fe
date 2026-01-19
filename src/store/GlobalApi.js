@@ -78,6 +78,7 @@ export const GlobalApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (body) => createPostRequest(`/auth/login`, body),
+      invalidatesTags: ["latestTickets"],
     }),
 
     createUser: builder.mutation({
@@ -109,12 +110,12 @@ export const GlobalApi = createApi({
 
     getUserById: builder.query({
       query: (id) => createRequest(`/admin/user/${id}`),
-      providesTags: (result, error, id) => [{ type: "User", id }],
+      providesTags: (result, error, id) => [{ type: "User", id }, "User"],
     }),
 
     updateUser: builder.mutation({
       query: ({ id, ...body }) => createPatchRequest(`/admin/user/${id}`, body),
-      invalidatesTags: ["User"],
+      invalidatesTags: (result, error, arg) => [{ type: "User", id: arg.id }, "User"],
     }),
 
     deleteUser: builder.mutation({
@@ -136,7 +137,7 @@ export const GlobalApi = createApi({
 
     getDepartmentById: builder.query({
       query: (id) => createRequest(`/admin/department/${id}`),
-      providesTags: (result, error, id) => [{ type: "Department", id }],
+      providesTags: (result, error, id) => [{ type: "Department", id }, "Department"],
     }),
 
     createDepartment: builder.mutation({
@@ -147,7 +148,7 @@ export const GlobalApi = createApi({
     updateDepartment: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/department/${id}`, body),
-      invalidatesTags: ["Department"],
+      invalidatesTags: (result, error, arg) => [{ type: "Department", id: arg.id }, "Department"],
     }),
 
     deleteDepartment: builder.mutation({
@@ -196,12 +197,12 @@ export const GlobalApi = createApi({
     }),
     getWorkOrderById: builder.query({
       query: (id) => createRequest(`/admin/work-order/${id}`),
-      providesTags: (result, error, id) => [{ type: "WorkOrder", id }],
+      providesTags: (result, error, id) => [{ type: "WorkOrder", id }, "WorkOrder"],
     }),
     updateWorkOrder: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/work-order/${id}`, body),
-      invalidatesTags: ["WorkOrder"],
+      invalidatesTags: (result, error, arg) => [{ type: "WorkOrder", id: arg.id }, "WorkOrder"],
     }),
     deleteWorkOrder: builder.mutation({
       query: (id) => createDeleteRequest(`/admin/work-order/${id}`),
@@ -239,12 +240,12 @@ export const GlobalApi = createApi({
     }),
     getCustomerById: builder.query({
       query: (id) => createRequest(`/admin/customer-ticket/${id}`),
-      providesTags: (result, error, id) => [{ type: "Customer", id }],
+      providesTags: (result, error, id) => [{ type: "Customer", id }, "Customer"],
     }),
     updateCustomer: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/customer-ticket/${id}`, body),
-      invalidatesTags: ["Customer"],
+      invalidatesTags: (result, error, arg) => [{ type: "Customer", id: arg.id }, "Customer"],
     }),
     deleteCustomer: builder.mutation({
       query: (id) => createDeleteRequest(`/admin/customer-ticket/${id}`),
@@ -281,12 +282,12 @@ export const GlobalApi = createApi({
     }),
     getAboveGroundTestById: builder.query({
       query: (id) => createRequest(`/admin/above-ground/${id}`),
-      providesTags: (result, error, id) => [{ type: "AboveGroundTest", id }],
+      providesTags: (result, error, id) => [{ type: "AboveGroundTest", id }, "AboveGroundTest"],
     }),
     updateAboveGroundTest: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/above-ground/${id}`, body),
-      invalidatesTags: ["AboveGroundTest"],
+      invalidatesTags: (result, error, arg) => [{ type: "AboveGroundTest", id: arg.id }, "AboveGroundTest"],
     }),
     deleteAboveGroundTest: builder.mutation({
       query: (id) => createDeleteRequest(`/admin/above-ground/${id}`),
@@ -322,12 +323,12 @@ export const GlobalApi = createApi({
     }),
     getServiceTicketById: builder.query({
       query: (id) => createRequest(`/admin/service-ticket/${id}`),
-      providesTags: (result, error, id) => [{ type: "ServiceTicket", id }],
+      providesTags: (result, error, id) => [{ type: "ServiceTicket", id }, "ServiceTicket"],
     }),
     updateServiceTicket: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/service-ticket/${id}`, body),
-      invalidatesTags: ["ServiceTicket"],
+      invalidatesTags: (result, error, arg) => [{ type: "ServiceTicket", id: arg.id }, "ServiceTicket"],
     }),
     deleteServiceTicket: builder.mutation({
       query: (id) => createDeleteRequest(`/admin/service-ticket/${id}`),
@@ -364,12 +365,12 @@ export const GlobalApi = createApi({
     }),
     getUndergroundTestById: builder.query({
       query: (id) => createRequest(`/admin/under-ground/${id}`),
-      providesTags: (result, error, id) => [{ type: "UndergroundTest", id }],
+      providesTags: (result, error, id) => [{ type: "UndergroundTest", id }, "UndergroundTest"],
     }),
     updateUndergroundTest: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/under-ground/${id}`, body),
-      invalidatesTags: ["UndergroundTest"],
+      invalidatesTags: (result, error, arg) => [{ type: "UndergroundTest", id: arg.id }, "UndergroundTest"],
     }),
     deleteUndergroundTest: builder.mutation({
       query: (id) => createDeleteRequest(`/admin/under-ground/${id}`),
@@ -430,13 +431,13 @@ export const GlobalApi = createApi({
 
     getAlarmById: builder.query({
       query: (id) => createRequest(`/admin/alarm/${id}`),
-      providesTags: (result, error, id) => [{ type: "Alarm", id }],
+      providesTags: (result, error, id) => [{ type: "Alarm", id }, "Alarm"],
     }),
 
     updateAlarm: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/alarm/${id}`, body),
-      invalidatesTags: ["Alarm"],
+      invalidatesTags: (result, error, arg) => [{ type: "Alarm", id: arg.id }, "Alarm"],
     }),
 
     deleteAlarm: builder.mutation({

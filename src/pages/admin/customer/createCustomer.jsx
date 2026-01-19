@@ -150,13 +150,13 @@ const formSchema = z.object({
     .enum(["Yes", "No", "N/A"], {
       required_error: "Please select an option for the Tax Exempt Certificate.",
     })
-    .default("na"),
+    .default("N/A"),
 
   directPayCertificate: z
     .enum(["Yes", "No", "N/A"], {
       required_error: "Please select an option for the Direct Pay Certificate.",
     })
-    .default("na"),
+    .default("N/A"),
 });
 
 export default function CustomerForm() {
@@ -203,9 +203,16 @@ export default function CustomerForm() {
   });
 
   useEffect(() => {
-    if (isUpdateMode && existingData) {
+    if (isUpdateMode && existingData?.data?.customer) {
       const customer = existingData.data.customer;
       form.reset(customer);
+      // Explicitly set these fields ensuring they match the Select options
+      if (customer.taxExemptCertificate) {
+        form.setValue("taxExemptCertificate", customer.taxExemptCertificate);
+      }
+      if (customer.directPayCertificate) {
+        form.setValue("directPayCertificate", customer.directPayCertificate);
+      }
     }
   }, [existingData, isUpdateMode, form]);
 
@@ -566,7 +573,8 @@ export default function CustomerForm() {
                         <FormLabel>Tax Exempt Certificate</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
+                          key={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -595,7 +603,8 @@ export default function CustomerForm() {
                         <FormLabel>Direct Pay Certificate</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
+                          key={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>

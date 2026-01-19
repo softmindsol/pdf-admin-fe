@@ -254,11 +254,11 @@ export default function ViewCustomer() {
               <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
                 <DetailItem
                   label="Tax Exempt Certificate"
-                  value={customer.taxExemptCertificate ? "Yes" : "No"}
+                  value={customer.taxExemptCertificate }
                 />
                 <DetailItem
                   label="Direct Pay Certificate"
-                  value={customer.directPayCertificate ? "Yes" : "No"}
+                  value={customer.directPayCertificate }
                 />
               </div>
             </div>

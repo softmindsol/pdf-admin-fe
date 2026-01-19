@@ -35,11 +35,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-const nameRegex = /^[a-zA-Z\s\-]+$/;
+const nameRegex = /^[a-zA-Z0-9\s\-]+$/;
 const generalTextRegex = /^[a-zA-Z0-9\s\.\,\-\_]+$/;
 
-// For Phone Numbers: Allows ONLY digits (0-9). No spaces, no hyphens, no other characters.
-const phoneNumberAllowedCharsRegex = /^\+?[0-9]+$/;
+const phoneNumberAllowedCharsRegex = /^[0-9\+\-\s\(\)]+$/;
 
 const formSchema = z.object({
   jobName: z
@@ -49,8 +48,8 @@ const formSchema = z.object({
       nameRegex,
       "Job name can only contain letters, spaces, and hyphens."
     ),
-  jobNumber: z.string().min(1, "Job number is required."),
-  workorderNumber: z.string().min(1, "Work Order P/O is required."),
+  jobNumber: z.string().optional(),
+  workorderNumber: z.string().optional(),
   laborCost: z.string().min(1, "Labor cost is required."),
   materialCost: z.string().min(1, "Material cost is required."),
   totalCost: z.string().min(1, "Total cost is required."),
@@ -110,12 +109,13 @@ const formSchema = z.object({
           ),
         technicianContactNumber: z
           .string()
-          .regex(
-            phoneNumberAllowedCharsRegex,
-            "Phone number must only contain digits."
-          )
-          .min(10, "Phone number must be at least 10 digits.")
-          .max(15, "Phone number must not exceed 15 digits."),
+          .optional(),
+        //   .regex(
+        //     phoneNumberAllowedCharsRegex,
+        //     "Phone number must only contain digits."
+        //   )
+        //   .min(10, "Phone number must be at least 10 digits.")
+        //   .max(15, "Phone number must not exceed 15 digits."),
         stHours: z.coerce.number().min(0).default(0),
         otHours: z.coerce.number().min(0).default(0),
       })
@@ -214,11 +214,14 @@ export default function ServiceTicketForm() {
         const formattedTicket = {
           ...ticket,
           completionDate: formatDateForInput(ticket.completionDate),
+          printName: ticket.printName || "",
         };
         form.reset(formattedTicket);
       }
     }
   }, [existingData, isUpdateMode, form]);
+
+  const onInvalid = (errors) => console.error("Form Validation Errors:", errors);
 
   async function onSubmit(values) {
     try {
@@ -290,7 +293,10 @@ export default function ServiceTicketForm() {
       <Card>
         <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+              onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+              className="space-y-8"
+            >
               {/* --- Job & Customer Information Section --- */}
               <div>
                 <CardTitle className="text-lg mb-4">
