@@ -1,45 +1,45 @@
 /* eslint-disable no-unused-vars */
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-const createRequest = (url) => ({
-  method: "GET",
+const createRequest = url => ({
+  method: 'GET',
   url,
 });
 
 const createPostRequest = (url, data) => ({
-  method: "POST",
+  method: 'POST',
   url,
   body: JSON.stringify(data),
-  headers: { "Content-Type": "application/json" },
+  headers: { 'Content-Type': 'application/json' },
 });
 
-const createDeleteRequest = (url) => ({
-  method: "DELETE",
+const createDeleteRequest = url => ({
+  method: 'DELETE',
   url,
 });
 
 const createUpdateRequest = (url, data) => ({
-  method: "PUT",
+  method: 'PUT',
   url,
   body: JSON.stringify(data),
-  headers: { "Content-Type": "application/json" },
+  headers: { 'Content-Type': 'application/json' },
 });
 
 const createPatchRequest = (url, data) => ({
-  method: "PATCH",
+  method: 'PATCH',
   url,
   body: JSON.stringify(data),
-  headers: { "Content-Type": "application/json" },
+  headers: { 'Content-Type': 'application/json' },
 });
 
 const coreBaseQuery = fetchBaseQuery({
   baseUrl,
-  prepareHeaders: (headers) => {
-    const authtoken = localStorage.getItem("token");
+  prepareHeaders: headers => {
+    const authtoken = localStorage.getItem('token');
     if (authtoken) {
-      headers.set("Authorization", `Bearer ${authtoken}`);
+      headers.set('Authorization', `Bearer ${authtoken}`);
     }
     return headers;
   },
@@ -47,54 +47,44 @@ const coreBaseQuery = fetchBaseQuery({
 
 const baseQueryWithAutoTokenSave = async (args, api, extraOptions) => {
   const result = await coreBaseQuery(args, api, extraOptions);
-  if (
-    result.error &&
-    (result.error.status === 403 || result.error.status === 401)
-  ) {
-    console.error("Authorization error, logging out user.", result.error);
+  if (result.error && (result.error.status === 403 || result.error.status === 401)) {
+    console.error('Authorization error, logging out user.', result.error);
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("role");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('role');
 
     const formattedErrorMessage = String(result?.error?.data?.message)
       .toLowerCase()
-      .replace(/ /g, "-");
+      .replace(/ /g, '-');
     window.location.href = `/auth/login?error=${formattedErrorMessage}`;
   }
   if (result.data?.data?.token) {
-    localStorage.setItem("token", result.data.data.token);
-    localStorage.setItem("user_id", result.data.data.user_id);
-    localStorage.setItem("role", result.data.data.role);
+    localStorage.setItem('token', result.data.data.token);
+    localStorage.setItem('user_id', result.data.data.user_id);
+    localStorage.setItem('role', result.data.data.role);
   }
   return result;
 };
 
 export const GlobalApi = createApi({
-  reducerPath: "GlobalApi",
+  reducerPath: 'GlobalApi',
   baseQuery: baseQueryWithAutoTokenSave,
 
-  tagTypes: ["User", "Department", "WorkOrder", "Customer", "latestTickets", "Alarm"],
-  endpoints: (builder) => ({
+  tagTypes: ['User', 'Department', 'WorkOrder', 'Customer', 'latestTickets', 'Alarm'],
+  endpoints: builder => ({
     login: builder.mutation({
-      query: (body) => createPostRequest(`/auth/login`, body),
-      invalidatesTags: ["latestTickets"],
+      query: body => createPostRequest(`/auth/login`, body),
+      invalidatesTags: ['latestTickets'],
     }),
 
     createUser: builder.mutation({
-      query: (body) => createPostRequest(`/admin/user`, body),
-      invalidatesTags: ["User", "Department"],
+      query: body => createPostRequest(`/admin/user`, body),
+      invalidatesTags: ['User', 'Department'],
     }),
 
     getUsers: builder.query({
-      query: ({
-        department,
-        page = 1,
-        limit = 10,
-        search,
-        role,
-        isDeleted = false,
-      }) => {
+      query: ({ department, page = 1, limit = 10, search, role, isDeleted = false }) => {
         const params = new URLSearchParams({
           page,
           limit,
@@ -105,22 +95,22 @@ export const GlobalApi = createApi({
         });
         return createRequest(`/admin/user?${params.toString()}`);
       },
-      providesTags: ["User"],
+      providesTags: ['User'],
     }),
 
     getUserById: builder.query({
-      query: (id) => createRequest(`/admin/user/${id}`),
-      providesTags: (result, error, id) => [{ type: "User", id }, "User"],
+      query: id => createRequest(`/admin/user/${id}`),
+      providesTags: (result, error, id) => [{ type: 'User', id }, 'User'],
     }),
 
     updateUser: builder.mutation({
       query: ({ id, ...body }) => createPatchRequest(`/admin/user/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "User", id: arg.id }, "User"],
+      invalidatesTags: (result, error, arg) => [{ type: 'User', id: arg.id }, 'User'],
     }),
 
     deleteUser: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/user/${id}`),
-      invalidatesTags: ["User"],
+      query: id => createDeleteRequest(`/admin/user/${id}`),
+      invalidatesTags: ['User'],
     }),
     getDepartments: builder.query({
       query: ({ page = 1, limit = 10, search, isDeleted = false }) => {
@@ -132,38 +122,40 @@ export const GlobalApi = createApi({
         });
         return createRequest(`/admin/department?${params.toString()}`);
       },
-      providesTags: ["Department"],
+      providesTags: ['Department'],
     }),
 
     getDepartmentById: builder.query({
-      query: (id) => createRequest(`/admin/department/${id}`),
-      providesTags: (result, error, id) => [{ type: "Department", id }, "Department"],
+      query: id => createRequest(`/admin/department/${id}`),
+      providesTags: (result, error, id) => [{ type: 'Department', id }, 'Department'],
     }),
 
     createDepartment: builder.mutation({
-      query: (body) => createPostRequest(`/admin/department`, body),
-      invalidatesTags: ["Department"],
+      query: body => createPostRequest(`/admin/department`, body),
+      invalidatesTags: ['Department'],
     }),
 
     updateDepartment: builder.mutation({
-      query: ({ id, ...body }) =>
-        createPatchRequest(`/admin/department/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "Department", id: arg.id }, "Department"],
+      query: ({ id, ...body }) => createPatchRequest(`/admin/department/${id}`, body),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'Department', id: arg.id },
+        'Department',
+      ],
     }),
 
     deleteDepartment: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/department/${id}`),
-      invalidatesTags: ["Department"],
+      query: id => createDeleteRequest(`/admin/department/${id}`),
+      invalidatesTags: ['Department'],
     }),
 
     forms: builder.query({
       query: () => createRequest(`/admin/department/forms`),
-      invalidatesTags: [""],
+      invalidatesTags: [''],
     }),
 
     createWorkOrder: builder.mutation({
-      query: (body) => createPostRequest(`/admin/work-order`, body),
-      invalidatesTags: ["WorkOrder", "latestTickets"],
+      query: body => createPostRequest(`/admin/work-order`, body),
+      invalidatesTags: ['WorkOrder', 'latestTickets'],
     }),
 
     getWorkOrders: builder.query({
@@ -188,41 +180,43 @@ export const GlobalApi = createApi({
           ...(technicianName && { technicianName }),
           ...(department && { department }),
 
-          ...(startDate && { "createdAt[gte]": startDate }),
-          ...(endDate && { "createdAt[lte]": endDate }),
+          ...(startDate && { 'createdAt[gte]': startDate }),
+          ...(endDate && { 'createdAt[lte]': endDate }),
         });
         return createRequest(`/admin/work-order?${params.toString()}`);
       },
-      providesTags: ["WorkOrder"],
+      providesTags: ['WorkOrder'],
     }),
     getWorkOrderById: builder.query({
-      query: (id) => createRequest(`/admin/work-order/${id}`),
-      providesTags: (result, error, id) => [{ type: "WorkOrder", id }, "WorkOrder"],
+      query: id => createRequest(`/admin/work-order/${id}`),
+      providesTags: (result, error, id) => [{ type: 'WorkOrder', id }, 'WorkOrder'],
     }),
     updateWorkOrder: builder.mutation({
-      query: ({ id, ...body }) =>
-        createPatchRequest(`/admin/work-order/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "WorkOrder", id: arg.id }, "WorkOrder"],
+      query: ({ id, ...body }) => createPatchRequest(`/admin/work-order/${id}`, body),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'WorkOrder', id: arg.id },
+        'WorkOrder',
+      ],
     }),
     deleteWorkOrder: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/work-order/${id}`),
-      invalidatesTags: ["WorkOrder"],
+      query: id => createDeleteRequest(`/admin/work-order/${id}`),
+      invalidatesTags: ['WorkOrder'],
     }),
 
     createCustomer: builder.mutation({
-      query: (body) => createPostRequest(`/admin/customer-ticket`, body),
-      invalidatesTags: ["Customer", 'latestTickets'],
+      query: body => createPostRequest(`/admin/customer-ticket`, body),
+      invalidatesTags: ['Customer', 'latestTickets'],
     }),
 
     getCustomers: builder.query({
-      query: (args) => {
+      query: args => {
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            if (key === "startDate") {
-              queryParams["createdAt[gte]"] = value;
-            } else if (key === "endDate") {
-              queryParams["createdAt[lte]"] = value;
+            if (key === 'startDate') {
+              queryParams['createdAt[gte]'] = value;
+            } else if (key === 'endDate') {
+              queryParams['createdAt[lte]'] = value;
             } else {
               queryParams[key] = value;
             }
@@ -236,36 +230,39 @@ export const GlobalApi = createApi({
 
         return createRequest(`/admin/customer-ticket?${params.toString()}`);
       },
-      providesTags: ["Customer"],
+      providesTags: ['Customer'],
     }),
     getCustomerById: builder.query({
-      query: (id) => createRequest(`/admin/customer-ticket/${id}`),
-      providesTags: (result, error, id) => [{ type: "Customer", id }, "Customer"],
+      query: id => createRequest(`/admin/customer-ticket/${id}`),
+      providesTags: (result, error, id) => [{ type: 'Customer', id }, 'Customer'],
     }),
     updateCustomer: builder.mutation({
       query: ({ id, ...body }) =>
         createPatchRequest(`/admin/customer-ticket/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "Customer", id: arg.id }, "Customer"],
+      invalidatesTags: (result, error, arg) => [
+        { type: 'Customer', id: arg.id },
+        'Customer',
+      ],
     }),
     deleteCustomer: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/customer-ticket/${id}`),
-      invalidatesTags: ["Customer"],
+      query: id => createDeleteRequest(`/admin/customer-ticket/${id}`),
+      invalidatesTags: ['Customer'],
     }),
 
     createAboveGroundTest: builder.mutation({
-      query: (body) => createPostRequest(`/admin/above-ground`, body),
-      invalidatesTags: ["AboveGroundTest", 'latestTickets'],
+      query: body => createPostRequest(`/admin/above-ground`, body),
+      invalidatesTags: ['AboveGroundTest', 'latestTickets'],
     }),
 
     getAboveGroundTests: builder.query({
-      query: (args) => {
+      query: args => {
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            if (key === "startDate") {
-              queryParams["createdAt[gte]"] = value;
-            } else if (key === "endDate") {
-              queryParams["createdAt[lte]"] = value;
+            if (key === 'startDate') {
+              queryParams['createdAt[gte]'] = value;
+            } else if (key === 'endDate') {
+              queryParams['createdAt[lte]'] = value;
             } else {
               queryParams[key] = value;
             }
@@ -278,35 +275,40 @@ export const GlobalApi = createApi({
         const params = new URLSearchParams(queryParams);
         return createRequest(`/admin/above-ground?${params.toString()}`);
       },
-      providesTags: ["AboveGroundTest"],
+      providesTags: ['AboveGroundTest'],
     }),
     getAboveGroundTestById: builder.query({
-      query: (id) => createRequest(`/admin/above-ground/${id}`),
-      providesTags: (result, error, id) => [{ type: "AboveGroundTest", id }, "AboveGroundTest"],
+      query: id => createRequest(`/admin/above-ground/${id}`),
+      providesTags: (result, error, id) => [
+        { type: 'AboveGroundTest', id },
+        'AboveGroundTest',
+      ],
     }),
     updateAboveGroundTest: builder.mutation({
-      query: ({ id, ...body }) =>
-        createPatchRequest(`/admin/above-ground/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "AboveGroundTest", id: arg.id }, "AboveGroundTest"],
+      query: ({ id, ...body }) => createPatchRequest(`/admin/above-ground/${id}`, body),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'AboveGroundTest', id: arg.id },
+        'AboveGroundTest',
+      ],
     }),
     deleteAboveGroundTest: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/above-ground/${id}`),
-      invalidatesTags: ["AboveGroundTest"],
+      query: id => createDeleteRequest(`/admin/above-ground/${id}`),
+      invalidatesTags: ['AboveGroundTest'],
     }),
     createServiceTicket: builder.mutation({
-      query: (body) => createPostRequest(`/admin/service-ticket`, body),
-      invalidatesTags: ["ServiceTicket", 'latestTickets'],
+      query: body => createPostRequest(`/admin/service-ticket`, body),
+      invalidatesTags: ['ServiceTicket', 'latestTickets'],
     }),
 
     getServiceTickets: builder.query({
-      query: (args) => {
+      query: args => {
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            if (key === "startDate") {
-              queryParams["createdAt[gte]"] = value;
-            } else if (key === "endDate") {
-              queryParams["createdAt[lte]"] = value;
+            if (key === 'startDate') {
+              queryParams['createdAt[gte]'] = value;
+            } else if (key === 'endDate') {
+              queryParams['createdAt[lte]'] = value;
             } else {
               queryParams[key] = value;
             }
@@ -319,36 +321,41 @@ export const GlobalApi = createApi({
         const params = new URLSearchParams(queryParams);
         return createRequest(`/admin/service-ticket?${params.toString()}`);
       },
-      providesTags: ["ServiceTicket"],
+      providesTags: ['ServiceTicket'],
     }),
     getServiceTicketById: builder.query({
-      query: (id) => createRequest(`/admin/service-ticket/${id}`),
-      providesTags: (result, error, id) => [{ type: "ServiceTicket", id }, "ServiceTicket"],
+      query: id => createRequest(`/admin/service-ticket/${id}`),
+      providesTags: (result, error, id) => [
+        { type: 'ServiceTicket', id },
+        'ServiceTicket',
+      ],
     }),
     updateServiceTicket: builder.mutation({
-      query: ({ id, ...body }) =>
-        createPatchRequest(`/admin/service-ticket/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "ServiceTicket", id: arg.id }, "ServiceTicket"],
+      query: ({ id, ...body }) => createPatchRequest(`/admin/service-ticket/${id}`, body),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'ServiceTicket', id: arg.id },
+        'ServiceTicket',
+      ],
     }),
     deleteServiceTicket: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/service-ticket/${id}`),
-      invalidatesTags: ["ServiceTicket"],
+      query: id => createDeleteRequest(`/admin/service-ticket/${id}`),
+      invalidatesTags: ['ServiceTicket'],
     }),
 
     createUndergroundTest: builder.mutation({
-      query: (body) => createPostRequest(`/admin/under-ground`, body),
-      invalidatesTags: ["UndergroundTest", 'latestTickets'],
+      query: body => createPostRequest(`/admin/under-ground`, body),
+      invalidatesTags: ['UndergroundTest', 'latestTickets'],
     }),
 
     getUndergroundTests: builder.query({
-      query: (args) => {
+      query: args => {
         const queryParams = {};
         Object.entries(args).forEach(([key, value]) => {
           if (value) {
-            if (key === "startDate") {
-              queryParams["createdAt[gte]"] = value;
-            } else if (key === "endDate") {
-              queryParams["createdAt[lte]"] = value;
+            if (key === 'startDate') {
+              queryParams['createdAt[gte]'] = value;
+            } else if (key === 'endDate') {
+              queryParams['createdAt[lte]'] = value;
             } else {
               queryParams[key] = value;
             }
@@ -361,46 +368,51 @@ export const GlobalApi = createApi({
         const params = new URLSearchParams(queryParams);
         return createRequest(`/admin/under-ground?${params.toString()}`);
       },
-      providesTags: ["UndergroundTest"],
+      providesTags: ['UndergroundTest'],
     }),
     getUndergroundTestById: builder.query({
-      query: (id) => createRequest(`/admin/under-ground/${id}`),
-      providesTags: (result, error, id) => [{ type: "UndergroundTest", id }, "UndergroundTest"],
+      query: id => createRequest(`/admin/under-ground/${id}`),
+      providesTags: (result, error, id) => [
+        { type: 'UndergroundTest', id },
+        'UndergroundTest',
+      ],
     }),
     updateUndergroundTest: builder.mutation({
-      query: ({ id, ...body }) =>
-        createPatchRequest(`/admin/under-ground/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "UndergroundTest", id: arg.id }, "UndergroundTest"],
+      query: ({ id, ...body }) => createPatchRequest(`/admin/under-ground/${id}`, body),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'UndergroundTest', id: arg.id },
+        'UndergroundTest',
+      ],
     }),
     deleteUndergroundTest: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/under-ground/${id}`),
-      invalidatesTags: ["UndergroundTest"],
+      query: id => createDeleteRequest(`/admin/under-ground/${id}`),
+      invalidatesTags: ['UndergroundTest'],
     }),
     getSignedUrl: builder.query({
-      query: (key) => {
+      query: key => {
         const params = new URLSearchParams({ key });
 
         return createRequest(`/file/pre-sign?${params.toString()}`);
       },
     }),
     changePassword: builder.mutation({
-      query: (body) => createPostRequest(`/auth/change-password`, body),
+      query: body => createPostRequest(`/auth/change-password`, body),
     }),
 
     changeUsername: builder.mutation({
-      query: (body) => createPostRequest(`/auth/change-username`, body),
+      query: body => createPostRequest(`/auth/change-username`, body),
     }),
     latestTickets: builder.query({
       query: ({ page = 1, limit = 10 }) =>
         createRequest(`/ticket/synced?page=${page}&limit=${limit}`),
-      providesTags: ["latestTickets"],
+      providesTags: ['latestTickets'],
     }),
 
     // ... after deleteCustomer endpoint
 
     createAlarm: builder.mutation({
-      query: (body) => createPostRequest(`/admin/alarm`, body),
-      invalidatesTags: ["Alarm", 'latestTickets'],
+      query: body => createPostRequest(`/admin/alarm`, body),
+      invalidatesTags: ['Alarm', 'latestTickets'],
     }),
 
     getAlarms: builder.query({
@@ -421,33 +433,63 @@ export const GlobalApi = createApi({
           ...(department && { department }),
           ...(dealerCode && { dealerCode }),
           ...(accountNumber && { accountNumber }),
-          ...(startDate && { "createdAt[gte]": startDate }), // Filter by creation date range
-          ...(endDate && { "createdAt[lte]": endDate }),
+          ...(startDate && { 'createdAt[gte]': startDate }), // Filter by creation date range
+          ...(endDate && { 'createdAt[lte]': endDate }),
         });
         return createRequest(`/admin/alarm?${params.toString()}`);
       },
-      providesTags: ["Alarm"],
+      providesTags: ['Alarm'],
     }),
 
     getAlarmById: builder.query({
-      query: (id) => createRequest(`/admin/alarm/${id}`),
-      providesTags: (result, error, id) => [{ type: "Alarm", id }, "Alarm"],
+      query: id => createRequest(`/admin/alarm/${id}`),
+      providesTags: (result, error, id) => [{ type: 'Alarm', id }, 'Alarm'],
     }),
 
     updateAlarm: builder.mutation({
-      query: ({ id, ...body }) =>
-        createPatchRequest(`/admin/alarm/${id}`, body),
-      invalidatesTags: (result, error, arg) => [{ type: "Alarm", id: arg.id }, "Alarm"],
+      query: ({ id, ...body }) => createPatchRequest(`/admin/alarm/${id}`, body),
+      invalidatesTags: (result, error, arg) => [{ type: 'Alarm', id: arg.id }, 'Alarm'],
     }),
 
     deleteAlarm: builder.mutation({
-      query: (id) => createDeleteRequest(`/admin/alarm/${id}`),
-      invalidatesTags: ["Alarm"],
+      query: id => createDeleteRequest(`/admin/alarm/${id}`),
+      invalidatesTags: ['Alarm'],
     }),
 
-    // ... other endpoints like createAboveGroundTest
-    // ...
+    createForm: builder.mutation({
+      query: body => createPostRequest(`/admin/form-builder`, body),
+      invalidatesTags: ['FormBuilder'],
+    }),
 
+    getAllForms: builder.query({
+      query: ({ page = 1, limit = 10, search }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+        });
+        return createRequest(`/admin/form-builder?${params.toString()}`);
+      },
+      providesTags: ['FormBuilder'],
+    }),
+
+    getFormById: builder.query({
+      query: id => createRequest(`/admin/form-builder/${id}`),
+      providesTags: (result, error, id) => [{ type: 'FormBuilder', id }, 'FormBuilder'],
+    }),
+
+    updateForm: builder.mutation({
+      query: ({ id, ...body }) => createPatchRequest(`/admin/form-builder/${id}`, body),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'FormBuilder', id: arg.id },
+        'FormBuilder',
+      ],
+    }),
+
+    deleteForm: builder.mutation({
+      query: id => createDeleteRequest(`/admin/form-builder/${id}`),
+      invalidatesTags: ['FormBuilder'],
+    }),
   }),
 });
 
@@ -504,4 +546,9 @@ export const {
   useGetAlarmByIdQuery,
   useUpdateAlarmMutation,
   useDeleteAlarmMutation,
+  useCreateFormMutation,
+  useGetAllFormsQuery,
+  useGetFormByIdQuery,
+  useUpdateFormMutation,
+  useDeleteFormMutation,
 } = GlobalApi;

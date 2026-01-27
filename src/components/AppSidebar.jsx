@@ -7,9 +7,9 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from "@/components/ui/sidebar";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+} from '@/components/ui/sidebar';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import {
   MdDashboard,
   MdPeople,
@@ -19,94 +19,99 @@ import {
   MdExpandMore,
   MdExpandLess,
   MdLogout,
-} from "react-icons/md";
-import { GrUserSettings } from "react-icons/gr";
-import { FileBarChart } from "lucide-react";
-import { getUserData } from "@/lib/auth";
+} from 'react-icons/md';
+import { GrUserSettings } from 'react-icons/gr';
+import { FileBarChart } from 'lucide-react';
+import { getUserData } from '@/lib/auth';
 
 // sidebarNavItems definition remains the same...
 const sidebarNavItems = [
   {
-    label: "Dashboard",
-    to: "/",
+    label: 'Dashboard',
+    to: '/',
     icon: MdDashboard,
   },
   {
-    label: "Manage",
-    to: "/manage",
+    label: 'Manage',
+    to: '/manage',
     icon: MdPeople,
     children: [
       {
-        label: "Users",
-        to: "/user",
+        label: 'Users',
+        to: '/user',
         icon: MdPeople,
-        module: "user",
+        module: 'user',
       },
       {
-        label: "Department",
-        to: "/department",
+        label: 'Department',
+        to: '/department',
         icon: MdInventory,
-        module: "department",
+        module: 'department',
       },
-      
     ],
   },
   {
-    label: "Documents",
-    to: "/docs",
+    label: 'Form Builder',
+    to: '/form-builder',
+    icon: FileBarChart,
+    module: 'formBuilder',
+  },
+  {
+    label: 'Documents',
+    to: '/docs',
     icon: FileBarChart,
     children: [
       {
-        label: "Alarm",
-        to: "/alarm",
+        label: 'Alarm',
+        to: '/alarm',
         icon: MdInventory,
-        module: "alarm",
+        module: 'alarm',
       },
       {
-        label: "Work Order",
-        to: "/work-order",
+        label: 'Work Order',
+        to: '/work-order',
         icon: FileBarChart,
-        module: "workOrder",
+        module: 'workOrder',
       },
       {
-        label: "Customer",
-        to: "/customer",
+        label: 'Customer',
+        to: '/customer',
         icon: FileBarChart,
-        module: "customer",
+        module: 'customer',
       },
       {
-        label: "Above Ground",
-        to: "/above-ground",
+        label: 'Above Ground',
+        to: '/above-ground',
         icon: FileBarChart,
-        module: "AboveGround",
+        module: 'AboveGround',
       },
       {
-        label: "Service Ticket",
-        to: "/service-ticket",
+        label: 'Service Ticket',
+        to: '/service-ticket',
         icon: FileBarChart,
-        module: "serviceTicket",
+        module: 'serviceTicket',
       },
       {
-        label: "Under Ground",
-        to: "/under-ground",
+        label: 'Under Ground',
+        to: '/under-ground',
         icon: FileBarChart,
-        module: "underGround",
+        module: 'underGround',
       },
     ],
   },
   {
-    label: "Profile",
-    to: "/profile",
+    label: 'Profile',
+    to: '/profile',
     icon: GrUserSettings,
     children: [
       {
-        label: "Change Password",
-        to: "/change-password",
+        label: 'Change Password',
+        to: '/change-password',
         icon: MdPeople,
       },
       {
-        label: "Change Username",
-        to: "/change-username",
+        label: 'Change Username',
+        to: '/change-username',
         icon: MdInventory,
       },
     ],
@@ -128,9 +133,9 @@ export function AppSidebar({
   const getInitialExpandedItems = () => {
     // ... (rest of the function is unchanged)
     const activeParentIndex = sidebarNavItems.findIndex(
-      (item) =>
+      item =>
         item.children &&
-        item.children.some((child) => location.pathname.startsWith(child.to))
+        item.children.some(child => location.pathname.startsWith(child.to)),
     );
     if (activeParentIndex !== -1) {
       return new Set([activeParentIndex]);
@@ -143,19 +148,19 @@ export function AppSidebar({
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/auth/login");
+    navigate('/auth/login');
   };
 
   const visibleNavItems = sidebarNavItems
-    .map((item) => {
+    .map(item => {
       // ... (filtering logic is unchanged)
       if (!item.children) {
         return item;
       }
-      const isModuleRestricted = item.children.some((child) => child.module);
+      const isModuleRestricted = item.children.some(child => child.module);
       if (isModuleRestricted) {
-        const visibleChildren = item.children.filter((child) =>
-          allowedModules.includes(child.module)
+        const visibleChildren = item.children.filter(child =>
+          allowedModules.includes(child.module),
         );
         if (visibleChildren.length > 0) {
           return { ...item, children: visibleChildren };
@@ -167,7 +172,7 @@ export function AppSidebar({
     })
     .filter(Boolean);
 
-  const toggleExpanded = (index) => {
+  const toggleExpanded = index => {
     // ... (function is unchanged)
     const newExpanded = new Set(expandedItems);
     if (newExpanded.has(index)) {
@@ -189,61 +194,51 @@ export function AppSidebar({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={`bg-gradient-to-b from-orange-50 to-orange-100 border-r border-orange-200 transition-all duration-300 fixed left-0 top-0 h-full z-50 flex flex-col ${
-        isVisuallyExpanded ? "w-64" : "w-16"
+        isVisuallyExpanded ? 'w-64' : 'w-16'
       }`}
     >
       {/* --- HEADER (Unchanged) --- */}
-      <SidebarHeader className="p-4 border-b border-orange-200 bg-white/50 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
+      <SidebarHeader className='p-4 border-b border-orange-200 bg-white/50 backdrop-blur-sm'>
+        <div className='flex items-center justify-between'>
           {isVisuallyExpanded && (
             <div
-              onClick={() => navigate("/")}
-              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => navigate('/')}
+              className='flex items-center space-x-2 cursor-pointer'
             >
-              <img
-                src="/metallogo.png"
-                alt="Admin Panel"
-                className="h-8 w-auto"
-              />
+              <img src='/metallogo.png' alt='Admin Panel' className='h-8 w-auto' />
             </div>
           )}
           {!isVisuallyExpanded && (
             <img
-              src="/logo.svg"
-              onClick={() => navigate("/")}
-              alt="Logo"
-              className="h-8 w-8 mx-auto cursor-pointer"
+              src='/logo.svg'
+              onClick={() => navigate('/')}
+              alt='Logo'
+              className='h-8 w-8 mx-auto cursor-pointer'
             />
           )}
           {isVisuallyExpanded && (
             <button
               onClick={toggleCollapse}
-              className="p-1.5 rounded-lg bg-orange-100 hover:bg-orange-200"
-              aria-label={isCollapsed ? "Pin sidebar" : "Unpin sidebar"}
+              className='p-1.5 rounded-lg bg-orange-100 hover:bg-orange-200'
+              aria-label={isCollapsed ? 'Pin sidebar' : 'Unpin sidebar'}
             >
-              {isCollapsed ? (
-                <MdPushPin size={16} />
-              ) : (
-                <MdChevronLeft size={16} />
-              )}
+              {isCollapsed ? <MdPushPin size={16} /> : <MdChevronLeft size={16} />}
             </button>
           )}
         </div>
       </SidebarHeader>
 
       {/* --- CONTENT (Navigation & User Profile) --- */}
-      <SidebarContent className="flex-1 flex flex-col p-2 overflow-y-auto">
-        <SidebarGroup className="flex-grow">
+      <SidebarContent className='flex-1 flex flex-col p-2 overflow-y-auto'>
+        <SidebarGroup className='flex-grow'>
           {/* ... (Navigation menu mapping logic is unchanged) ... */}
-          <SidebarMenu className="space-y-1">
+          <SidebarMenu className='space-y-1'>
             {visibleNavItems.map((item, index) => {
               const Icon = item.icon;
               const isExpanded = expandedItems.has(index);
 
               const isActive = item.children
-                ? item.children.some((child) =>
-                    location.pathname.startsWith(child.to)
-                  )
+                ? item.children.some(child => location.pathname.startsWith(child.to))
                 : location.pathname === item.to;
 
               return (
@@ -251,24 +246,18 @@ export function AppSidebar({
                   {item.children ? (
                     <>
                       <SidebarMenuButton
-                        onClick={() =>
-                          isVisuallyExpanded && toggleExpanded(index)
-                        }
+                        onClick={() => isVisuallyExpanded && toggleExpanded(index)}
                         className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 group ${
-                          isVisuallyExpanded
-                            ? "justify-between"
-                            : "justify-center"
+                          isVisuallyExpanded ? 'justify-between' : 'justify-center'
                         } hover:bg-orange-200 hover:text-orange-800 text-orange-700 ${
-                          isActive
-                            ? "bg-orange-200 text-orange-800 font-semibold"
-                            : ""
+                          isActive ? 'bg-orange-200 text-orange-800 font-semibold' : ''
                         }`}
                         title={!isVisuallyExpanded ? item.label : undefined}
                       >
-                        <div className="flex items-center space-x-3">
-                          <Icon size={20} className="flex-shrink-0" />
+                        <div className='flex items-center space-x-3'>
+                          <Icon size={20} className='flex-shrink-0' />
                           {isVisuallyExpanded && (
-                            <span className="font-medium">{item.label}</span>
+                            <span className='font-medium'>{item.label}</span>
                           )}
                         </div>
                         {isVisuallyExpanded &&
@@ -280,7 +269,7 @@ export function AppSidebar({
                       </SidebarMenuButton>
 
                       {isExpanded && isVisuallyExpanded && (
-                        <div className="ml-4 pl-2 border-l-2 border-orange-200 mt-1 space-y-1">
+                        <div className='ml-4 pl-2 border-l-2 border-orange-200 mt-1 space-y-1'>
                           <SidebarMenu>
                             {item.children.map((child, childIndex) => (
                               <SidebarMenuItem key={childIndex}>
@@ -288,8 +277,8 @@ export function AppSidebar({
                                   onClick={() => navigate(child.to)}
                                   className={`w-full flex items-center space-x-3 p-2.5 rounded-md text-sm hover:bg-orange-100 hover:text-orange-800 text-orange-600 transition-colors duration-200 ${
                                     location.pathname.startsWith(child.to)
-                                      ? "bg-orange-200 text-orange-800 font-semibold"
-                                      : ""
+                                      ? 'bg-orange-200 text-orange-800 font-semibold'
+                                      : ''
                                   }`}
                                 >
                                   <span>{child.label}</span>
@@ -304,19 +293,15 @@ export function AppSidebar({
                     <SidebarMenuButton
                       onClick={() => navigate(item.to)}
                       className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
-                        isVisuallyExpanded
-                          ? "justify-start space-x-3"
-                          : "justify-center"
+                        isVisuallyExpanded ? 'justify-start space-x-3' : 'justify-center'
                       } hover:bg-orange-200 hover:text-orange-800 text-orange-700 ${
-                        isActive
-                          ? "bg-orange-200 text-orange-800 font-semibold"
-                          : ""
+                        isActive ? 'bg-orange-200 text-orange-800 font-semibold' : ''
                       }`}
                       title={!isVisuallyExpanded ? item.label : undefined}
                     >
-                      <Icon size={20} className="flex-shrink-0" />
+                      <Icon size={20} className='flex-shrink-0' />
                       {isVisuallyExpanded && (
-                        <span className="font-medium">{item.label}</span>
+                        <span className='font-medium'>{item.label}</span>
                       )}
                     </SidebarMenuButton>
                   )}
@@ -327,36 +312,36 @@ export function AppSidebar({
         </SidebarGroup>
 
         {/* --- START: NEW USER PROFILE SECTION --- */}
-        <SidebarGroup className="mt-auto pt-2 border-t border-orange-200">
+        <SidebarGroup className='mt-auto pt-2 border-t border-orange-200'>
           <SidebarMenuItem>
             <div
               className={`w-full flex items-center p-2 transition-all duration-200 ${
-                isVisuallyExpanded ? "justify-start" : "justify-center"
+                isVisuallyExpanded ? 'justify-start' : 'justify-center'
               }`}
             >
               {/* Avatar with initials */}
-              <div className="flex-shrink-0 w-9 h-9 bg-orange-500 text-white flex items-center justify-center rounded-full font-bold text-sm">
+              <div className='flex-shrink-0 w-9 h-9 bg-orange-500 text-white flex items-center justify-center rounded-full font-bold text-sm'>
                 {user?.firstName?.charAt(0).toUpperCase()}
                 {user?.lastName?.charAt(0).toUpperCase()}
               </div>
 
               {/* User Info - shown only when expanded */}
               {isVisuallyExpanded && (
-                <div className="ml-3 text-left overflow-hidden">
+                <div className='ml-3 text-left overflow-hidden'>
                   <p
-                    className="text-sm font-semibold text-orange-900 truncate"
+                    className='text-sm font-semibold text-orange-900 truncate'
                     title={`${user?.firstName} ${user?.lastName}`}
                   >
                     {user?.firstName} {user?.lastName}
                   </p>
                   <p
-                    className="text-xs text-orange-700 truncate uppercase"
+                    className='text-xs text-orange-700 truncate uppercase'
                     title={user?.role}
                   >
                     {user?.role}
                   </p>
                   <p
-                    className="text-xs text-orange-700 truncate"
+                    className='text-xs text-orange-700 truncate'
                     title={user?.departmentName}
                   >
                     {user?.departmentName} (@{user?.username})
@@ -371,31 +356,27 @@ export function AppSidebar({
             <SidebarMenuButton
               onClick={handleLogout}
               className={`w-full flex items-center p-3 rounded-lg bg-red-100 transition-all duration-200 text-red-600 hover:bg-red-200 hover:text-red-800 ${
-                isVisuallyExpanded
-                  ? "justify-start space-x-3"
-                  : "justify-center"
+                isVisuallyExpanded ? 'justify-start space-x-3' : 'justify-center'
               }`}
-              title={!isVisuallyExpanded ? "Logout" : undefined}
+              title={!isVisuallyExpanded ? 'Logout' : undefined}
             >
-              <MdLogout size={20} className="flex-shrink-0" />
-              {isVisuallyExpanded && (
-                <span className="font-medium">Logout</span>
-              )}
+              <MdLogout size={20} className='flex-shrink-0' />
+              {isVisuallyExpanded && <span className='font-medium'>Logout</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarGroup>
       </SidebarContent>
 
       {/* --- FOOTER (Unchanged) --- */}
-      <SidebarFooter className="p-4 border-t border-orange-200 bg-white/30 backdrop-blur-sm">
+      <SidebarFooter className='p-4 border-t border-orange-200 bg-white/30 backdrop-blur-sm'>
         {isVisuallyExpanded ? (
-          <div className="text-center">
-            <p className="text-xs text-orange-600">© 2025 Management Panel</p>
-            <p className="text-xs text-orange-500 mt-1">v1.0.0</p>
+          <div className='text-center'>
+            <p className='text-xs text-orange-600'>© 2025 Management Panel</p>
+            <p className='text-xs text-orange-500 mt-1'>v1.0.0</p>
           </div>
         ) : (
-          <div className="flex justify-center">
-            <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+          <div className='flex justify-center'>
+            <div className='w-2 h-2 bg-orange-400 rounded-full'></div>
           </div>
         )}
       </SidebarFooter>
