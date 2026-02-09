@@ -101,19 +101,12 @@ const formSchema = z.object({
       "Customer name can only contain letters, spaces, dots, and hyphens."
     ),
   emailAddress: z.string().email("Invalid email address."), // Email has its own   specific format
-  phoneNumber: z
-    .string()
-    .regex(
-      phoneNumberAllowedCharsRegex,
-      "Customer name can only contain letters, spaces, dots, and hyphens."
-    ),
-  jobNumber: z
-    .string()
-    .min(1, "Job number is required."),
-    // Job numbers often contain hyphens and numbers, potentially letters.
-    // Adjust this regex if you need specific format (e.g., allow alphanumeric and hyphens)
-    // For now, allowing typical name chars (letters, spaces, dots, hyphens)
-   
+  phoneNumber: z.string().optional(),
+  jobNumber: z.string().optional(),
+  // Job numbers often contain hyphens and numbers, potentially letters.
+  // Adjust this regex if you need specific format (e.g., allow alphanumeric and hyphens)
+  // For now, allowing typical name chars (letters, spaces, dots, hyphens)
+
   technicianName: z
     .string()
     .min(2, "Technician name is required.")
@@ -121,12 +114,23 @@ const formSchema = z.object({
       nameAllowedCharsRegex,
       "Technician name can only contain letters, spaces, dots, and hyphens."
     ),
-    contactName: z
+  contactName: z
     .string()
     .min(2, "Contact name is required.")
     .regex(
       nameAllowedCharsRegex,
       "Technician name can only contain letters, spaces, dots, and hyphens."
+    ),
+  printName: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        !val || (val.length >= 2 && nameAllowedCharsRegex.test(val)),
+      {
+        message:
+          "Print name must be at least 2 characters and can only contain letters, spaces, dots, and hyphens.",
+      }
     ),
   contactNumber: z
     .string()
@@ -170,6 +174,7 @@ export default function WorkOrderForm() {
       jobNumber: "",
       technicianName: "",
       contactName: "",
+      printName: "",
       contactNumber: "",
       paymentMethod: "",
       date: new Date(),
@@ -184,6 +189,7 @@ export default function WorkOrderForm() {
       const workOrder = existingData.data.workOrder;
       form.reset({
         ...workOrder,
+        printName: workOrder.printName || "",
         date: new Date(workOrder.date),
       });
 
@@ -267,11 +273,20 @@ export default function WorkOrderForm() {
       }
       navigate("/work-order");
     } catch (err) {
-      if (err.data?.errors?.[0]?.jobNumber) {
-        form.setError("jobNumber", {
-          type: "manual",
-          message: err.data.errors[0].jobNumber,
-        });
+      const errors = err.data?.errors?.[0];
+      if (errors) {
+        if (errors.jobNumber) {
+          form.setError("jobNumber", {
+            type: "manual",
+            message: errors.jobNumber,
+          });
+        }
+        if (errors.printName) {
+          form.setError("printName", {
+            type: "manual",
+            message: errors.printName,
+          });
+        }
       } else {
         console.error(
           `Failed to ${isUpdateMode ? "update" : "create"} work order:`,
@@ -333,7 +348,7 @@ export default function WorkOrderForm() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log("Form Validation Errors:", errors))} className="space-y-8">
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FormField
                   control={control}
@@ -384,10 +399,6 @@ export default function WorkOrderForm() {
                         <Input
                           placeholder="WO-10234"
                           {...field}
-                          disabled={isUpdateMode}
-                          className={
-                            isUpdateMode ? "bg-muted cursor-not-allowed" : ""
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -407,7 +418,7 @@ export default function WorkOrderForm() {
                     </FormItem>
                   )}
                 />
-                 <FormField
+                <FormField
                   control={control}
                   name="contactName"
                   render={({ field }) => (
@@ -415,6 +426,19 @@ export default function WorkOrderForm() {
                       <FormLabel>Contact Name</FormLabel>
                       <FormControl>
                         <Input placeholder="Mike Rowe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="printName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Print Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Print Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -615,7 +639,7 @@ export default function WorkOrderForm() {
                                     disabled={noTax[index]}
                                     className={cn(
                                       noTax[index] &&
-                                        "bg-muted cursor-not-allowed"
+                                      "bg-muted cursor-not-allowed"
                                     )}
                                   />
                                 </FormControl>
